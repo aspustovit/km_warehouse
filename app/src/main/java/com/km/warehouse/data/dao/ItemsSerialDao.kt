@@ -1,6 +1,8 @@
 package com.km.warehouse.data.dao
 
 import androidx.room.Dao
+import androidx.room.Query
+import com.km.warehouse.data.entity.Bayer
 import com.km.warehouse.data.entity.ItemsSerial
 
 /**
@@ -8,4 +10,6 @@ import com.km.warehouse.data.entity.ItemsSerial
  */
 @Dao
 abstract class ItemsSerialDao : BaseDao<ItemsSerial>() {
+    @Query("SELECT b.* FROM items_serial b ")
+    abstract fun getSerialsToSync(): List<ItemsSerial>
 }

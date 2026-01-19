@@ -64,6 +64,17 @@ dependencies {
     implementation(libs.androidx.room)
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+
+    //Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.gson)
+    implementation(libs.logging.interceptor)
+    implementation(libs.auth0.jwt)
+
+    //Lottie
+    implementation(libs.lottie.compose)
+    implementation(libs.material3)
 
     // KSP for Room compiler (for each target platform in KMP)
     ksp(libs.androidx.room.compiler)

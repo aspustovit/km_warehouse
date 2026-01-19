@@ -20,12 +20,17 @@ data class MoveOrder(
     val id: Int = 0,
     val description: String,
     @ColumnInfo(name = "creation_date")
-    val creationDate: Long,
+    val creationDate: String,
     @ColumnInfo(name = "move_date")
-    val moveDate: Long,
+    val moveDate: String,
     val number: String,
     @ColumnInfo(name = "bayer_id")
-    val bayerId: Int
+    val bayerId: Int,
+    val status: String,
+    @ColumnInfo(name = "scanner_id")
+    val scannerId: Int,
+    @ColumnInfo(name = "is_complete")
+    val isComplete: String
 ) {
     companion object {
         const val TABLE_NAME = "move_order"

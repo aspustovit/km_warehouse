@@ -16,7 +16,13 @@ lifecycle = "2.9.4"
 room = "2.8.1"
 
 koin = "4.1.1"
-kotlin-symbol-processing = "2.2.10-2.0.2" #https://github.com/google/ksp
+kotlin-symbol-processing = "2.2.10-2.0.2"
+lifecycleViewmodelKtx = "2.10.0" #https://github.com/google/ksp
+retrofit = "3.0.0"
+interceptor = "4.12.0"
+jwt = "4.5.0"
+lottie = "6.7.1"
+material3Version = "1.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -43,7 +49,13 @@ androidx-room-compiler = { group = "androidx.room", name="room-compiler", versio
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 koin-android = { group = "io.insert-koin", name = "koin-android-compat", version.ref = "koin" }
 koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
-
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "interceptor" }
+auth0-jwt= { group = "com.auth0", name = "java-jwt", version.ref = "jwt" }
+lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
+material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3Version" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -52,6 +64,7 @@ org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.re
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "kotlin-symbol-processing" }
+
 
 
 

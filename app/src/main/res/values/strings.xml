@@ -10,4 +10,20 @@
 
     <string name="file_data">Скановані штрихкоди</string>
 
+    <string name="auth_message">Будь ласка введіть свій логін пароль.</string>
+    <string name="auth_message_error">Сталася помилка авторизації перевірте вірність введених данних.</string>
+    <string name="login">Логін</string>
+    <string name="log_in">Увійти</string>
+    <string name="password">Пароль</string>
+    <string name="error">Помилка!</string>
+    <string name="ok">Зрозуміло</string>
+    <string name="cancel">Відміна</string>
+    <string name="sync_data">Синхронізувати</string>
+    <string name="password_is_empty">Пароль не може бути пустий!</string>
+    <string name="sync_message">Синхронізація данних з основною БД.</string>
+    <string name="move_order_update_date">Дата оновлення:</string>
+    <string name="barcode_number">Штрихкод:</string>
+    <string name="barcode_accept">Примінити</string>
+    <string name="inventory_id">Інвентарний номер:</string>
+    <string name="item_segment">Сегмент:</string>
 </resources>

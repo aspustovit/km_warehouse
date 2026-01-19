@@ -2,4 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="error">#D03232</color>
+    <color name="sync_dialog">#E7E2E2</color>
+    <color name="move_order_complete">#B4E7D4</color>
+    <color name="color_text_secondary">#686060</color>
 </resources>

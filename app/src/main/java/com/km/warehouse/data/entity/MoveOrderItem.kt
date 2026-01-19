@@ -18,18 +18,22 @@ import com.km.warehouse.data.entity.MoveOrderItem.Companion.TABLE_NAME
 data class MoveOrderItem(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val quantity: Int,
+    val quantity: Double,
     @ColumnInfo(name = "qty_given")
-    val qtyGiven: Int,
+    val qtyGiven: Double,
     @ColumnInfo(name = "inventory_id")
     val inventoryId: Int,
     val description: String,
-    @ColumnInfo(name = "internal_code")
-    val internalCode: String,
     @ColumnInfo(name = "mfr_code")
-    val mfrCode: String,
+    val mfrCode: String, // mfgPartNum
     @ColumnInfo(name = "move_order_id")
-    val moveOrderId: Int
+    val moveOrderId: Int,
+    @ColumnInfo(name = "mfg_part_num_exp")
+    val mfgPartNumExp: String?,
+    @ColumnInfo(name = "no_serials")
+    val noSerials: String,
+    @ColumnInfo(name = "item_segment")
+    val itemSegment: String?
 ) {
     companion object {
         const val TABLE_NAME = "move_order_item"

@@ -2,9 +2,7 @@ package com.km.warehouse
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
@@ -16,6 +14,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -24,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.km.warehouse.ui.CustomOutlinedImageButton
 import com.km.warehouse.ui.DarkTopAppBar
 import com.km.warehouse.ui.SharedViewModel
+import com.km.warehouse.ui.sync.SyncDialog
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
@@ -63,7 +66,14 @@ fun MenuScreen(
     onIncomeDocumentClick: () -> Unit = {},
     onScanToFileClick: () -> Unit = {}
 ) {
-
+    var showDialog by remember { mutableStateOf(false) }
+    if (showDialog) {
+        SyncDialog(onDismissRequest = {
+            showDialog = false
+        },
+            painter = painterResource(R.drawable.ic_internet_connection_phone),
+            imageDescription = "")
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -163,13 +173,10 @@ fun MenuScreen(
                     painterResource(id = R.drawable.ic_cloud_sync),
                     contentDescription = null
                 )
+
             },
             onClick = {
-                Toast.makeText(
-                    activity,
-                    activity.getString(R.string.sync),
-                    Toast.LENGTH_LONG
-                ).show()
+                showDialog = true
             },
             enabled = true,
             text = {

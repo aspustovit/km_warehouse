@@ -6,9 +6,7 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Share
+
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,11 +52,11 @@ fun ScanToFileView(activity: Activity) {
                     val shareIntent = Intent.createChooser(sendIntent, null)
                     activity.startActivity(shareIntent)
                 }) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
+                    /*Icon(
+                        imageVector = ,
                         contentDescription = "",
                         tint = MaterialTheme.colorScheme.surface
-                    )
+                    )*/
                 }
             }
         )

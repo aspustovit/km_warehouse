@@ -1,6 +1,8 @@
 package com.km.warehouse.data.dao
 
 import androidx.room.Dao
+import androidx.room.Query
+import com.km.warehouse.data.entity.Bayer
 import com.km.warehouse.data.entity.MoveOrder
 
 /**
@@ -8,4 +10,6 @@ import com.km.warehouse.data.entity.MoveOrder
  */
 @Dao
 abstract class MoveOrderDao: BaseDao<MoveOrder>() {
+    @Query("SELECT b.* FROM move_order b")
+    abstract fun getMoveOrders(): List<MoveOrder>
 }

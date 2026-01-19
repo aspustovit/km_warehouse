@@ -12,14 +12,14 @@ import com.km.warehouse.data.entity.ItemsSerial.Companion.TABLE_NAME
 @Entity(tableName = TABLE_NAME, foreignKeys = [ForeignKey(
     entity = MoveOrderItem::class,
     parentColumns = arrayOf("id"),
-    childColumns = arrayOf("move_order_itemId"),
+    childColumns = arrayOf("move_order_item_id"),
     onDelete = ForeignKey.CASCADE
 )])
 data class ItemsSerial(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val serial: String,
-    @ColumnInfo(name = "move_order_itemId")
+    @ColumnInfo(name = "move_order_item_id")
     val moveOrderItemId: Int
 ){
     companion object {

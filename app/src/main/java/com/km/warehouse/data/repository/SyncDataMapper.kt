@@ -1,7 +1,9 @@
 package com.km.warehouse.data.repository
 
+import com.km.warehouse.data.entity.ItemsSerial
 import com.km.warehouse.data.entity.MoveOrder
 import com.km.warehouse.data.entity.MoveOrderItem
+import com.km.warehouse.data.network.entity.ItemSerialSync
 import com.km.warehouse.data.network.entity.MoveOrderEntity
 import com.km.warehouse.data.network.entity.MoveOrderItemsEntity
 import java.time.LocalDateTime
@@ -40,4 +42,8 @@ fun MoveOrderItemsEntity.toMoveOrderItemDb(): MoveOrderItem {
         quantity = quantity,
         qtyGiven = qtyGiven
     )
+}
+
+fun ItemsSerial.toItemSerialSync(): ItemSerialSync {
+    return ItemSerialSync(moveItemId = moveOrderItemId, serialNumber = serial)
 }

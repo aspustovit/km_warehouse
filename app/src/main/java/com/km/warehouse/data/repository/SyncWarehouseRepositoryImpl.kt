@@ -57,19 +57,12 @@ class SyncWarehouseRepositoryImpl(private val warehouseApiService: WarehouseApiS
     override suspend fun syncToServerSerialsData(): SyncResultModel {
         val serials = database.itemsSerialDao().getSerialsToSync()
         try {
-            val moveOrderItemSerials = HashMap<Long, String>()
 
-            serials.forEach {
-                moveOrderItemSerials.put(it.id.toLong(), it.serial)
-            }
-            val response = warehouseApiService.insertMoveOrderItemSerial(moveOrderItemSerials).execute()
+            val listToSend = serials.map { it.toItemSerialSync() }
+            Log.d("syncToServerWarehouseData", "${listToSend}")
+            val response = warehouseApiService.insertMoveOrderItemSerial(listToSend).execute()
             Log.d("syncToServerWarehouseData", "${response.raw()}")
-
-           /* serials.forEach {
-                val response = warehouseApiService.insertMoveOrderItemSerial(moveOrderItemId = it.moveOrderItemId, serialNumber = it.serial).execute()
-                Log.d("syncToServerWarehouseData", "$response")
-            }*/
-            return SyncResultModel(isSyncSuccess = response.isSuccessful, "${response.body()?.error}", errorCode = response.code())
+            return SyncResultModel(isSyncSuccess = response.isSuccessful, "${response.code()}\n${response.body()?.error}", errorCode = response.code())
         } catch (ex: Exception){
             Log.e("syncToServerWarehouseData", "$ex")
             return SyncResultModel(isSyncSuccess = false, "$ex", errorCode = 500)

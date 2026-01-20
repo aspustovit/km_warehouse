@@ -3,6 +3,7 @@ package com.km.warehouse.data.network
 import com.km.warehouse.data.network.entity.BaseResponse
 import com.km.warehouse.data.network.entity.BayerEntity
 import com.km.warehouse.data.network.entity.ItemSerialEntity
+import com.km.warehouse.data.network.entity.ItemSerialSync
 import com.km.warehouse.data.network.entity.MoveOrderEntity
 import com.km.warehouse.data.network.entity.MoveOrderItemsEntity
 import com.km.warehouse.domain.usecase.model.MoveOrderModel
@@ -85,9 +86,8 @@ interface WarehouseApiService {
     return ResponseEntity.ok(new SuccessResponse<String>(null, "OK"));
   }
     * */
-    @FormUrlEncoded
     @POST("/api/main/insert_move_item_serial")
     fun insertMoveOrderItemSerial(
-        @Field("moveOrderItemSerials") moveOrderItemSerials: HashMap<Long, String>
+        @Body moveOrderItemSerials: List<ItemSerialSync>
     ): Call<BaseResponse<Unit>>
 }

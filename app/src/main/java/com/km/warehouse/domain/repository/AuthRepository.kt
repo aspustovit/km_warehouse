@@ -10,5 +10,5 @@ import com.km.warehouse.domain.usecase.model.PrevAuthModel
 interface AuthRepository {
       suspend fun login(auth: AuthRequest): LoginModel
 
-      suspend fun getAuthLogin(): PrevAuthModel
+      suspend fun getRefreshLoginToken(): PrevAuthModel
 }

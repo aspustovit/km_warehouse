@@ -8,10 +8,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialogDefaults.containerColor
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,6 +31,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -44,6 +48,15 @@ import org.koin.androidx.compose.koinViewModel
  * Create by Pustovit Oleksandr on 1/5/2026
  */
 
+private fun getDialogHeight(syncStatus: SyncStatus): Dp {
+    return when(syncStatus) {
+        SyncStatus.NOT_STARTED -> 475.dp
+        SyncStatus.ERROR -> 530.dp
+        SyncStatus.FINISHED -> 370.dp
+        SyncStatus.STARTED -> 475.dp
+    }
+}
+
 @Composable
 fun SyncDialog(
     onDismissRequest: () -> Unit,
@@ -51,6 +64,7 @@ fun SyncDialog(
     imageDescription: String,
 ) {
     val viewModel: SyncViewModel = koinViewModel()
+    viewModel.initState()
     val state = viewModel.viewState.collectAsState()
 
     Dialog(
@@ -58,10 +72,12 @@ fun SyncDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         // Draw a rectangle shape with rounded corners inside the dialog
+        val errorScrollState = rememberScrollState()
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(if(state.value.syncStatus != SyncStatus.ERROR) 375.dp else 475.dp)
+                .height(getDialogHeight(state.value.syncStatus))
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
@@ -141,39 +157,99 @@ fun SyncDialog(
                             .width(140.dp)
                     )
                 }
-                if(state.value.syncStatus == SyncStatus.ERROR) {
+                if (state.value.syncStatus == SyncStatus.ERROR) {
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        modifier = Modifier.padding(horizontal = 16.dp),
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .heightIn(max = 150.dp)
+                            .verticalScroll(errorScrollState),
                         text = state.value.syncError!!,
                         fontSize = 11.sp,
                         color = colorResource(R.color.error)
                     )
                 }
                 Spacer(modifier = Modifier.height(48.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.Bottom
-                ) {
-                    TextButton(
-                        onClick = { onDismissRequest() },
-                        modifier = Modifier.padding(8.dp),
-                    ) {
-                        Text(text = stringResource(R.string.cancel), fontSize = 18.sp)
+                when (state.value.syncStatus) {
+                    SyncStatus.NOT_STARTED -> {
+                        SyncButtons(
+                            onDismissRequest = onDismissRequest,
+                            viewModel = viewModel,
+                            enabledSync = true
+                        )
                     }
-                    TextButton(
-                        onClick = { viewModel.runSync() },
-                        modifier = Modifier.padding(8.dp),
-                    ) {
-                        Text(
-                            text = stringResource(R.string.sync_data),
-                            fontSize = 18.sp
+                    SyncStatus.STARTED -> {
+                        SyncButtons(onDismissRequest = onDismissRequest, viewModel = viewModel)
+                    }
+                    SyncStatus.FINISHED -> {
+                        FinishButtons(
+                            onDismissRequest = onDismissRequest,
+                            viewModel = viewModel
+                        )
+                    }
+                    SyncStatus.ERROR -> {
+                        SyncButtons(
+                            onDismissRequest = onDismissRequest,
+                            viewModel = viewModel,
+                            enabledSync = true
                         )
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun SyncButtons(
+    onDismissRequest: () -> Unit,
+    viewModel: SyncViewModel,
+    enabledSync: Boolean = false
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.End
+    ) {
+        TextButton(
+            onClick = { onDismissRequest() },
+            modifier = Modifier.padding(8.dp),
+        ) {
+            Text(text = stringResource(R.string.cancel), fontSize = 18.sp)
+        }
+        TextButton(
+            onClick = { viewModel.runSync() },
+            modifier = Modifier.padding(8.dp),
+            enabled = enabledSync
+        ) {
+            Text(
+                text = stringResource(R.string.sync_data),
+                fontSize = 18.sp
+            )
+        }
+        TextButton(
+            onClick = { viewModel.runSyncToServer() },
+            modifier = Modifier.padding(8.dp),
+            enabled = enabledSync
+        ) {
+            Text(
+                text = stringResource(R.string.sync_data_to_server),
+                fontSize = 18.sp
+            )
+        }
+    }
+}
+
+@Composable
+fun FinishButtons(onDismissRequest: () -> Unit, viewModel: SyncViewModel) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.End
+    ) {
+        TextButton(
+            onClick = { onDismissRequest() },
+            modifier = Modifier.padding(8.dp),
+        ) {
+            Text(text = stringResource(R.string.finish_sync), fontSize = 18.sp)
         }
     }
 }

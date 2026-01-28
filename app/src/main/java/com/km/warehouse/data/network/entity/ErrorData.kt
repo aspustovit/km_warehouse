@@ -10,6 +10,10 @@ data class ErrorData(
     val status: Int,
     val message: String,
     val error: String,
-    val path: String,
-    val timestamp: String
-)
+    val path: String = "",
+    val timestamp: String = ""
+){
+    fun getErrorMessage(): String {
+        return "$status - ${error}\n $message"
+    }
+}

@@ -88,6 +88,11 @@ interface WarehouseApiService {
     * */
     @POST("/api/main/insert_move_item_serial")
     fun insertMoveOrderItemSerial(
+        @Body moveOrderItemSerial: ItemSerialSync
+    ): Call<BaseResponse<Unit>>
+
+    @POST("/api/main/insert_move_item_serials")
+    fun insertMoveOrderItemSerials(
         @Body moveOrderItemSerials: List<ItemSerialSync>
     ): Call<BaseResponse<Unit>>
 }

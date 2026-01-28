@@ -1,8 +1,10 @@
 package com.km.warehouse.ui.move_order
 
 import android.util.Log
-import android.view.KeyEvent
-import androidx.compose.foundation.layout.Arrangement
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,9 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -32,32 +32,32 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.Key
+//import androidx.compose.ui.input.key.KeyEvent
+import android.view.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.fieldbee.core.ui.compose.theme.PaddingsDefaults
 import com.km.warehouse.R
-import com.km.warehouse.data.entity.Bayer
 import com.km.warehouse.domain.usecase.model.ItemSerialModel
 import com.km.warehouse.domain.usecase.model.MoveOrderItemsModel
 import com.km.warehouse.domain.usecase.model.MoveOrderModel
 import com.km.warehouse.domain.usecase.model.OrderModel
 import com.km.warehouse.ui.SharedViewModel
+import com.km.warehouse.ui.move_order.MoveOrderItemViewModel.Companion.SERIAL_NUMBER_NOT_FOUND
 import com.km.warehouse.ui.sync.ErrorDialog
-import com.km.warehouse.ui.sync.SyncStatus
 import org.koin.androidx.compose.koinViewModel
-import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
 
 /**
  * Create by Pustovit Oleksandr on 9/24/2025
@@ -65,9 +65,15 @@ import java.nio.charset.StandardCharsets
 
 @Composable
 fun MoveOrderView(
-    modifier: Modifier, onWidgetClicked: () -> Unit
+    modifier: Modifier,
+    onWidgetClicked: () -> Unit,
+    onBackClick: () -> Unit
 ) {
+    BackHandler {
+        onBackClick.invoke()
+    }
     val viewModel: MoveOrderItemViewModel = koinViewModel()
+    val scanViewModel: SharedViewModel = koinViewModel()
     val state = viewModel.viewState.collectAsState()
     LaunchedEffect(viewModel) {
         viewModel.loadMoveOrders()
@@ -89,22 +95,54 @@ fun MoveOrderView(
             thickness = 1.dp
         )
         Spacer(modifier = Modifier.width(16.dp))
-        MoveOrdersList(state.value.moveOrders, state.value.itemSerials)
-        if(state.value.itemSerials.isNotEmpty()){
-            MoveOrdersList(state.value.moveOrders, state.value.itemSerials)
+        MoveOrdersList(state.value.moveOrders, state.value.itemSerials, scanViewModel)
+        if (state.value.itemSerials.isNotEmpty()) {
+            MoveOrdersList(state.value.moveOrders, state.value.itemSerials, scanViewModel)
         }
-        if (state.value.error.isNotBlank()) {
-            ErrorDialog(errorMessage = state.value.error, onDismiss = {
-                viewModel.cancelError()
-            })
+        state.value.errorData?.let {
+            if (it.status == SERIAL_NUMBER_NOT_FOUND){
+                ErrorDialog(errorMessage = "${stringResource(R.string.barcode)} ${it.message} ${stringResource(R.string.barcode_not_found_error)}", onDismiss = {
+                    viewModel.cancelError()
+                })
+            } else {
+                ErrorDialog(errorMessage = it.getErrorMessage(), onDismiss = {
+                    viewModel.cancelError()
+                })
+            }
+        }
+        if (state.value.errorData != null) {
+
         }
     }
 }
 
 @Composable
-fun MoveOrdersList(moveOrders: HashMap<String, List<OrderModel>>, serials: List<ItemSerialModel>) {
-    Log.e("SERIALS", "Upadte list")
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+fun MoveOrdersList(moveOrders: HashMap<String, List<OrderModel>>,
+                   serials: List<ItemSerialModel>,
+                   scanViewModel: SharedViewModel ) {
+    LazyColumn(modifier = Modifier.fillMaxSize().focusable().onPreviewKeyEvent { e ->
+        val native = e.nativeKeyEvent
+        if (native.action == KeyEvent.ACTION_DOWN) {
+            val pressedKey = native.unicodeChar.toChar()
+            Log.d("NAV_CONTROLLER", "$pressedKey")
+            scanViewModel.onBarcodeScan(pressedKey)
+        }
+        if (native.action == KeyEvent.ACTION_DOWN && native.keyCode == KeyEvent.KEYCODE_ENTER) {
+            scanViewModel.postBarcode()
+        }
+        false
+
+        //Log.e("NAV_CONTROLLER", "$e")
+        /*if (e.type == KeyEventType.KeyDown) {
+            val pressedKey = e.unicodeChar.toChar()
+            Log.d("NAV_CONTROLLER", "$pressedKey")
+            //viewModel.onBarcodeScan(pressedKey)
+        }
+        if (e.type == KeyEventType.KeyDown && e.nativeKeyEvent.keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
+            //viewModel.postBarcode()
+        }
+        */
+    }) {
         moveOrders.forEach {
             item {
                 Text(
@@ -115,10 +153,6 @@ fun MoveOrdersList(moveOrders: HashMap<String, List<OrderModel>>, serials: List<
                     fontFamily = FontFamily.SansSerif
                 )
                 it.value.forEach { moveOrder ->
-                    val win1251Bytes =
-                        moveOrder.moveOrderModel.description.toByteArray(Charset.forName("Windows-1251"))
-                    val s = String(win1251Bytes, StandardCharsets.UTF_8)
-                    Log.e("moveOrders", "$s")
                     Spacer(modifier = Modifier.height(8.dp))
                     MoveOrderHeader(moveOrder.moveOrderModel)
                     moveOrder.moveOrderItemsModels.forEach { item ->
@@ -179,13 +213,26 @@ fun MoveOrderItemView(item: MoveOrderItemsModel, serials: List<ItemSerialModel>)
             Text(text = item.description, fontSize = 12.sp)
             Spacer(modifier = Modifier.height(8.dp))
         }
-        serials.filter { it.moveOrderItemId == item.moveOrderId }.forEach { serial ->
-            Text(
-                text = serial.serial,
-                fontSize = 14.sp,
-                color = colorResource(R.color.color_text_secondary),
-                fontWeight = FontWeight.Bold
-            )
+       // Spacer(modifier = Modifier.height(8.dp))
+        Log.i("SERIALS", "${item.moveOrderId} = list $serials")
+        serials.filter { it.moveOrderItemId == item.id }.forEach { serial ->
+            Log.e("_SERIALS_", "Upadte list $serials")
+            Column {
+                Spacer(
+                    modifier = Modifier
+                        .height(1.dp)
+                        .fillMaxWidth()
+                        .background(colorResource(R.color.color_text_secondary))
+                )
+                Text(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    text = serial.serial,
+                    fontSize = 14.sp,
+                    color = colorResource(R.color.color_text_secondary),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
         }
     }
 }
@@ -252,23 +299,41 @@ fun MoveOrderHeader(moveOrder: MoveOrderModel) {
 }
 
 @Composable
-fun ManualSerialSearchView(viewModel: MoveOrderItemViewModel) {
-    var searchNumber by remember { mutableStateOf("0193015506459") }
+fun ManualSerialSearchView(viewModel: MoveOrderItemViewModel, defaultSerialNumber: String = "0193015506459") {
+    var searchNumber by remember { mutableStateOf(defaultSerialNumber) }
+    var isEditTextEnabled by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+
+    var login by remember { mutableStateOf("") }
+
     Row(verticalAlignment = Alignment.CenterVertically) {
-        OutlinedTextField(
-            value = searchNumber,
-            onValueChange = { searchNumber = it },
-            label = { Text(stringResource(R.string.barcode_number)) },
-            modifier = Modifier.weight(1.5f),
-            singleLine = true
-        )
+        Box(modifier = Modifier.weight(1.5f)) {
+            OutlinedTextField(
+                value = searchNumber,
+                onValueChange = { searchNumber = it },
+                label = { Text(stringResource(R.string.barcode_number)) },
+                singleLine = true,
+                enabled = isEditTextEnabled,
+                modifier = Modifier.focusRequester(focusRequester),
+                )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable(onClick = {
+                        isEditTextEnabled = true
+                        focusRequester.requestFocus()
+                    }),
+            )
+        }
 
         Spacer(modifier = Modifier.width(8.dp))
         Button(
             modifier = Modifier
                 .weight(0.9f),
             onClick = {
+                isEditTextEnabled = false
                 viewModel.searchBarcodeInOrderItems(searchNumber)
+                focusRequester.freeFocus()
             },
         ) {
             Text(text = stringResource(R.string.barcode_accept), fontSize = 16.sp)

@@ -2,6 +2,8 @@ package com.km.warehouse
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -63,9 +65,11 @@ fun NavigationController(modifier: Modifier) {
                     title = { Text(stringResource(id = R.string.approved_documents)) },
                     modifier = Modifier.fillMaxWidth()
                 )
-                MoveOrderView(modifier = Modifier.fillMaxWidth(), onWidgetClicked = {
-
+                MoveOrderView(modifier = Modifier.fillMaxWidth(), onWidgetClicked = {}, onBackClick ={
+                    Log.d("NAV_CONTROLLER", "asasa")
+                    navController.popBackStack()
                 })
+
             }
         }
         composable<NavigationStep.ScanToFileScreen> {

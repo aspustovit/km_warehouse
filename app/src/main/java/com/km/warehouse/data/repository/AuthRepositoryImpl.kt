@@ -36,19 +36,19 @@ class AuthRepositoryImpl(val authApiService: AuthApiService, val context: Contex
         }
     }
 
-    override suspend fun getAuthLogin(): PrevAuthModel {
+    override suspend fun getRefreshLoginToken(): PrevAuthModel {
         val tokenManager = TokenManager(context)
         try {
-            if(tokenManager.getToken().isEmpty()) {
-                val response = authApiService.refreshFullToken(tokenManager.getRefreshToken())
-                val tokenResponse = response.body()
-                if (tokenResponse != null) {
-                    tokenManager.saveToken(tokenResponse.accessToken)
-                    tokenManager.saveRefreshToken(tokenResponse.refreshToken)
-                } else {
-                    tokenManager.deleteToken()
-                    tokenManager.deleteRefreshToken()
-                }
+            Log.v("AuthLogin_S", "${tokenManager.getToken()}")
+            val response = authApiService.refreshFullToken(tokenManager.getRefreshToken())
+            val tokenResponse = response.body()
+            Log.d("AuthLogin_R", "${tokenResponse}")
+            if (tokenResponse != null) {
+                tokenManager.saveToken(tokenResponse.accessToken)
+                tokenManager.saveRefreshToken(tokenResponse.refreshToken)
+            } else {
+                tokenManager.deleteToken()
+                tokenManager.deleteRefreshToken()
             }
         } catch (ex: Exception) {
             Log.e("AuthLogin", "$ex")

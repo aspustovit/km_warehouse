@@ -31,6 +31,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -58,23 +60,29 @@ class AuthActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val tokenManager = TokenManager(this@AuthActivity)
+
         setContent {
             val viewModel: AuthViewModel = koinViewModel()
             val state = viewModel.viewState.collectAsState()
-
-            LaunchedEffect(state.value) {
+            val prevLogin = state.value.prevLogin
+            LaunchedEffect(prevLogin != null && prevLogin.token.isNotBlank(), state.value.loginModel.isLoggedIn) {
                 state.value.apply {
                     Log.d("AUTH_RESPONCE_", "${state.value.prevLogin?.userName}")
                     if (prevLogin != null && prevLogin.token.isNotBlank()) {
                         val intent = Intent(this@AuthActivity, MainActivity::class.java)
                         startActivity(intent)
+                        finish()
                     } else {
                         if (loginModel.isLoggedIn) {
                             val intent = Intent(this@AuthActivity, MainActivity::class.java)
                             startActivity(intent)
+                            finish()
                         }
                     }
                 }
+            }
+            LaunchedEffect(Unit) {
+                viewModel.initAuthState()
             }
             MaterialTheme { // Apply your app's theme
                 Log.d(
@@ -93,7 +101,6 @@ class AuthActivity : ComponentActivity() {
                         viewModel.logIn(login, pass)
                     })
             }
-            viewModel.initAuthState()
         }
     }
 
@@ -103,7 +110,7 @@ class AuthActivity : ComponentActivity() {
         isLoading: Boolean,
         onStartLogin: (String, String) -> Unit
     ) {
-
+        val focusRequester = remember { FocusRequester() }
         var login by remember { mutableStateOf(userLogin) }
         var password by remember { mutableStateOf("") }
         var showPasswordIsEmptyError by remember { mutableStateOf(false) }
@@ -124,6 +131,7 @@ class AuthActivity : ComponentActivity() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp)
+                    .focusRequester(focusRequester)
             )
 
             OutlinedTextField(
@@ -132,7 +140,8 @@ class AuthActivity : ComponentActivity() {
                 label = { Text(stringResource(R.string.password)) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp),
+                    .padding(top = 8.dp)
+                    .focusRequester(focusRequester),
                 visualTransformation = PasswordVisualTransformation(),
                 isError = showPasswordIsEmptyError,
                 supportingText = { if(showPasswordIsEmptyError) Text(stringResource(R.string.password_is_empty)) }
@@ -151,6 +160,7 @@ class AuthActivity : ComponentActivity() {
                         if (login == null || login.isEmpty()) userLogin else login,
                         password
                     )
+                    focusRequester.freeFocus()
                 },
                 modifier = Modifier
                     .fillMaxWidth().height(56.dp),

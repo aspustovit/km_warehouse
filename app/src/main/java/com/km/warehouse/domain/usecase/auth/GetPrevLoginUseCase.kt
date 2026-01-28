@@ -10,6 +10,6 @@ import com.km.warehouse.domain.usecase.model.PrevAuthModel
 class GetPrevLoginUseCase(private val authRepository: AuthRepository) :
     UseCase<PrevAuthModel, Unit>() {
     override suspend fun run(params: Unit): Result<PrevAuthModel> {
-        return Result.success(authRepository.getAuthLogin())
+        return Result.success(authRepository.getRefreshLoginToken())
     }
 }

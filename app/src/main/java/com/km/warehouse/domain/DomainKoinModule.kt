@@ -17,7 +17,12 @@ object DomainKoinModule {
     private val databaseModule = module {
         factory { LoadBayerUseCase(bayerRepository = get()) }
         factory { ObserveBarcodeDataUseCase() }
-        factory { SyncWarehouseDataUseCase(syncWarehouseRepository = get()) }
+        factory {
+            SyncWarehouseDataUseCase(
+                syncWarehouseRepository = get(),
+                authRepository = get()
+            )
+        }
         factory { LoginUseCase(authRepository = get()) }
         factory { GetPrevLoginUseCase(authRepository = get()) }
         factory { LoadMoveOrdersUseCase(warehouseRepository = get()) }

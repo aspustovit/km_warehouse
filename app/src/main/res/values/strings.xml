@@ -18,7 +18,8 @@
     <string name="error">Помилка!</string>
     <string name="ok">Зрозуміло</string>
     <string name="cancel">Відміна</string>
-    <string name="sync_data">Синхронізувати</string>
+    <string name="sync_data">Синхронізувати з серверу</string>
+    <string name="sync_data_to_server">Надіслати дані на сервер</string>
     <string name="password_is_empty">Пароль не може бути пустий!</string>
     <string name="sync_message">Синхронізація данних з основною БД.</string>
     <string name="move_order_update_date">Дата оновлення:</string>
@@ -26,4 +27,7 @@
     <string name="barcode_accept">Примінити</string>
     <string name="inventory_id">Інвентарний номер:</string>
     <string name="item_segment">Сегмент:</string>
+    <string name="finish_sync">Завершити</string>
+    <string name="barcode">Штрихкод:</string>
+    <string name="barcode_not_found_error">не знайдено!</string>
 </resources>

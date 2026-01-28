@@ -3,13 +3,12 @@ package com.km.warehouse.ui.move_order
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.km.warehouse.domain.usecase.LoadBayerUseCase
+import com.km.warehouse.data.network.entity.ErrorData
 import com.km.warehouse.domain.usecase.LoadMoveOrdersUseCase
 import com.km.warehouse.domain.usecase.ObserveBarcodeDataUseCase
 import com.km.warehouse.domain.usecase.SaveSerialToDBUseCase
 import com.km.warehouse.domain.usecase.SyncToServerSerialsUseCase
 import com.km.warehouse.domain.usecase.auth.GetPrevLoginUseCase
-import com.km.warehouse.domain.usecase.base.DataHub
 import com.km.warehouse.domain.usecase.model.ItemSerialModel
 import com.km.warehouse.ui.scan_to_file.BarcodeReadState
 import kotlinx.coroutines.Job
@@ -30,6 +29,10 @@ class MoveOrderItemViewModel(
     private val syncToServerSerialsUseCase: SyncToServerSerialsUseCase,
     private val getPrevLoginUseCase: GetPrevLoginUseCase
 ) : ViewModel() {
+    companion object {
+        val SERIAL_NUMBER_NOT_FOUND = 1024
+    }
+
     private var _viewState: MutableStateFlow<MoveOrderState> = MutableStateFlow(
         MoveOrderState(bayers = emptyList())
     )
@@ -44,9 +47,9 @@ class MoveOrderItemViewModel(
 
     fun observeBarcodes() {
         barcodeJob?.cancel()
-
+        Log.e("onKeyDown_SCAN_3", "LAUNCH")
         barcodeJob = observeBarcodeDataUseCase.observe().onEach { bar ->
-            Log.e("onKeyDown_SCAN_3", bar)
+            Log.e("onKeyDown_SCAN_4", bar)
             searchBarcodeInOrderItems(bar)
         }.launchIn(viewModelScope)
         observeBarcodeDataUseCase(Unit)
@@ -69,14 +72,24 @@ class MoveOrderItemViewModel(
                                     )
                                     serials.add(itemSerial)
                                     saveItemSerialToDb(itemSerial)
-                                    Log.e("SERIALS", "$serial")
-                                    _viewState.update {_viewState.value.copy(itemSerials = serials.toList())}
+                                    Log.i("SERIALS_", "$itemSerial")
+                                    Log.d("SERIALS_S", "$serials")
+                                    _viewState.update { _viewState.value.copy(itemSerials = serials.toList()) }
                                     return
                                 }
                             }
                         }
                     }
                 }
+            }
+            _viewState.update {
+                _viewState.value.copy(
+                    errorData = ErrorData(
+                        status = SERIAL_NUMBER_NOT_FOUND,
+                        message = barcode,
+                        error = "Barcode not found!"
+                    )
+                )
             }
         }
     }
@@ -85,7 +98,6 @@ class MoveOrderItemViewModel(
         viewModelScope.launch {
             saveSerialToDBUseCase.invoke(itemSerialModel).onSuccess {
                 Log.d("saveItemSerialToDb", "SAVED")
-                sync()
             }.onFailure {
                 _viewState.update { it.copy(error = "$it") }
             }
@@ -95,9 +107,9 @@ class MoveOrderItemViewModel(
     fun sync() {
         viewModelScope.launch {
             syncToServerSerialsUseCase.invoke(Unit).onSuccess {
-                if(!it.isSyncSuccess){
-                    _viewState.update {state -> state.copy(error = it.errorMessage) }
-                    if(it.errorCode == 401){
+                if (!it.isSyncSuccess) {
+                    _viewState.update { state -> state.copy(errorData = it.errorData) }
+                    if (it.errorData?.status == 401) {
                         updateTokens()
                     }
                 } else {
@@ -107,10 +119,10 @@ class MoveOrderItemViewModel(
         }
     }
 
-    fun updateTokens(){
+    fun updateTokens() {
         viewModelScope.launch {
             getPrevLoginUseCase.invoke(Unit).onSuccess {
-               Log.d("syncToServerWarehouseData", "$it")
+                Log.d("syncToServerWarehouseData", "$it")
             }
         }
     }
@@ -118,7 +130,7 @@ class MoveOrderItemViewModel(
     fun loadMoveOrders() {
         viewModelScope.launch {
             loadMoveOrdersUseCase.invoke(Unit).onSuccess { result ->
-                _viewState.update { it.copy(moveOrders = result, error = "") }
+                _viewState.update { it.copy(moveOrders = result, errorData = null) }
             }.onFailure {
                 _viewState.update { it.copy(error = "$it") }
             }
@@ -126,6 +138,6 @@ class MoveOrderItemViewModel(
     }
 
     fun cancelError() {
-        _viewState.update { it.copy(error = "") }
+        _viewState.update { it.copy(error = "", errorData = null) }
     }
 }

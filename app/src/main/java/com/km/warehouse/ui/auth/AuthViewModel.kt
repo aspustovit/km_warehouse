@@ -24,6 +24,7 @@ class AuthViewModel(
     val viewState: StateFlow<AuthState> = _authState
 
     fun initAuthState() {
+        Log.e("AuthLogin_INIT", "initAuthState")
         viewModelScope.launch {
             getPrevLoginUseCase.invoke(Unit).onSuccess {
                 _authState.update { state ->

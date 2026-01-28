@@ -32,7 +32,7 @@ class SharedViewModel(
         barcodeJob?.cancel()
 
         barcodeJob = observeBarcodeDataUseCase.observe().onEach { bar ->
-            Log.e("onKeyDown_SCAN_3", bar)
+            //Log.e("onKeyDown_SCAN_3", bar)
             _barcodeState.update {
                 it.copy(
                     lastBarcode = bar,

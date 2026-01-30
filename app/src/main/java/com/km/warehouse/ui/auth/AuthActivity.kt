@@ -87,10 +87,10 @@ class AuthActivity : ComponentActivity() {
             MaterialTheme { // Apply your app's theme
                 Log.d(
                     "_AUTH_RESPONCE_",
-                    "${state.value.loginModel.isLoggedIn} - ${state.value.loginModel.errorText}"
+                    "${state.value.loginModel.isLoggedIn} - ${state.value.loginModel.error}"
                 )
-                if (!state.value.loginModel.isLoggedIn && state.value.loginModel.errorText.isNotBlank()) {
-                    ErrorDialog(errorMessage = state.value.loginModel.errorText, onDismiss = {
+                if (!state.value.loginModel.isLoggedIn && state.value.loginModel.error != null) {
+                    ErrorDialog(errorMessage = state.value.loginModel.error!!.getErrorMessage(), onDismiss = {
                         viewModel.cancelError()
                     })
                 }

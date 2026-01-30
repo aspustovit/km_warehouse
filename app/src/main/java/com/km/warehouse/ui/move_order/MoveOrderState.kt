@@ -13,5 +13,6 @@ data class MoveOrderState(
     val moveOrders: HashMap<String, List<OrderModel>> = HashMap(),
     val errorData: ErrorData? = null,
     val error: String = "",
-    val itemSerials: List<ItemSerialModel> = emptyList()
+    val itemSerials: List<ItemSerialModel> = emptyList(),
+    val showManualEnterBarcode: Boolean = false
 )

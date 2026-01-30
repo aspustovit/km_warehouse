@@ -37,6 +37,8 @@ interface SyncWarehouseRepository {
 
     suspend fun syncToServerSerialsData(): SyncResultModel
 
+    suspend fun getDocumentCountForSync(): Int
+
     /*suspend fun loadBayer(): List<BayerModel>
 
     suspend fun loadMoveOrders(): List<MoveOrderModel>

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.km.warehouse.data.network.auth.AuthRequest
+import com.km.warehouse.data.network.entity.ErrorData
 import com.km.warehouse.domain.usecase.auth.GetPrevLoginUseCase
 import com.km.warehouse.domain.usecase.auth.LoginUseCase
 import com.km.warehouse.domain.usecase.model.LoginModel
@@ -20,7 +21,7 @@ class AuthViewModel(
     private val getPrevLoginUseCase: GetPrevLoginUseCase
 ) : ViewModel() {
     private var _authState: MutableStateFlow<AuthState> =
-        MutableStateFlow(AuthState(null, LoginModel(isLoggedIn = false, errorText = "")))
+        MutableStateFlow(AuthState(null, LoginModel(isLoggedIn = false, error = null)))
     val viewState: StateFlow<AuthState> = _authState
 
     fun initAuthState() {
@@ -47,7 +48,16 @@ class AuthViewModel(
             }.onFailure {
                 Log.e("LOG_IN_FAIL", "$it")
                 _authState.update { state ->
-                    state.copy(loginModel = LoginModel(isLoggedIn = false, errorText = "$it"), isLoading = false)
+                    state.copy(
+                        loginModel = LoginModel(
+                            isLoggedIn = false,
+                            error = ErrorData(
+                                status = 600,
+                                error = "LOG_IN_FAIL",
+                                message = it.toString()
+                            )
+                        ), isLoading = false
+                    )
                 }
             }
         }
@@ -55,7 +65,7 @@ class AuthViewModel(
 
     fun cancelError() {
         _authState.update { state ->
-            state.copy(loginModel = LoginModel(isLoggedIn = false, errorText = ""), isLoading = false)
+            state.copy(loginModel = LoginModel(isLoggedIn = false, error = null), isLoading = false)
         }
     }
 }

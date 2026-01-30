@@ -37,11 +37,6 @@ class SyncWarehouseRepositoryImpl(
             val moveOrderResponse = warehouseApiService.getMoveOrders().execute()
             if(!moveOrderResponse.isSuccessful)
                 errorData = parseError(moveOrderResponse.errorBody()!!.string())
-            /*    val win1251Bytes =
-                        moveOrder.moveOrderModel.description.toByteArray(Charset.forName("Windows-1251"))
-                    val s = String(win1251Bytes, StandardCharsets.UTF_8)
-                    */
-            Log.v("_syncWarehouseData", "${moveOrderResponse.body()}")
             val moveOrderData = moveOrderResponse.body()?.data
             moveOrderData?.apply {
                 forEach {
@@ -51,6 +46,7 @@ class SyncWarehouseRepositoryImpl(
                         database.bayerDao()
                             .insert(Bayer(id = it.bayerId, description = it.bayerName))
                     }
+                    Log.v("_syncWarehouseData", "${it.toMoveOrderDb()}")
                     val id = database.moveOrderDao().insert(it.toMoveOrderDb())
                     if (id != 0L) {
                         errorData = syncMoveOrderItems(id)
@@ -70,7 +66,6 @@ class SyncWarehouseRepositoryImpl(
     override suspend fun syncToServerSerialsData(): SyncResultModel {
         val serials = database.itemsSerialDao().getSerialsToSync()
         try {
-
             val listToSend = serials.map { it.toItemSerialSync() }
             if (listToSend.size == 1) {
                 val first = listToSend.first()
@@ -83,6 +78,8 @@ class SyncWarehouseRepositoryImpl(
                         errorData = errorData,
                     )
                 } else {
+                    database.itemsSerialDao().delete(serials.first())
+                    database.moveOrderItemDao().deleteById(serials.first().moveOrderItemId)
                     return SyncResultModel(
                         isSyncSuccess = response.isSuccessful,
                         errorData = null,
@@ -99,6 +96,10 @@ class SyncWarehouseRepositoryImpl(
                         errorData = errorData,
                     )
                 } else {
+                    serials.forEach {
+                        database.itemsSerialDao().delete(it)
+                        database.moveOrderItemDao().deleteById(it.moveOrderItemId)
+                    }
                     return SyncResultModel(
                         isSyncSuccess = response.isSuccessful,
                         errorData = null,
@@ -128,18 +129,15 @@ class SyncWarehouseRepositoryImpl(
         return errorData
     }
 
-    fun parseError(errorBody: String): ErrorData? {
+    private fun parseError(errorBody: String): ErrorData? {
         val gson = Gson()
         val error = gson.fromJson(errorBody, ErrorData::class.java)
         Log.e("syncToServerWarehouseData", "$error")
         return error
+    }
 
-        /*Log.e("syncToServerWarehouseData", "$errorBody")
-        val errorMessage = JsonParser().parse(errorBody)
-            .asJsonObject["error"]
-            .asJsonObject["message"]
-            .asString
-        Log.e("syncToServerWarehouseData", "$errorMessage")*/
+    override suspend fun getDocumentCountForSync(): Int {
+        return database.itemsSerialDao().getSerialsToSync().size
     }
 
     /*override suspend fun loadBayer(): List<BayerModel> {

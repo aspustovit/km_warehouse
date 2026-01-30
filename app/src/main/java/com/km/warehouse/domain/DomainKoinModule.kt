@@ -1,5 +1,6 @@
 package com.km.warehouse.domain
 
+import com.km.warehouse.domain.usecase.GetDocumentDataToSyncUseCase
 import com.km.warehouse.domain.usecase.LoadBayerUseCase
 import com.km.warehouse.domain.usecase.LoadMoveOrdersUseCase
 import com.km.warehouse.domain.usecase.auth.LoginUseCase
@@ -28,6 +29,7 @@ object DomainKoinModule {
         factory { LoadMoveOrdersUseCase(warehouseRepository = get()) }
         factory { SaveSerialToDBUseCase(localWarehouseRepository = get()) }
         factory { SyncToServerSerialsUseCase(syncWarehouseRepository = get()) }
+        factory { GetDocumentDataToSyncUseCase(syncWarehouseRepository = get()) }
     }
 
     val parentModule = module {

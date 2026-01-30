@@ -3,6 +3,7 @@ package com.km.warehouse.ui.sync
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.km.warehouse.domain.usecase.GetDocumentDataToSyncUseCase
 import com.km.warehouse.domain.usecase.SyncToServerSerialsUseCase
 import com.km.warehouse.domain.usecase.SyncWarehouseDataUseCase
 import kotlinx.coroutines.delay
@@ -16,7 +17,8 @@ import kotlinx.coroutines.launch
  */
 class SyncViewModel(
     private val syncWarehouseDataUseCase: SyncWarehouseDataUseCase,
-    private val syncToServerSerialsUseCase: SyncToServerSerialsUseCase
+    private val syncToServerSerialsUseCase: SyncToServerSerialsUseCase,
+    private val getDocumentDataToSyncUseCase: GetDocumentDataToSyncUseCase
 ) : ViewModel() {
     private var _viewState: MutableStateFlow<SyncState> = MutableStateFlow(
         SyncState(syncStatus = SyncStatus.NOT_STARTED)
@@ -25,6 +27,15 @@ class SyncViewModel(
 
     fun initState() {
         _viewState.update { state -> state.copy(syncStatus = SyncStatus.NOT_STARTED, syncError = null) }
+        getDocumentCountForSync()
+    }
+
+    fun getDocumentCountForSync() {
+        viewModelScope.launch {
+            getDocumentDataToSyncUseCase.invoke(Unit).onSuccess {
+                _viewState.update { state -> state.copy(documentForSyncCount = it) }
+            }
+        }
     }
 
     fun runSync() {

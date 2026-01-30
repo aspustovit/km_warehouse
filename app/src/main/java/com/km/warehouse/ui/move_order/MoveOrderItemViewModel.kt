@@ -74,7 +74,7 @@ class MoveOrderItemViewModel(
                                     saveItemSerialToDb(itemSerial)
                                     Log.i("SERIALS_", "$itemSerial")
                                     Log.d("SERIALS_S", "$serials")
-                                    _viewState.update { _viewState.value.copy(itemSerials = serials.toList()) }
+                                    _viewState.update { _viewState.value.copy(itemSerials = serials.toList(), showManualEnterBarcode = false) }
                                     return
                                 }
                             }
@@ -88,7 +88,8 @@ class MoveOrderItemViewModel(
                         status = SERIAL_NUMBER_NOT_FOUND,
                         message = barcode,
                         error = "Barcode not found!"
-                    )
+                    ),
+                    showManualEnterBarcode = false
                 )
             }
         }
@@ -139,5 +140,13 @@ class MoveOrderItemViewModel(
 
     fun cancelError() {
         _viewState.update { it.copy(error = "", errorData = null) }
+    }
+
+    fun showManualBarcodeEntering() {
+        _viewState.update { it.copy(showManualEnterBarcode = true) }
+    }
+
+    fun cancelManualBarcodeEntering() {
+        _viewState.update { it.copy(showManualEnterBarcode = false) }
     }
 }

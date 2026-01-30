@@ -28,7 +28,8 @@ object AppViewModelModule {
         viewModel {
             SyncViewModel(
                 syncWarehouseDataUseCase = get(),
-                syncToServerSerialsUseCase = get()
+                syncToServerSerialsUseCase = get(),
+                getDocumentDataToSyncUseCase = get()
             )
         }
         viewModel { AuthViewModel(loginUseCase = get(), getPrevLoginUseCase = get()) }

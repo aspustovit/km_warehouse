@@ -18,7 +18,7 @@ fun MoveOrderEntity.toMoveOrderDb(): MoveOrder {
     val createDate = LocalDateTime.parse(creationDate, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
     return MoveOrder(
         id = id,
-        description = String(bytes = description.toByteArray(), charset = charset("windows-1254")),
+        description = description,
         creationDate = creationDate,
         moveDate = moveDate,
         number = number,

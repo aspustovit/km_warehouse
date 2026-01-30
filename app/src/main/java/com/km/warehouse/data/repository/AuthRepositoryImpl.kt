@@ -6,6 +6,7 @@ import com.google.gson.Gson
 import com.km.warehouse.data.network.AuthApiService
 import com.km.warehouse.data.network.auth.TokenManager
 import com.km.warehouse.data.network.auth.AuthRequest
+import com.km.warehouse.data.network.entity.ErrorData
 import com.km.warehouse.domain.repository.AuthRepository
 import com.km.warehouse.domain.usecase.model.LoginModel
 import com.km.warehouse.domain.usecase.model.PrevAuthModel
@@ -29,10 +30,21 @@ class AuthRepositoryImpl(val authApiService: AuthApiService, val context: Contex
                 tokenManager.saveLastLogin(it.userName)
             }
             Log.i("AUTH_RESPONCE", "Return")
-            return LoginModel(isLoggedIn = response.isSuccessful, errorText = "")
+            var errorData: ErrorData? = null
+            if (!response.isSuccessful)
+                errorData = parseError(response.errorBody()!!.string())
+
+            return LoginModel(isLoggedIn = response.isSuccessful, error = errorData)
         } catch (ex: Exception) {
             Log.e("AUTH_RESPONCE", "$ex")
-            return LoginModel(isLoggedIn = false, errorText = ex.toString())
+            return LoginModel(
+                isLoggedIn = false,
+                error = ErrorData(
+                    status = 600,
+                    message = ex.toString(),
+                    error = "AuthRepositoryImpl.login()"
+                )
+            )
         }
     }
 
@@ -62,5 +74,12 @@ class AuthRepositoryImpl(val authApiService: AuthApiService, val context: Contex
             refreshToken = tokenManager.getRefreshToken(),
             userName = tokenManager.getLastLogin()
         )
+    }
+
+    private fun parseError(errorBody: String): ErrorData? {
+        val gson = Gson()
+        val error = gson.fromJson(errorBody, ErrorData::class.java)
+        Log.e("syncToServerWarehouseData", "$error")
+        return error
     }
 }

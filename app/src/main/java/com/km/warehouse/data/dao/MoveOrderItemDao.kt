@@ -12,4 +12,7 @@ import com.km.warehouse.data.entity.MoveOrderItem
 abstract class MoveOrderItemDao : BaseDao<MoveOrderItem>() {
     @Query("SELECT m.* FROM move_order_item m where m.move_order_id = :moveOrderId")
     abstract fun getMoveOrderItemsByOrderId(moveOrderId: Int): List<MoveOrderItem>
+
+    @Query("DELETE FROM move_order_item  where id = :moveOrderItemId")
+    abstract fun deleteById(moveOrderItemId: Int): Int
 }

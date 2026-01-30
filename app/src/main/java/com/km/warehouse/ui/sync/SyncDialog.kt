@@ -51,7 +51,7 @@ import org.koin.androidx.compose.koinViewModel
 private fun getDialogHeight(syncStatus: SyncStatus): Dp {
     return when(syncStatus) {
         SyncStatus.NOT_STARTED -> 475.dp
-        SyncStatus.ERROR -> 530.dp
+        SyncStatus.ERROR -> 570.dp
         SyncStatus.FINISHED -> 370.dp
         SyncStatus.STARTED -> 475.dp
     }
@@ -168,8 +168,14 @@ fun SyncDialog(
                         fontSize = 11.sp,
                         color = colorResource(R.color.error)
                     )
+                } else if(state.value.documentForSyncCount != 0) {
+                    Text(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp).fillMaxWidth(),
+                        text = "${stringResource(R.string.document_for_sync)} ${state.value.documentForSyncCount}",
+                        fontSize = 14.sp,
+                        color = colorResource(R.color.sync_count)
+                    )
                 }
-                Spacer(modifier = Modifier.height(48.dp))
                 when (state.value.syncStatus) {
                     SyncStatus.NOT_STARTED -> {
                         SyncButtons(
@@ -212,13 +218,13 @@ fun SyncButtons(
     ) {
         TextButton(
             onClick = { onDismissRequest() },
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier.padding(4.dp),
         ) {
             Text(text = stringResource(R.string.cancel), fontSize = 18.sp)
         }
         TextButton(
             onClick = { viewModel.runSync() },
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier.padding(4.dp),
             enabled = enabledSync
         ) {
             Text(
@@ -228,7 +234,7 @@ fun SyncButtons(
         }
         TextButton(
             onClick = { viewModel.runSyncToServer() },
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier.padding(4.dp),
             enabled = enabledSync
         ) {
             Text(

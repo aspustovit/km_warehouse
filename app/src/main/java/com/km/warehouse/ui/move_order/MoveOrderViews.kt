@@ -57,6 +57,7 @@ import com.km.warehouse.domain.usecase.model.OrderModel
 import com.km.warehouse.ui.SharedViewModel
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel.Companion.SERIAL_NUMBER_NOT_FOUND
 import com.km.warehouse.ui.sync.ErrorDialog
+import com.km.warehouse.ui.sync.SyncViewModel
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -75,6 +76,7 @@ fun MoveOrderView(
     val viewModel: MoveOrderItemViewModel = koinViewModel()
     val scanViewModel: SharedViewModel = koinViewModel()
     val state = viewModel.viewState.collectAsState()
+
     LaunchedEffect(viewModel) {
         viewModel.loadMoveOrders()
         viewModel.observeBarcodes()
@@ -131,17 +133,6 @@ fun MoveOrdersList(moveOrders: HashMap<String, List<OrderModel>>,
             scanViewModel.postBarcode()
         }
         false
-
-        //Log.e("NAV_CONTROLLER", "$e")
-        /*if (e.type == KeyEventType.KeyDown) {
-            val pressedKey = e.unicodeChar.toChar()
-            Log.d("NAV_CONTROLLER", "$pressedKey")
-            //viewModel.onBarcodeScan(pressedKey)
-        }
-        if (e.type == KeyEventType.KeyDown && e.nativeKeyEvent.keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
-            //viewModel.postBarcode()
-        }
-        */
     }) {
         moveOrders.forEach {
             item {
@@ -168,15 +159,6 @@ fun MoveOrdersList(moveOrders: HashMap<String, List<OrderModel>>,
                 Spacer(modifier = Modifier.height(12.dp))
             }
         }
-        /*items(moveOrders ) { item ->
-            // Define the UI for each individual item here
-            Log.e("moveOrders", "$item")
-            Text(text = item.description)
-            *//*moveOrders.forEach {
-                Text(text = it.description)
-            }*//*
-
-        }*/
     }
 }
 
@@ -299,15 +281,10 @@ fun MoveOrderHeader(moveOrder: MoveOrderModel) {
 }
 
 @Composable
-fun ManualSerialSearchView(viewModel: MoveOrderItemViewModel, defaultSerialNumber: String = "0193015506459") {
-    var searchNumber by remember { mutableStateOf(defaultSerialNumber) }
-    var isEditTextEnabled by remember { mutableStateOf(false) }
-    val focusRequester = remember { FocusRequester() }
-
-    var login by remember { mutableStateOf("") }
-
+fun ManualSerialSearchView(viewModel: MoveOrderItemViewModel) {
+    val state = viewModel.viewState.collectAsState()
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(modifier = Modifier.weight(1.5f)) {
+        /*Box(modifier = Modifier.weight(1.5f)) {
             OutlinedTextField(
                 value = searchNumber,
                 onValueChange = { searchNumber = it },
@@ -326,18 +303,18 @@ fun ManualSerialSearchView(viewModel: MoveOrderItemViewModel, defaultSerialNumbe
             )
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(8.dp))*/
         Button(
-            modifier = Modifier
-                .weight(0.9f),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             onClick = {
-                isEditTextEnabled = false
-                viewModel.searchBarcodeInOrderItems(searchNumber)
-                focusRequester.freeFocus()
+                viewModel.showManualBarcodeEntering()
             },
         ) {
-            Text(text = stringResource(R.string.barcode_accept), fontSize = 16.sp)
+            Text(text = stringResource(R.string.manual_barcode), fontSize = 16.sp)
         }
-
+        if(state.value.showManualEnterBarcode)
+            ManualBarcodeEnterDialog(viewModel = viewModel, onDismiss = {
+                viewModel.cancelManualBarcodeEntering()
+            })
     }
 }

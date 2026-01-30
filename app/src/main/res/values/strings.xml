@@ -30,4 +30,7 @@
     <string name="finish_sync">Завершити</string>
     <string name="barcode">Штрихкод:</string>
     <string name="barcode_not_found_error">не знайдено!</string>
+    <string name="manual_barcode_header">Введіть штрихкод.</string>
+    <string name="manual_barcode">Ввести штрихкод.</string>
+    <string name="document_for_sync">Документів на синхронізацію з сервером: </string>
 </resources>

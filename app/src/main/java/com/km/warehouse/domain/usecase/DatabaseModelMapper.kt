@@ -35,11 +35,15 @@ fun MoveOrderItem.toMoveOrderItemsModel(): MoveOrderItemsModel {
         description = description,
         mfrCode = mfrCode,
         mfgPartNumExp = mfgPartNumExp,
-        noSerials = noSerials == "N",
+        noSerials = noSerials == "Y",
         itemSegment = itemSegment
     )
 }
 
 fun ItemSerialModel.toItemSerialDb(): ItemsSerial {
     return ItemsSerial(serial = serial, moveOrderItemId = moveOrderItemId)
+}
+
+fun ItemsSerial.toItemSerialModel(): ItemSerialModel {
+    return ItemSerialModel(serial = serial, moveOrderItemId = moveOrderItemId, id = id)
 }

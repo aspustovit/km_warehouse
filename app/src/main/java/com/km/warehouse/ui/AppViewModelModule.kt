@@ -22,7 +22,11 @@ object AppViewModelModule {
                 observeBarcodeDataUseCase = get(),
                 saveSerialToDBUseCase = get(),
                 syncToServerSerialsUseCase = get(),
-                getPrevLoginUseCase = get()
+                getPrevLoginUseCase = get(),
+                getItemSerialFromDBUseCase = get(),
+                deleteSerialNumberUseCase = get(),
+                setQuantityGivenUseCase = get(),
+                setNoSerialsUseCase = get()
             )
         }
         viewModel {

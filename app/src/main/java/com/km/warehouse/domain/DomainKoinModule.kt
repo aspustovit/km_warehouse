@@ -1,11 +1,15 @@
 package com.km.warehouse.domain
 
+import com.km.warehouse.domain.usecase.DeleteSerialNumberUseCase
 import com.km.warehouse.domain.usecase.GetDocumentDataToSyncUseCase
+import com.km.warehouse.domain.usecase.GetItemSerialFromDBUseCase
 import com.km.warehouse.domain.usecase.LoadBayerUseCase
 import com.km.warehouse.domain.usecase.LoadMoveOrdersUseCase
 import com.km.warehouse.domain.usecase.auth.LoginUseCase
 import com.km.warehouse.domain.usecase.ObserveBarcodeDataUseCase
 import com.km.warehouse.domain.usecase.SaveSerialToDBUseCase
+import com.km.warehouse.domain.usecase.SetNoSerialsUseCase
+import com.km.warehouse.domain.usecase.SetQuantityGivenUseCase
 import com.km.warehouse.domain.usecase.SyncToServerSerialsUseCase
 import com.km.warehouse.domain.usecase.SyncWarehouseDataUseCase
 import com.km.warehouse.domain.usecase.auth.GetPrevLoginUseCase
@@ -30,6 +34,10 @@ object DomainKoinModule {
         factory { SaveSerialToDBUseCase(localWarehouseRepository = get()) }
         factory { SyncToServerSerialsUseCase(syncWarehouseRepository = get()) }
         factory { GetDocumentDataToSyncUseCase(syncWarehouseRepository = get()) }
+        factory { GetItemSerialFromDBUseCase(localWarehouseRepository = get()) }
+        factory { DeleteSerialNumberUseCase(localWarehouseRepository = get()) }
+        factory { SetQuantityGivenUseCase(localWarehouseRepository = get()) }
+        factory { SetNoSerialsUseCase(localWarehouseRepository = get()) }
     }
 
     val parentModule = module {

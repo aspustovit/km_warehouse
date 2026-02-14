@@ -15,4 +15,7 @@ abstract class MoveOrderItemDao : BaseDao<MoveOrderItem>() {
 
     @Query("DELETE FROM move_order_item  where id = :moveOrderItemId")
     abstract fun deleteById(moveOrderItemId: Int): Int
+
+    @Query("SELECT m.* FROM move_order_item m where m.id = :id")
+    abstract fun getMoveOrderItem(id: Int): MoveOrderItem?
 }

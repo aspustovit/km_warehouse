@@ -12,4 +12,7 @@ import com.km.warehouse.data.entity.ItemsSerial
 abstract class ItemsSerialDao : BaseDao<ItemsSerial>() {
     @Query("SELECT b.* FROM items_serial b ")
     abstract fun getSerialsToSync(): List<ItemsSerial>
+
+    @Query("DELETE FROM items_serial WHERE serial = :serial")
+    abstract fun deleteBySerial(serial: String): Int
 }

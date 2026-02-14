@@ -7,4 +7,7 @@
     <color name="move_order_complete">#B4E7D4</color>
     <color name="color_text_secondary">#686060</color>
     <color name="sync_count">#006457</color>
+    <color name="new_order">#F09A1D</color>
+    <color name="finished_order">#119716</color>
+    <color name="not_finished_order">#0027FF</color>
 </resources>

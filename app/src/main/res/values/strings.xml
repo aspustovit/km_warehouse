@@ -33,4 +33,8 @@
     <string name="manual_barcode_header">Введіть штрихкод.</string>
     <string name="manual_barcode">Ввести штрихкод.</string>
     <string name="document_for_sync">Документів на синхронізацію з сервером: </string>
+    <string name="code">Код:</string>
+    <string name="quantity">Кількість:</string>
+    <string name="no_barcode_for_scan">Серійні не потрібні</string>
+    <string name="manual_quantity_input">Введіть кількість.</string>
 </resources>

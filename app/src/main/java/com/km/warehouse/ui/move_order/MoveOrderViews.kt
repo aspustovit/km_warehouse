@@ -2,10 +2,8 @@ package com.km.warehouse.ui.move_order
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,27 +19,18 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.key.Key
 //import androidx.compose.ui.input.key.KeyEvent
 import android.view.KeyEvent
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
+import androidx.compose.material3.Icon
 import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -56,8 +45,8 @@ import com.km.warehouse.domain.usecase.model.MoveOrderModel
 import com.km.warehouse.domain.usecase.model.OrderModel
 import com.km.warehouse.ui.SharedViewModel
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel.Companion.SERIAL_NUMBER_NOT_FOUND
+import com.km.warehouse.ui.move_order.scan.ScanMoveOrderView
 import com.km.warehouse.ui.sync.ErrorDialog
-import com.km.warehouse.ui.sync.SyncViewModel
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -67,19 +56,24 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun MoveOrderView(
     modifier: Modifier,
-    onWidgetClicked: () -> Unit,
+    documentType: DocumentType,
     onBackClick: () -> Unit
 ) {
     BackHandler {
         onBackClick.invoke()
     }
     val viewModel: MoveOrderItemViewModel = koinViewModel()
-    val scanViewModel: SharedViewModel = koinViewModel()
     val state = viewModel.viewState.collectAsState()
 
     LaunchedEffect(viewModel) {
-        viewModel.loadMoveOrders()
-        viewModel.observeBarcodes()
+        viewModel.loadMoveOrders(documentType)
+    }
+    if (state.value.selectedOrder != null) {
+        ScanMoveOrderView(onBackClick = {
+            viewModel.postSelectedMoveOrder(moveOrder = null)
+            viewModel.loadMoveOrders(documentType)
+        })
+        return
     }
     Column(
         modifier = Modifier
@@ -87,25 +81,50 @@ fun MoveOrderView(
             .padding(16.dp),
         horizontalAlignment = Alignment.Start
     ) {
-        ManualSerialSearchView(viewModel)
-        /*Row(modifier = Modifier.fillMaxWidth()) {
-            Text(text = state.value.bayers.size.toString())
-        }*/
         Spacer(modifier = Modifier.height(12.dp))
         HorizontalDivider(
             color = MaterialTheme.colorScheme.outlineVariant,
             thickness = 1.dp
         )
         Spacer(modifier = Modifier.width(16.dp))
-        MoveOrdersList(state.value.moveOrders, state.value.itemSerials, scanViewModel)
+        MoveOrdersList(
+            moveOrders = state.value.moveOrders,
+            serials = state.value.itemSerials,
+            headerStateList = state.value.headerStateList,
+            onHeaderClick = { groupName ->
+                viewModel.changeGroupState(groupName)
+            },
+            onSelectMoveOrderItem = {
+                viewModel.setManualOrderItemForScan(it)
+            },
+            onMoveOrderClick = {
+                viewModel.postSelectedMoveOrder(it)
+            })
         if (state.value.itemSerials.isNotEmpty()) {
-            MoveOrdersList(state.value.moveOrders, state.value.itemSerials, scanViewModel)
+            MoveOrdersList(
+                moveOrders = state.value.moveOrders,
+                serials = state.value.itemSerials,
+                headerStateList = state.value.headerStateList,
+                onHeaderClick = { groupName ->
+                    viewModel.changeGroupState(groupName)
+                },
+                onSelectMoveOrderItem = {
+                    viewModel.setManualOrderItemForScan(it)
+                },
+                onMoveOrderClick = {
+                    viewModel.postSelectedMoveOrder(it)
+                })
         }
         state.value.errorData?.let {
-            if (it.status == SERIAL_NUMBER_NOT_FOUND){
-                ErrorDialog(errorMessage = "${stringResource(R.string.barcode)} ${it.message} ${stringResource(R.string.barcode_not_found_error)}", onDismiss = {
-                    viewModel.cancelError()
-                })
+            if (it.status == SERIAL_NUMBER_NOT_FOUND) {
+                ErrorDialog(
+                    errorMessage = "${stringResource(R.string.barcode)} ${it.message} ${
+                        stringResource(
+                            R.string.barcode_not_found_error
+                        )
+                    }", onDismiss = {
+                        viewModel.cancelError()
+                    })
             } else {
                 ErrorDialog(errorMessage = it.getErrorMessage(), onDismiss = {
                     viewModel.cancelError()
@@ -119,35 +138,62 @@ fun MoveOrderView(
 }
 
 @Composable
-fun MoveOrdersList(moveOrders: HashMap<String, List<OrderModel>>,
-                   serials: List<ItemSerialModel>,
-                   scanViewModel: SharedViewModel ) {
-    LazyColumn(modifier = Modifier.fillMaxSize().focusable().onPreviewKeyEvent { e ->
-        val native = e.nativeKeyEvent
-        if (native.action == KeyEvent.ACTION_DOWN) {
-            val pressedKey = native.unicodeChar.toChar()
-            Log.d("NAV_CONTROLLER", "$pressedKey")
-            scanViewModel.onBarcodeScan(pressedKey)
-        }
-        if (native.action == KeyEvent.ACTION_DOWN && native.keyCode == KeyEvent.KEYCODE_ENTER) {
-            scanViewModel.postBarcode()
-        }
-        false
-    }) {
+fun MoveOrdersList(
+    moveOrders: HashMap<String, List<OrderModel>>,
+    serials: List<ItemSerialModel>,
+    headerStateList: List<HeaderState>,
+    onHeaderClick: (String) -> Unit,
+    onMoveOrderClick: (OrderModel) -> Unit,
+    onSelectMoveOrderItem: (MoveOrderItemsModel) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .focusable()
+    ) {
         moveOrders.forEach {
+            val headerState = headerStateList.find { h -> h.header == it.key }!!
             item {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = it.key,
-                    color = colorResource(R.color.black),
-                    fontSize = 20.sp,
-                    fontFamily = FontFamily.SansSerif
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = { onHeaderClick(it.key) })
+                        .padding(vertical = 16.dp)
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        text = it.key,
+                        color = colorResource(R.color.black),
+                        fontSize = 20.sp,
+                        fontFamily = FontFamily.SansSerif
+                    )
+                    Icon(
+                        painter = painterResource(id = if (headerState.isExpand) R.drawable.ic_expand else R.drawable.ic_expand_more),
+                        contentDescription = null, modifier = Modifier.weight(weight = 0.2f)
+                    )
+                }
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    thickness = 1.dp
                 )
+
+                if (!headerState.isExpand)
+                    return@item
+
                 it.value.forEach { moveOrder ->
                     Spacer(modifier = Modifier.height(8.dp))
-                    MoveOrderHeader(moveOrder.moveOrderModel)
+                    MoveOrderHeader(
+                        order = moveOrder,
+                        onMoveOrderClick = onMoveOrderClick
+                    )
                     moveOrder.moveOrderItemsModels.forEach { item ->
-                        MoveOrderItemView(item, serials)
+                        MoveOrderItemView(
+                            item,
+                            serials,
+                            onDeleteSerial = {},
+                            onSelectMoveOrderItem = onSelectMoveOrderItem)
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -162,68 +208,17 @@ fun MoveOrdersList(moveOrders: HashMap<String, List<OrderModel>>,
     }
 }
 
+
 @Composable
-fun MoveOrderItemView(item: MoveOrderItemsModel, serials: List<ItemSerialModel>) {
-    Spacer(modifier = Modifier.height(8.dp))
+fun MoveOrderHeader(
+    order: OrderModel,
+    onMoveOrderClick: (OrderModel) -> Unit
+) {
+    val moveOrder = order.moveOrderModel
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = colorResource(R.color.sync_dialog),
-            contentColor = colorResource(R.color.black)
-        )
-    ) {
-        Row(modifier = Modifier.padding(horizontal = 16.dp)) {
-            Text(text = stringResource(R.string.inventory_id), fontSize = 16.sp)
-            Text(
-                text = item.inventoryId.toString(),
-                fontSize = 16.sp,
-                color = colorResource(R.color.color_text_secondary)
-            )
-        }
-        Row(modifier = Modifier.padding(horizontal = 16.dp)) {
-            Text(text = stringResource(R.string.item_segment), fontSize = 16.sp)
-            Text(
-                text = item.itemSegment ?: "",
-                fontSize = 16.sp,
-                color = colorResource(R.color.color_text_secondary)
-            )
-        }
-        Row(modifier = Modifier.padding(horizontal = 16.dp)) {
-            Text(text = item.description, fontSize = 12.sp)
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-       // Spacer(modifier = Modifier.height(8.dp))
-        Log.i("SERIALS", "${item.moveOrderId} = list $serials")
-        serials.filter { it.moveOrderItemId == item.id }.forEach { serial ->
-            Log.e("_SERIALS_", "Upadte list $serials")
-            Column {
-                Spacer(
-                    modifier = Modifier
-                        .height(1.dp)
-                        .fillMaxWidth()
-                        .background(colorResource(R.color.color_text_secondary))
-                )
-                Text(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    text = serial.serial,
-                    fontSize = 14.sp,
-                    color = colorResource(R.color.color_text_secondary),
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-        }
-    }
-}
-
-@Composable
-fun MoveOrderHeader(moveOrder: MoveOrderModel) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth(),
+            .clickable(onClick = { onMoveOrderClick(order) }),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (moveOrder.isComplete) colorResource(R.color.move_order_complete) else colorResource(
@@ -277,44 +272,5 @@ fun MoveOrderHeader(moveOrder: MoveOrderModel) {
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
-    }
-}
-
-@Composable
-fun ManualSerialSearchView(viewModel: MoveOrderItemViewModel) {
-    val state = viewModel.viewState.collectAsState()
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        /*Box(modifier = Modifier.weight(1.5f)) {
-            OutlinedTextField(
-                value = searchNumber,
-                onValueChange = { searchNumber = it },
-                label = { Text(stringResource(R.string.barcode_number)) },
-                singleLine = true,
-                enabled = isEditTextEnabled,
-                modifier = Modifier.focusRequester(focusRequester),
-                )
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .clickable(onClick = {
-                        isEditTextEnabled = true
-                        focusRequester.requestFocus()
-                    }),
-            )
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))*/
-        Button(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-            onClick = {
-                viewModel.showManualBarcodeEntering()
-            },
-        ) {
-            Text(text = stringResource(R.string.manual_barcode), fontSize = 16.sp)
-        }
-        if(state.value.showManualEnterBarcode)
-            ManualBarcodeEnterDialog(viewModel = viewModel, onDismiss = {
-                viewModel.cancelManualBarcodeEntering()
-            })
     }
 }

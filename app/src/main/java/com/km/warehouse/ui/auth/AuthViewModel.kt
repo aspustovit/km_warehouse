@@ -1,6 +1,8 @@
 package com.km.warehouse.ui.auth
 
 import android.util.Log
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.toUpperCase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.km.warehouse.data.network.auth.AuthRequest
@@ -40,7 +42,7 @@ class AuthViewModel(
             state.copy(isLoading = true)
         }
         viewModelScope.launch {
-            loginUseCase.invoke(AuthRequest(userName = login, password = password)).onSuccess {
+            loginUseCase.invoke(AuthRequest(userName = login.toUpperCase(Locale.current), password = password)).onSuccess {
                 Log.e("_AUTH_RESPONCE", "$it")
                 _authState.update { state ->
                     state.copy(loginModel = it, isLoading = false)

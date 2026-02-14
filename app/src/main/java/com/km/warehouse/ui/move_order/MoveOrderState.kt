@@ -3,6 +3,7 @@ package com.km.warehouse.ui.move_order
 import com.km.warehouse.data.entity.Bayer
 import com.km.warehouse.data.network.entity.ErrorData
 import com.km.warehouse.domain.usecase.model.ItemSerialModel
+import com.km.warehouse.domain.usecase.model.MoveOrderItemsModel
 import com.km.warehouse.domain.usecase.model.OrderModel
 
 /**
@@ -14,5 +15,10 @@ data class MoveOrderState(
     val errorData: ErrorData? = null,
     val error: String = "",
     val itemSerials: List<ItemSerialModel> = emptyList(),
-    val showManualEnterBarcode: Boolean = false
+    val showManualEnterBarcode: Boolean = false,
+    val headerStateList: List<HeaderState> = emptyList(),
+    val selectedOrder: OrderModel? = null,
+    val orderItemForScan: MoveOrderItemsModel? = null,
+    val documentType: DocumentType? = null,
+    val showQuantityEntering: Boolean = false,
 )

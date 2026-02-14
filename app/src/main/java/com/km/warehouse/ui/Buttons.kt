@@ -15,11 +15,15 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 
 /**
@@ -38,7 +42,7 @@ import androidx.compose.ui.unit.dp
  * @param content The button content.
  */
 @Composable
-fun  CustomButton(
+fun CustomButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -48,8 +52,8 @@ fun  CustomButton(
     Button(
         onClick = onClick,
         modifier = modifier.defaultMinSize(
-            minWidth =  CustomButtonDefaults.minWidth(),
-            minHeight =  CustomButtonDefaults.minHeight()
+            minWidth = CustomButtonDefaults.minWidth(),
+            minHeight = CustomButtonDefaults.minHeight()
         ),
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
@@ -72,7 +76,7 @@ fun  CustomButton(
  * @param endIcon The button end icon content. Pass `null` here for no end icon.
  */
 @Composable
-fun  CustomButton(
+fun CustomButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -80,13 +84,13 @@ fun  CustomButton(
     startIcon: @Composable (() -> Unit)? = null,
     endIcon: @Composable (() -> Unit)? = null,
 ) {
-     CustomButton(
+    CustomButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
         contentPadding = contentPadding(startIcon != null, endIcon != null),
     ) {
-         CustomButtonContent(
+        CustomButtonContent(
             text = text,
             startIcon = startIcon,
             endIcon = endIcon,
@@ -106,7 +110,7 @@ fun  CustomButton(
  * @param content The button content.
  */
 @Composable
-fun  CustomOutlinedButton(
+fun CustomOutlinedButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -117,13 +121,31 @@ fun  CustomOutlinedButton(
         OutlinedButton(
             onClick = onClick,
             modifier = modifier.defaultMinSize(
-                minWidth =  CustomButtonDefaults.minWidth(),
-                minHeight =  CustomButtonDefaults.minHeight()
+                minWidth = CustomButtonDefaults.minWidth(),
+                minHeight = CustomButtonDefaults.minHeight()
             ),
             enabled = enabled,
             border = IconButtonDefaults.outlinedIconButtonBorder(enabled = enabled),
             contentPadding = contentPadding,
             content = content,
+        )
+    }
+}
+
+@Composable
+fun OutlinedIconButton(
+    onClick: () -> Unit,
+    resDrawable: Int,
+    resDescription: Int
+) {
+    OutlinedIconButton(
+        onClick = { onClick() },
+    ) {
+        val imageVector = ImageVector.vectorResource(id = resDrawable)
+
+        Icon(
+            imageVector = imageVector,
+            contentDescription = stringResource(resDescription)
         )
     }
 }
@@ -140,7 +162,7 @@ fun  CustomOutlinedButton(
  * @param endIcon The button end icon content. Pass `null` here for no end icon.
  */
 @Composable
-fun  CustomOutlinedImageButton(
+fun CustomOutlinedImageButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -148,13 +170,13 @@ fun  CustomOutlinedImageButton(
     startIcon: @Composable (() -> Unit)? = null,
     endIcon: @Composable (() -> Unit)? = null,
 ) {
-     CustomOutlinedButton(
+    CustomOutlinedButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
         contentPadding = contentPadding(startIcon != null, endIcon != null)
     ) {
-         CustomButtonContent(
+        CustomButtonContent(
             text = text,
             startIcon = startIcon,
             endIcon = endIcon,
@@ -174,7 +196,7 @@ fun  CustomOutlinedImageButton(
  * @param content The button content.
  */
 @Composable
-fun  CustomElevatedButton(
+fun CustomElevatedButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -184,8 +206,8 @@ fun  CustomElevatedButton(
     ElevatedButton(
         onClick = onClick,
         modifier = modifier.defaultMinSize(
-            minWidth =  CustomButtonDefaults.minWidth(),
-            minHeight =  CustomButtonDefaults.minHeight()
+            minWidth = CustomButtonDefaults.minWidth(),
+            minHeight = CustomButtonDefaults.minHeight()
         ),
         enabled = enabled,
         contentPadding = contentPadding,
@@ -205,7 +227,7 @@ fun  CustomElevatedButton(
  * @param endIcon The button end icon content. Pass `null` here for no end icon.
  */
 @Composable
-fun  CustomElevatedButton(
+fun CustomElevatedButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -213,13 +235,13 @@ fun  CustomElevatedButton(
     startIcon: @Composable (() -> Unit)? = null,
     endIcon: @Composable (() -> Unit)? = null,
 ) {
-     CustomElevatedButton(
+    CustomElevatedButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
         contentPadding = contentPadding(startIcon != null, endIcon != null)
     ) {
-         CustomButtonContent(
+        CustomButtonContent(
             text = text,
             startIcon = startIcon,
             endIcon = endIcon,
@@ -239,7 +261,7 @@ fun  CustomElevatedButton(
  * @param content The button content.
  */
 @Composable
-fun  CustomTonalButton(
+fun CustomTonalButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -249,8 +271,8 @@ fun  CustomTonalButton(
     FilledTonalButton(
         onClick = onClick,
         modifier = modifier.defaultMinSize(
-            minWidth =  CustomButtonDefaults.minWidth(),
-            minHeight =  CustomButtonDefaults.minHeight()
+            minWidth = CustomButtonDefaults.minWidth(),
+            minHeight = CustomButtonDefaults.minHeight()
         ),
         enabled = enabled,
         contentPadding = contentPadding,
@@ -270,7 +292,7 @@ fun  CustomTonalButton(
  * @param endIcon The button end icon content. Pass `null` here for no end icon.
  */
 @Composable
-fun  CustomTonalButton(
+fun CustomTonalButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -278,13 +300,13 @@ fun  CustomTonalButton(
     startIcon: @Composable (() -> Unit)? = null,
     endIcon: @Composable (() -> Unit)? = null,
 ) {
-     CustomTonalButton(
+    CustomTonalButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
         contentPadding = contentPadding(startIcon != null, endIcon != null),
     ) {
-         CustomButtonContent(
+        CustomButtonContent(
             text = text,
             startIcon = startIcon,
             endIcon = endIcon,
@@ -304,7 +326,7 @@ fun  CustomTonalButton(
  * @param content The button content.
  */
 @Composable
-fun  CustomTextButton(
+fun CustomTextButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -314,8 +336,8 @@ fun  CustomTextButton(
     TextButton(
         onClick = onClick,
         modifier = modifier.defaultMinSize(
-            minWidth =  CustomButtonDefaults.minWidth(),
-            minHeight =  CustomButtonDefaults.minHeight()
+            minWidth = CustomButtonDefaults.minWidth(),
+            minHeight = CustomButtonDefaults.minHeight()
         ),
         enabled = enabled,
         contentPadding = contentPadding,
@@ -335,7 +357,7 @@ fun  CustomTextButton(
  * @param endIcon The button end icon content. Pass `null` here for no end icon.
  */
 @Composable
-fun  CustomTextButton(
+fun CustomTextButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -343,13 +365,13 @@ fun  CustomTextButton(
     startIcon: @Composable (() -> Unit)? = null,
     endIcon: @Composable (() -> Unit)? = null,
 ) {
-     CustomTextButton(
+    CustomTextButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
         contentPadding = contentPadding(startIcon != null, endIcon != null),
     ) {
-         CustomButtonContent(
+        CustomButtonContent(
             text = text,
             startIcon = startIcon,
             endIcon = endIcon,
@@ -365,14 +387,14 @@ fun  CustomTextButton(
  * @param endIcon The button right icon content. Default is `null`
  */
 @Composable
-private fun  CustomButtonContent(
+private fun CustomButtonContent(
     text: @Composable () -> Unit,
     startIcon: @Composable (() -> Unit)? = null,
     endIcon: @Composable (() -> Unit)? = null,
 ) {
     if (startIcon != null) {
         Box(
-            modifier = Modifier.size( CustomButtonDefaults.iconSize()),
+            modifier = Modifier.size(CustomButtonDefaults.iconSize()),
             propagateMinConstraints = true
         ) {
             startIcon()
@@ -381,15 +403,15 @@ private fun  CustomButtonContent(
     Box(
         modifier = Modifier
             .padding(
-                start = if (startIcon != null)  CustomButtonDefaults.iconSpacing() else 0.dp,
-                end = if (endIcon != null)  CustomButtonDefaults.iconSpacing() else 0.dp,
+                start = if (startIcon != null) CustomButtonDefaults.iconSpacing() else 0.dp,
+                end = if (endIcon != null) CustomButtonDefaults.iconSpacing() else 0.dp,
             )
     ) {
         text()
     }
     if (endIcon != null) {
         Box(
-            modifier = Modifier.size( CustomButtonDefaults.iconSize()),
+            modifier = Modifier.size(CustomButtonDefaults.iconSize()),
             propagateMinConstraints = true
         ) {
             endIcon()
@@ -404,13 +426,13 @@ private fun  CustomButtonContent(
 @Composable
 private fun contentPadding(start: Boolean = false, end: Boolean = false): PaddingValues =
     PaddingValues(
-        start = if (start)  CustomButtonDefaults.buttonWithIconHorizontalPadding() else  CustomButtonDefaults.buttonHorizontalPadding(),
-        top =  CustomButtonDefaults.ButtonVerticalPadding,
-        end = if (end)  CustomButtonDefaults.buttonWithIconHorizontalPadding() else  CustomButtonDefaults.buttonHorizontalPadding(),
-        bottom =  CustomButtonDefaults.ButtonVerticalPadding
+        start = if (start) CustomButtonDefaults.buttonWithIconHorizontalPadding() else CustomButtonDefaults.buttonHorizontalPadding(),
+        top = CustomButtonDefaults.ButtonVerticalPadding,
+        end = if (end) CustomButtonDefaults.buttonWithIconHorizontalPadding() else CustomButtonDefaults.buttonHorizontalPadding(),
+        bottom = CustomButtonDefaults.ButtonVerticalPadding
     )
 
-private object  CustomButtonDefaults {
+private object CustomButtonDefaults {
 
     @Composable
     fun minWidth() = 56.dp
@@ -419,7 +441,7 @@ private object  CustomButtonDefaults {
     fun minHeight() = 40.dp
 
     @Composable
-    fun iconSpacing() =8.dp
+    fun iconSpacing() = 8.dp
 
     @Composable
     fun iconSize() = 18.dp

@@ -50,7 +50,7 @@ class SharedViewModel(
     fun postBarcode() {
         Log.i("onKeyDown_SCAN", "barcode = $barcode")
         viewModelScope.launch {
-            DataHub.emitBarcodeData(barcode)
+            DataHub.emitBarcodeData(barcode.replace("\n",""))
         }
         barcode = ""
     }

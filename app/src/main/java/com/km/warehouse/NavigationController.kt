@@ -21,6 +21,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.km.warehouse.ui.DarkTopAppBar
 import com.km.warehouse.ui.NavigationStep
+import com.km.warehouse.ui.move_order.DocumentType
 import com.km.warehouse.ui.move_order.MoveOrderView
 import com.km.warehouse.ui.scan_to_file.ScanToFileView
 
@@ -65,8 +66,7 @@ fun NavigationController(modifier: Modifier) {
                     title = { Text(stringResource(id = R.string.approved_documents)) },
                     modifier = Modifier.fillMaxWidth()
                 )
-                MoveOrderView(modifier = Modifier.fillMaxWidth(), onWidgetClicked = {}, onBackClick ={
-                    Log.d("NAV_CONTROLLER", "asasa")
+                MoveOrderView(modifier = Modifier.fillMaxWidth(), documentType = DocumentType.APPROVED, onBackClick ={
                     navController.popBackStack()
                 })
 
@@ -82,6 +82,9 @@ fun NavigationController(modifier: Modifier) {
                     title = { Text(stringResource(id = R.string.issued_documents)) },
                     modifier = Modifier.fillMaxWidth()
                 )
+                MoveOrderView(modifier = Modifier.fillMaxWidth(), documentType = DocumentType.SEND, onBackClick ={
+                    navController.popBackStack()
+                })
             }
         }
 

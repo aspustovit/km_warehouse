@@ -10,6 +10,9 @@ import com.km.warehouse.data.entity.MoveOrder
  */
 @Dao
 abstract class MoveOrderDao: BaseDao<MoveOrder>() {
+    @Query("SELECT b.* FROM move_order b WHERE b.is_complete = :code")
+    abstract fun getMoveOrders(code: String): List<MoveOrder>
+
     @Query("SELECT b.* FROM move_order b")
     abstract fun getMoveOrders(): List<MoveOrder>
 }

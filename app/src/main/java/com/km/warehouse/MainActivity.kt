@@ -27,28 +27,27 @@ import androidx.compose.ui.unit.sp
 import com.km.warehouse.ui.CustomOutlinedImageButton
 import com.km.warehouse.ui.DarkTopAppBar
 import com.km.warehouse.ui.SharedViewModel
-import com.km.warehouse.ui.move_order.ManualSerialSearchView
-import com.km.warehouse.ui.move_order.MoveOrderItemViewModel
 import com.km.warehouse.ui.sync.SyncDialog
-import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
-  //  val viewModel: SharedViewModel by viewModel()
+    val viewModel: SharedViewModel by viewModel()
 
-/*    @SuppressLint("RestrictedApi")
+    @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(e: KeyEvent): Boolean {
         Log.d("NAV_CONTROLLER", "$e")
         if (e.action == KeyEvent.ACTION_DOWN) {
             val pressedKey = e.unicodeChar.toChar()
-            Log.d("NAV_CONTROLLER", "$pressedKey")
-            viewModel.onBarcodeScan(pressedKey)
+            Log.i("NAV_CONTROLLER", "$pressedKey")
+            if(e.keyCode != KeyEvent.KEYCODE_ENTER)
+                viewModel.onBarcodeScan(pressedKey)
         }
         if (e.action == KeyEvent.ACTION_DOWN && e.keyCode == KeyEvent.KEYCODE_ENTER) {
             viewModel.postBarcode()
+            return false
         }
         return super.dispatchKeyEvent(e)
-    }*/
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

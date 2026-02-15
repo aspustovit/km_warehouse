@@ -86,6 +86,11 @@ interface WarehouseApiService {
     return ResponseEntity.ok(new SuccessResponse<String>(null, "OK"));
   }
     * */
+    @POST("/api/main/set_move_order_item_quantity_gived")
+    fun updateMoveOrderItem(
+        @Body moveOrderItem: MoveOrderItemsEntity
+    ): Call<BaseResponse<Unit>>
+
     @POST("/api/main/insert_move_item_serial")
     fun insertMoveOrderItemSerial(
         @Body moveOrderItemSerial: ItemSerialSync

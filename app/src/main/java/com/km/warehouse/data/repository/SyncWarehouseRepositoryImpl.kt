@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonParser
 import com.km.warehouse.data.KmWarehouseDatabase
 import com.km.warehouse.data.entity.Bayer
+import com.km.warehouse.data.entity.MoveOrderItem
 import com.km.warehouse.data.network.WarehouseApiService
 import com.km.warehouse.data.network.entity.ErrorData
 import com.km.warehouse.domain.repository.SyncWarehouseRepository
@@ -23,8 +24,8 @@ class SyncWarehouseRepositoryImpl(
     override suspend fun syncWarehouseData(): SyncResultModel {
         try {
             val response = warehouseApiService.getBuyers().execute()
-            var errorData : ErrorData? = null
-            if(!response.isSuccessful)
+            var errorData: ErrorData? = null
+            if (!response.isSuccessful)
                 errorData = parseError(response.errorBody()!!.string())
             val data = response.body()?.data
             data?.apply {
@@ -35,7 +36,7 @@ class SyncWarehouseRepositoryImpl(
                 }
             }
             val moveOrderResponse = warehouseApiService.getMoveOrders().execute()
-            if(!moveOrderResponse.isSuccessful)
+            if (!moveOrderResponse.isSuccessful)
                 errorData = parseError(moveOrderResponse.errorBody()!!.string())
             val moveOrderData = moveOrderResponse.body()?.data
             moveOrderData?.apply {
@@ -58,66 +59,89 @@ class SyncWarehouseRepositoryImpl(
             return SyncResultModel(isSyncSuccess = response.isSuccessful, errorData = errorData)
         } catch (ex: Exception) {
             Log.e("syncWarehouseData", "$ex")
-            return SyncResultModel(isSyncSuccess = false, errorData = ErrorData(status = 600, message = ex.toString(), error = "syncWarehouseData") )
+            return SyncResultModel(
+                isSyncSuccess = false,
+                errorData = ErrorData(
+                    status = 600,
+                    message = ex.toString(),
+                    error = "syncWarehouseData"
+                )
+            )
         }
 
     }
 
     override suspend fun syncToServerSerialsData(): SyncResultModel {
         val serials = database.itemsSerialDao().getSerialsToSync()
+        val moveOrderItems = database.moveOrderItemDao().getMoveOrderItems()
+        val moveOrderItemsNoSerials = database.moveOrderItemDao().getMoveOrderItemsNoSerials()
+        val moveOrderWidthSerials = HashSet<Int>()
+        serials.forEach {
+            moveOrderWidthSerials.add(it.moveOrderItemId)
+        }
+        moveOrderItemsNoSerials.forEach { moveOrderWidthSerials.add(it.id) }
         try {
             val listToSend = serials.map { it.toItemSerialSync() }
-            if (listToSend.size == 1) {
-                val first = listToSend.first()
-                val response = warehouseApiService.insertMoveOrderItemSerial(first).execute()
-                Log.d("syncToServerWarehouseData_F", "${response.raw()}")
-                if (response.errorBody() != null) {
-                    val errorData = parseError(response.errorBody()!!.string())
-                    return SyncResultModel(
-                        isSyncSuccess = response.isSuccessful,
-                        errorData = errorData,
-                    )
-                } else {
-                    database.itemsSerialDao().delete(serials.first())
-                    database.moveOrderItemDao().deleteById(serials.first().moveOrderItemId)
-                    return SyncResultModel(
-                        isSyncSuccess = response.isSuccessful,
-                        errorData = null,
-                    )
-                }
-            } else {
-                Log.d("syncToServerWarehouseData", "${listToSend}")
-                val response = warehouseApiService.insertMoveOrderItemSerials(listToSend).execute()
-                Log.d("syncToServerWarehouseData", "${response.raw()}")
-                if (response.errorBody() != null) {
-                    val errorData = parseError(response.errorBody()!!.string())
-                    return SyncResultModel(
-                        isSyncSuccess = response.isSuccessful,
-                        errorData = errorData,
-                    )
-                } else {
-                    serials.forEach {
-                        database.itemsSerialDao().delete(it)
-                        database.moveOrderItemDao().deleteById(it.moveOrderItemId)
+            val moveOrdersItemToDel = ArrayList<MoveOrderItem>()
+            Log.i("syncToServerWarehouseData", "${moveOrderWidthSerials}")
+            moveOrderWidthSerials.forEach {
+                val moveOrderItem = moveOrderItems.find { moi -> moi.id == it }
+                if (moveOrderItem != null) {
+                    val sync = moveOrderItem.toMoveOrderItemSync()
+                    val upadateResponce = warehouseApiService.updateMoveOrderItem(sync).execute()
+                    Log.i("syncToServerWarehouseData", "${sync}")
+                    if (upadateResponce.errorBody() != null) {
+                        val errorData = parseError(upadateResponce.errorBody()!!.string())
+                        return SyncResultModel(
+                            isSyncSuccess = upadateResponce.isSuccessful,
+                            errorData = errorData,
+                        )
+                    } else {
+                        moveOrdersItemToDel.add(moveOrderItem)
                     }
-                    return SyncResultModel(
-                        isSyncSuccess = response.isSuccessful,
-                        errorData = null,
-                    )
                 }
             }
 
+            val response = warehouseApiService.insertMoveOrderItemSerials(listToSend).execute()
+            Log.d("syncToServerWarehouseData", "${response.raw()}")
+            if (response.errorBody() != null) {
+                val errorData = parseError(response.errorBody()!!.string())
+                return SyncResultModel(
+                    isSyncSuccess = response.isSuccessful,
+                    errorData = errorData,
+                )
+            } else {
+                serials.forEach {
+                    database.itemsSerialDao().delete(it)
+                    database.moveOrderItemDao().deleteById(it.moveOrderItemId)
+                }
+                moveOrdersItemToDel.forEach {
+                    database.moveOrderItemDao().delete(it)
+                }
+
+                return SyncResultModel(
+                    isSyncSuccess = response.isSuccessful,
+                    errorData = null,
+                )
+            }
         } catch (ex: Exception) {
             Log.e("syncToServerWarehouseData", "$ex")
-            return SyncResultModel(isSyncSuccess = false,  errorData = ErrorData(status = 600, message = ex.toString(), error = "syncToServerWarehouseData") )
+            return SyncResultModel(
+                isSyncSuccess = false,
+                errorData = ErrorData(
+                    status = 600,
+                    message = ex.toString(),
+                    error = "syncToServerWarehouseData"
+                )
+            )
         }
     }
 
-    private fun syncMoveOrderItems(moveOrderId: Long): ErrorData?{
+    private fun syncMoveOrderItems(moveOrderId: Long): ErrorData? {
         val response =
             warehouseApiService.getMoveOrderItems(moveOrderId = moveOrderId.toInt()).execute()
-        var errorData : ErrorData? = null
-        if(!response.isSuccessful)
+        var errorData: ErrorData? = null
+        if (!response.isSuccessful)
             errorData = parseError(response.errorBody()!!.string())
         val data = response.body()?.data
         data?.apply {
@@ -139,28 +163,4 @@ class SyncWarehouseRepositoryImpl(
     override suspend fun getDocumentCountForSync(): Int {
         return database.itemsSerialDao().getSerialsToSync().size
     }
-
-    /*override suspend fun loadBayer(): List<BayerModel> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun loadMoveOrders(): List<MoveOrderModel> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun loadMoveOrder(moveOrderId: Int): MoveOrderModel {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun loadMoveOrderItems(moveOrderId: Int): List<MoveOrderItemsModel> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun loadMoveOrderItem(moveOrderItemId: Int): MoveOrderItemsModel {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun loadMoveOrderItemSerial(moveOrderItemId: Int): ItemSerialModel {
-        TODO("Not yet implemented")
-    }*/
 }

@@ -47,3 +47,16 @@ fun MoveOrderItemsEntity.toMoveOrderItemDb(): MoveOrderItem {
 fun ItemsSerial.toItemSerialSync(): ItemSerialSync {
     return ItemSerialSync(moveItemId = moveOrderItemId, serialNumber = serial)
 }
+
+fun MoveOrderItem.toMoveOrderItemSync(): MoveOrderItemsEntity {
+    return MoveOrderItemsEntity(id = id,
+        moveOrderId = moveOrderId,
+        quantity = quantity,
+        qtyGiven = qtyGiven,
+        inventoryId = inventoryId,
+        noSerials = noSerials,
+        description = description,
+        itemSegment1 = itemSegment ?: "",
+        mfgPartNum = mfrCode,
+        mfgPartNumExp = mfgPartNumExp)
+}

@@ -2,9 +2,13 @@ package com.km.warehouse.ui.move_order
 
 import android.util.Log
 import android.view.ViewParent
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.km.warehouse.R
 import com.km.warehouse.data.network.entity.ErrorData
+import com.km.warehouse.domain.usecase.CheckInputSerialsUseCase
 import com.km.warehouse.domain.usecase.DeleteSerialNumberUseCase
 import com.km.warehouse.domain.usecase.GetItemSerialFromDBUseCase
 import com.km.warehouse.domain.usecase.LoadMoveOrdersUseCase
@@ -40,7 +44,8 @@ class MoveOrderItemViewModel(
     private val getItemSerialFromDBUseCase: GetItemSerialFromDBUseCase,
     private val deleteSerialNumberUseCase: DeleteSerialNumberUseCase,
     private val setQuantityGivenUseCase: SetQuantityGivenUseCase,
-    private val setNoSerialsUseCase: SetNoSerialsUseCase
+    private val setNoSerialsUseCase: SetNoSerialsUseCase,
+    private val checkInputSerialsUseCase: CheckInputSerialsUseCase
 ) : ViewModel() {
     companion object {
         val SERIAL_NUMBER_NOT_FOUND = 1024
@@ -65,7 +70,7 @@ class MoveOrderItemViewModel(
             if (_viewState.value.orderItemForScan == null) {
                 searchOrderItem(bar)
             } else {
-                addSerial(
+                checkInputSerials(
                     orderItemForScan = _viewState.value.orderItemForScan!!,
                     barcodeSerial = bar
                 )
@@ -122,6 +127,20 @@ class MoveOrderItemViewModel(
         }
     }
 
+    fun checkInputSerials(orderItemForScan: MoveOrderItemsModel, barcodeSerial: String) {
+        viewModelScope.launch {
+            checkInputSerialsUseCase.invoke(barcodeSerial).onSuccess { error ->
+                if(error.status == 0) {
+                    addSerial(orderItemForScan, barcodeSerial)
+                } else {
+                    _viewState.update {
+                        _viewState.value.copy(errorData = error)
+                    }
+                }
+            }
+        }
+    }
+
     fun addSerial(orderItemForScan: MoveOrderItemsModel, barcodeSerial: String) {
         val serials = viewState.value.itemSerials.toMutableList()
         val itemSerials: ArrayList<ItemSerialModel> = ArrayList()
@@ -146,11 +165,13 @@ class MoveOrderItemViewModel(
         val updatedMoveOrderItem: MoveOrderItemsModel =
             orderItemForScan.copy(qtyGiven = orderItemForScan.qtyGiven + 1)
         Log.d("SERIALS_S", "${updatedMoveOrderItem.qtyGiven}")
+        val selected = _viewState.value.selectedOrder
+        val unselectItemForScan = if(selected?.moveOrderModel?.isComplete == null) true else !selected.moveOrderModel.isComplete
         _viewState.update {
             _viewState.value.copy(
                 itemSerials = serials.toList(),
                 showManualEnterBarcode = false,
-                orderItemForScan = updatedMoveOrderItem
+                orderItemForScan = if(unselectItemForScan) null else updatedMoveOrderItem
             )
         }
     }
@@ -316,6 +337,12 @@ class MoveOrderItemViewModel(
         val orderItems = selectedOrder?.moveOrderItemsModels
         var orderItemForScan: MoveOrderItemsModel? = null
         var orderItemForDelete: MoveOrderItemsModel? = null
+        if (moveOrderItemsModel.quantity < qtyGiven) {
+            _viewState.update {
+                _viewState.value.copy(error = "Перевищено кількість додаданих серійних номерів, максимальна кількість ${moveOrderItemsModel.quantity.toInt()}")
+            }
+            return
+        }
         viewModelScope.launch {
             setQuantityGivenUseCase.invoke(
                 QuantityGivenModel(
@@ -382,5 +409,19 @@ class MoveOrderItemViewModel(
                 }
             }
         }
+    }
+
+    fun isAllMoveOrdersItemDone(moveOrderItems: List<MoveOrderItemsModel>, serials: List<ItemSerialModel>): Boolean {
+        var itemsDone = 0
+
+        moveOrderItems.forEach { item ->
+            val serialsList = serials.filter { it.moveOrderItemId == item.id }
+            if(item.qtyGiven == item.quantity && item.noSerials) {
+                itemsDone++
+            } else if(item.qtyGiven == item.quantity && serialsList.size == item.qtyGiven.toInt()) {
+                itemsDone++
+            }
+        }
+        return itemsDone == moveOrderItems.size
     }
 }

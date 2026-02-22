@@ -99,7 +99,8 @@ fun MoveOrderView(
             },
             onMoveOrderClick = {
                 viewModel.postSelectedMoveOrder(it)
-            })
+            },
+            viewModel = viewModel)
         if (state.value.itemSerials.isNotEmpty()) {
             MoveOrdersList(
                 moveOrders = state.value.moveOrders,
@@ -113,7 +114,8 @@ fun MoveOrderView(
                 },
                 onMoveOrderClick = {
                     viewModel.postSelectedMoveOrder(it)
-                })
+                },
+                viewModel = viewModel)
         }
         state.value.errorData?.let {
             if (it.status == SERIAL_NUMBER_NOT_FOUND) {
@@ -144,7 +146,8 @@ fun MoveOrdersList(
     headerStateList: List<HeaderState>,
     onHeaderClick: (String) -> Unit,
     onMoveOrderClick: (OrderModel) -> Unit,
-    onSelectMoveOrderItem: (MoveOrderItemsModel) -> Unit
+    onSelectMoveOrderItem: (MoveOrderItemsModel) -> Unit,
+    viewModel: MoveOrderItemViewModel
 ) {
     LazyColumn(
         modifier = Modifier
@@ -184,9 +187,12 @@ fun MoveOrdersList(
 
                 it.value.forEach { moveOrder ->
                     Spacer(modifier = Modifier.height(8.dp))
+                    val isOrderDone = viewModel.isAllMoveOrdersItemDone(moveOrder.moveOrderItemsModels,
+                        serials)
                     MoveOrderHeader(
                         order = moveOrder,
-                        onMoveOrderClick = onMoveOrderClick
+                        onMoveOrderClick = onMoveOrderClick,
+                        isOrderDone = isOrderDone
                     )
                     moveOrder.moveOrderItemsModels.forEach { item ->
                         MoveOrderItemView(
@@ -212,7 +218,8 @@ fun MoveOrdersList(
 @Composable
 fun MoveOrderHeader(
     order: OrderModel,
-    onMoveOrderClick: (OrderModel) -> Unit
+    onMoveOrderClick: (OrderModel) -> Unit,
+    isOrderDone: Boolean
 ) {
     val moveOrder = order.moveOrderModel
     Card(
@@ -228,9 +235,16 @@ fun MoveOrderHeader(
         )
     ) {
         Spacer(modifier = Modifier.height(4.dp))
-        Row {
+        var headerIcon = if(isOrderDone) painterResource(id = R.drawable.ic_star_border) else painterResource(id = R.drawable.ic_star_border)
+        var tintColor = if(isOrderDone) colorResource(R.color.finished_order) else colorResource(R.color.new_order)
+
+        Row(verticalAlignment = Alignment.CenterVertically){
+            Icon(modifier = Modifier.padding(horizontal = 16.dp),
+                painter = headerIcon,
+                contentDescription = null,
+                tint = tintColor
+            )
             Text(
-                modifier = Modifier.padding(horizontal = 16.dp),
                 text = moveOrder.number,
                 color = colorResource(R.color.black),
                 fontStyle = FontStyle.Normal,
@@ -250,7 +264,7 @@ fun MoveOrderHeader(
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             text = moveOrder.description,
             color = colorResource(R.color.black),
             fontSize = 12.sp

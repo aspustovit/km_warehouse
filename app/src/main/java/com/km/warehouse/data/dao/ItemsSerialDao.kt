@@ -15,4 +15,7 @@ abstract class ItemsSerialDao : BaseDao<ItemsSerial>() {
 
     @Query("DELETE FROM items_serial WHERE serial = :serial")
     abstract fun deleteBySerial(serial: String): Int
+
+    @Query("SELECT b.* FROM items_serial b where b.serial == :serial ")
+    abstract fun checkSerialAlreadyAdded(serial: String): ItemsSerial?
 }

@@ -1,8 +1,10 @@
 package com.km.warehouse.data.repository
 
+import android.util.Log
 import com.km.warehouse.data.KmWarehouseDatabase
 import com.km.warehouse.data.entity.Bayer
 import com.km.warehouse.data.entity.MoveOrder
+import com.km.warehouse.data.network.entity.ErrorData
 import com.km.warehouse.domain.repository.LocalWarehouseRepository
 import com.km.warehouse.domain.usecase.model.ItemSerialModel
 import com.km.warehouse.domain.usecase.model.MoveOrderModel
@@ -99,6 +101,16 @@ class BayerRepositoryImpl(val database: KmWarehouseDatabase) : LocalWarehouseRep
             result = database.moveOrderItemDao().update(updateItem)
         }
         return result
+    }
+
+    override suspend fun checkSerialAlreadyEnter(serialNumber: String): ErrorData {
+        val serial = database.itemsSerialDao().checkSerialAlreadyAdded(serialNumber)
+        Log.d("checkSerialAlreadyEnter", "$serialNumber = $serial")
+        if(serial != null) {
+            val moi = database.moveOrderItemDao().getMoveOrderItem(serial.moveOrderItemId)
+            return ErrorData(1001, "Серійний номер вже додано в документ! ${moi?.mfrCode} - Серійний номер:${serial.serial}", "Повторення серійного номеру")
+        }
+        return ErrorData(status = 0, message = "", error = "")
     }
 
     private fun getBayerName(bayerId: Int, bayers: List<Bayer>): String {

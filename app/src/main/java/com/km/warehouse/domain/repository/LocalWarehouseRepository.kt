@@ -1,6 +1,7 @@
 package com.km.warehouse.domain.repository
 
 import com.km.warehouse.data.entity.Bayer
+import com.km.warehouse.data.network.entity.ErrorData
 import com.km.warehouse.domain.usecase.model.ItemSerialModel
 import com.km.warehouse.domain.usecase.model.MoveOrderModel
 import com.km.warehouse.domain.usecase.model.OrderModel
@@ -26,4 +27,6 @@ interface LocalWarehouseRepository {
     suspend fun setQuantityGiven(quantityGivenModel: QuantityGivenModel): Int
 
     suspend fun setNoSerials(moveOrderItemId: Int): Int
+
+    suspend fun checkSerialAlreadyEnter(serialNumber: String): ErrorData
 }

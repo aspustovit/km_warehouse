@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
 object AppDataModule {
     private val retrofitClient = named("warehouseRetrofitClient")
     private val retrofitClientTimeout = 10L
-    private val baseUrl = "http://192.168.0.167:8081/api/"
+    private val baseUrl = "http://172.18.0.60:8081/api/"
 
     private val networkModule = module {
         koinApplication()

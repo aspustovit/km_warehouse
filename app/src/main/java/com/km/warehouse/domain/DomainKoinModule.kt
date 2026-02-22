@@ -1,5 +1,6 @@
 package com.km.warehouse.domain
 
+import com.km.warehouse.domain.usecase.CheckInputSerialsUseCase
 import com.km.warehouse.domain.usecase.DeleteSerialNumberUseCase
 import com.km.warehouse.domain.usecase.GetDocumentDataToSyncUseCase
 import com.km.warehouse.domain.usecase.GetItemSerialFromDBUseCase
@@ -38,6 +39,7 @@ object DomainKoinModule {
         factory { DeleteSerialNumberUseCase(localWarehouseRepository = get()) }
         factory { SetQuantityGivenUseCase(localWarehouseRepository = get()) }
         factory { SetNoSerialsUseCase(localWarehouseRepository = get()) }
+        factory { CheckInputSerialsUseCase(localWarehouseRepository = get()) }
     }
 
     val parentModule = module {

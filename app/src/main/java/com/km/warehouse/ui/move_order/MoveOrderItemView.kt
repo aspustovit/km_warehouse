@@ -54,22 +54,21 @@ fun MoveOrderItemView(
     }
     var headerIcon = painterResource(id = R.drawable.ic_not_start_order)
     var tintColor = colorResource(R.color.new_order)
+    val serialsList = serials.filter { it.moveOrderItemId == item.id }
 
     if(item.qtyGiven == item.quantity && item.noSerials) {
         headerIcon = painterResource(id = R.drawable.ic_order_finished)
         tintColor = colorResource(R.color.finished_order)
-    } else if(item.qtyGiven == item.quantity && serials.size == item.qtyGiven.toInt()) {
+    } else if(item.qtyGiven == item.quantity && serialsList.size == item.qtyGiven.toInt()) {
         headerIcon = painterResource(id = R.drawable.ic_order_finished)
         tintColor= colorResource(R.color.finished_order)
-    } else if(item.qtyGiven == item.quantity && serials.size != item.qtyGiven.toInt()){
+    } else if(item.qtyGiven == item.quantity && serialsList.size != item.qtyGiven.toInt()){
         headerIcon = painterResource(id = R.drawable.ic_order_not_finished)
         tintColor= colorResource(R.color.not_finished_order)
     } else {
         headerIcon = painterResource(id = R.drawable.ic_not_start_order)
         tintColor= colorResource(R.color.new_order)
     }
-
-    val serialsList = serials.filter { it.moveOrderItemId == item.id }
     val serialsCountState = if(item.noSerials) "-" else "${serialsList.size}"
     Spacer(modifier = Modifier.height(8.dp))
     Card(

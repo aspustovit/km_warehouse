@@ -26,7 +26,8 @@ object AppViewModelModule {
                 getItemSerialFromDBUseCase = get(),
                 deleteSerialNumberUseCase = get(),
                 setQuantityGivenUseCase = get(),
-                setNoSerialsUseCase = get()
+                setNoSerialsUseCase = get(),
+                checkInputSerialsUseCase = get()
             )
         }
         viewModel {

@@ -57,8 +57,11 @@ class BayerRepositoryImpl(val database: KmWarehouseDatabase) : LocalWarehouseRep
             val moveOrderItem = database.moveOrderItemDao().getMoveOrderItem(seralNumberModel.moveOrderItemId)
             database.itemsSerialDao().insert(seralNumberModel.toItemSerialDb())
             moveOrderItem?.let {
-                val updateItem = it.copy(qtyGiven = it.qtyGiven+1)
-                database.moveOrderItemDao().update(updateItem)
+                val moveOrderItem = database.moveOrderDao().getMoveOrderById(it.moveOrderId)
+                if(moveOrderItem.isComplete == "N") {
+                    val updateItem = it.copy(qtyGiven = it.qtyGiven + 1)
+                    database.moveOrderItemDao().update(updateItem)
+                }
             }
             return ""
         } catch (ex: Exception){
@@ -76,8 +79,11 @@ class BayerRepositoryImpl(val database: KmWarehouseDatabase) : LocalWarehouseRep
         if(result > 0) {
             val moveOrderItem = database.moveOrderItemDao().getMoveOrderItem(seralNumberModel.moveOrderItemId)
             moveOrderItem?.let {
-                val updateItem = it.copy(qtyGiven = it.qtyGiven-1)
-                database.moveOrderItemDao().update(updateItem)
+                val moveOrder = database.moveOrderDao().getMoveOrderById(it.moveOrderId)
+                if(moveOrder.isComplete == "N") {
+                    val updateItem = it.copy(qtyGiven = it.qtyGiven - 1)
+                    database.moveOrderItemDao().update(updateItem)
+                }
             }
         }
         return result

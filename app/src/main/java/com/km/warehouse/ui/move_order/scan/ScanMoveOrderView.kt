@@ -3,6 +3,7 @@ package com.km.warehouse.ui.move_order.scan
 import android.util.Log
 import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +34,7 @@ import com.km.warehouse.domain.usecase.model.ItemSerialModel
 import com.km.warehouse.domain.usecase.model.MoveOrderItemsModel
 import com.km.warehouse.domain.usecase.model.MoveOrderModel
 import com.km.warehouse.ui.SharedViewModel
+import com.km.warehouse.ui.move_order.BayerView
 import com.km.warehouse.ui.move_order.MoveOrderItemView
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel.Companion.SERIAL_NUMBER_NOT_FOUND
@@ -43,7 +47,8 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ScanMoveOrderView(
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    bayerName: String
 ) {
     BackHandler {
         onBackClick.invoke()
@@ -61,8 +66,9 @@ fun ScanMoveOrderView(
     }
     state.value.selectedOrder?.let {
         ManualSerialSearchView(viewModel)
-        NoSerialsView(onAcceptClick = {
-            viewModel.setNoSerials()
+        NoSerialsView(onAcceptClick = { isNoSerials ->
+            if(isNoSerials)
+                viewModel.setNoSerials()
         }, onCancelClick = {
             onBackClick.invoke()
             viewModel.viewState.value.documentType?.let { dt ->
@@ -71,6 +77,13 @@ fun ScanMoveOrderView(
         },onQuantityClick = {
             viewModel.showQuantityEntering()
         })
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant,
+            thickness = 1.dp
+        )
+        BayerView(isExpand = false, showExpand = false, key = bayerName, modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp, horizontal = 16.dp))
         MoveOrderHeaderView(moveOrder = it.moveOrderModel)
         ScanMoveOrderItemList(
             viewModel = viewModel,

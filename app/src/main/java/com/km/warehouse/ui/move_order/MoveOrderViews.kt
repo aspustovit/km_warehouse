@@ -69,10 +69,19 @@ fun MoveOrderView(
         viewModel.loadMoveOrders(documentType)
     }
     if (state.value.selectedOrder != null) {
+        var bayerName = ""
+        state.value.moveOrders.forEach {
+            it.value.forEach { o ->
+                if(o.moveOrderModel.id == state.value.selectedOrder?.moveOrderModel?.id){
+                    bayerName = it.key
+                    return@forEach
+                }
+            }
+        }
         ScanMoveOrderView(onBackClick = {
             viewModel.postSelectedMoveOrder(moveOrder = null)
             viewModel.loadMoveOrders(documentType)
-        })
+        }, bayerName = bayerName)
         return
     }
     Column(
@@ -157,7 +166,13 @@ fun MoveOrdersList(
         moveOrders.forEach {
             val headerState = headerStateList.find { h -> h.header == it.key }!!
             item {
-                Row(
+                BayerView(modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = { onHeaderClick(it.key) })
+                    .padding(vertical = 16.dp),
+                    isExpand = headerState.isExpand,
+                    showExpand = true, key = it.key)
+                /*Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable(onClick = { onHeaderClick(it.key) })
@@ -176,7 +191,7 @@ fun MoveOrdersList(
                         painter = painterResource(id = if (headerState.isExpand) R.drawable.ic_expand else R.drawable.ic_expand_more),
                         contentDescription = null, modifier = Modifier.weight(weight = 0.2f)
                     )
-                }
+                }*/
                 HorizontalDivider(
                     color = MaterialTheme.colorScheme.outlineVariant,
                     thickness = 1.dp
@@ -194,13 +209,14 @@ fun MoveOrdersList(
                         onMoveOrderClick = onMoveOrderClick,
                         isOrderDone = isOrderDone
                     )
-                    moveOrder.moveOrderItemsModels.forEach { item ->
+
+                    /*moveOrder.moveOrderItemsModels.forEach { item ->
                         MoveOrderItemView(
                             item,
                             serials,
                             onDeleteSerial = {},
                             onSelectMoveOrderItem = onSelectMoveOrderItem)
-                    }
+                    }*/
 
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -228,9 +244,8 @@ fun MoveOrderHeader(
             .clickable(onClick = { onMoveOrderClick(order) }),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (moveOrder.isComplete) colorResource(R.color.move_order_complete) else colorResource(
-                R.color.sync_dialog
-            ),
+            containerColor = if (isOrderDone) colorResource(R.color.move_order_complete) else colorResource(
+                R.color.sync_dialog),
             contentColor = colorResource(R.color.black)
         )
     ) {

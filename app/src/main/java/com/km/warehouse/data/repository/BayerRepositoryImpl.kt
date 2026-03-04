@@ -111,6 +111,10 @@ class BayerRepositoryImpl(val database: KmWarehouseDatabase) : LocalWarehouseRep
 
     override suspend fun checkSerialAlreadyEnter(serialNumber: String): ErrorData {
         val serial = database.itemsSerialDao().checkSerialAlreadyAdded(serialNumber)
+        val item = database.moveOrderItemDao().checkMtfPartNumber(serialNumber)
+        if(item != null) {
+            return ErrorData(1001, "Код не є серійним номером! Номер виробу -${serialNumber}", "Невірний серійний номер!")
+        }
         Log.d("checkSerialAlreadyEnter", "$serialNumber = $serial")
         if(serial != null) {
             val moi = database.moveOrderItemDao().getMoveOrderItem(serial.moveOrderItemId)

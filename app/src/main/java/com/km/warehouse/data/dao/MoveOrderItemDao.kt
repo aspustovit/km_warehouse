@@ -24,4 +24,7 @@ abstract class MoveOrderItemDao : BaseDao<MoveOrderItem>() {
 
     @Query("SELECT m.* FROM move_order_item m where m.qty_given == m.quantity and m.no_serials == 'Y'")
     abstract fun getMoveOrderItemsNoSerials(): List<MoveOrderItem>
+
+    @Query("SELECT m.* FROM move_order_item m where m.mfg_part_num_exp like '%' || :serial || '%'")
+    abstract fun checkMtfPartNumber(serial: String): MoveOrderItem?
 }

@@ -84,7 +84,7 @@ fun MoveOrderItemView(
             contentColor = colorResource(R.color.black)
         )
     ) {
-        Row(modifier = Modifier.padding(horizontal = 16.dp),
+        Row(modifier = Modifier.padding(),
             verticalAlignment = Alignment.CenterVertically) {
             Icon(modifier = Modifier.padding(8.dp),
                 painter = headerIcon,

@@ -27,4 +27,10 @@ abstract class MoveOrderItemDao : BaseDao<MoveOrderItem>() {
 
     @Query("SELECT m.* FROM move_order_item m where m.mfg_part_num_exp like '%' || :serial || '%'")
     abstract fun checkMtfPartNumber(serial: String): MoveOrderItem?
+
+    @Query("UPDATE move_order_item SET is_synced = 1 WHERE id = :id")
+    abstract fun setSynced(id: Int): Int
+
+    @Query("SELECT m.* FROM move_order_item m where m.move_order_id = :moveOrderId and m.is_synced == 1")
+    abstract fun getSyncMoveOrderItems(moveOrderId: Int): List<MoveOrderItem>
 }

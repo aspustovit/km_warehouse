@@ -6,6 +6,7 @@ import com.km.warehouse.data.network.entity.ItemSerialEntity
 import com.km.warehouse.data.network.entity.ItemSerialSync
 import com.km.warehouse.data.network.entity.MoveOrderEntity
 import com.km.warehouse.data.network.entity.MoveOrderItemsEntity
+import com.km.warehouse.data.network.entity.MoveOrderStatus
 import com.km.warehouse.domain.usecase.model.MoveOrderModel
 import retrofit2.Call
 import retrofit2.http.Body
@@ -99,5 +100,10 @@ interface WarehouseApiService {
     @POST("/api/main/insert_move_item_serials")
     fun insertMoveOrderItemSerials(
         @Body moveOrderItemSerials: List<ItemSerialSync>
+    ): Call<BaseResponse<Unit>>
+
+    @POST("/api/main/set_move_order_status")
+    fun setMoveOrderStatus(
+        @Body moveOrderStatus: MoveOrderStatus
     ): Call<BaseResponse<Unit>>
 }

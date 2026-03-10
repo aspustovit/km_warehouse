@@ -1,5 +1,6 @@
 package com.km.warehouse.ui.move_order
 
+import androidx.compose.foundation.lazy.LazyListState
 import com.km.warehouse.data.entity.Bayer
 import com.km.warehouse.data.network.entity.ErrorData
 import com.km.warehouse.domain.usecase.model.ItemSerialModel
@@ -21,4 +22,5 @@ data class MoveOrderState(
     val orderItemForScan: MoveOrderItemsModel? = null,
     val documentType: DocumentType? = null,
     val showQuantityEntering: Boolean = false,
+    val selectedIndexForScroll: Int = 0
 )

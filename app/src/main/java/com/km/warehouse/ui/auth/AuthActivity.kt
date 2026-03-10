@@ -122,7 +122,7 @@ class AuthActivity : ComponentActivity() {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(stringResource(R.string.auth_message), fontSize = 28.sp) //
+            Text(stringResource(R.string.auth_message), fontSize = 22.sp) //
 
             OutlinedTextField(
                 value = login,

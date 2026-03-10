@@ -8,6 +8,7 @@ import com.km.warehouse.data.entity.Bayer
 import com.km.warehouse.data.entity.MoveOrderItem
 import com.km.warehouse.data.network.WarehouseApiService
 import com.km.warehouse.data.network.entity.ErrorData
+import com.km.warehouse.data.network.entity.MoveOrderStatus
 import com.km.warehouse.domain.repository.SyncWarehouseRepository
 import com.km.warehouse.domain.usecase.model.SyncResultModel
 
@@ -73,9 +74,12 @@ class SyncWarehouseRepositoryImpl(
 
     override suspend fun syncToServerSerialsData(): SyncResultModel {
         val serials = database.itemsSerialDao().getSerialsToSync()
+        val moveOrders = database.moveOrderDao().getMoveOrders()
         val moveOrderItems = database.moveOrderItemDao().getMoveOrderItems()
         val moveOrderItemsNoSerials = database.moveOrderItemDao().getMoveOrderItemsNoSerials()
         val moveOrderWidthSerials = HashSet<Int>()
+        val moveOrdersToDel : ArrayList<Int> = ArrayList()
+
         serials.forEach {
             moveOrderWidthSerials.add(it.moveOrderItemId)
         }
@@ -86,7 +90,7 @@ class SyncWarehouseRepositoryImpl(
             Log.i("syncToServerWarehouseData", "${moveOrderWidthSerials}")
             moveOrderWidthSerials.forEach {
                 val moveOrderItem = moveOrderItems.find { moi -> moi.id == it }
-                if (moveOrderItem != null) {
+                if (moveOrderItem != null && moveOrderItem.isSynced == 0) {
                     val sync = moveOrderItem.toMoveOrderItemSync()
                     val upadateResponce = warehouseApiService.updateMoveOrderItem(sync).execute()
                     Log.i("syncToServerWarehouseData", "${sync}")
@@ -97,6 +101,7 @@ class SyncWarehouseRepositoryImpl(
                             errorData = errorData,
                         )
                     } else {
+                        database.moveOrderItemDao().setSynced(moveOrderItem.id)
                         moveOrdersItemToDel.add(moveOrderItem)
                     }
                 }
@@ -112,11 +117,45 @@ class SyncWarehouseRepositoryImpl(
                 )
             } else {
                 serials.forEach {
+                    database.itemsSerialDao().setSynced(it.id)
+                }
+                moveOrders.forEach {
+                    val orderItems = database.moveOrderItemDao().getMoveOrderItemsByOrderId(it.id)
+                    val syncOrderItems = database.moveOrderItemDao().getSyncMoveOrderItems(it.id)
+                    Log.v("syncToServerWarehouseData", "${syncOrderItems.size} == ${orderItems.size}")
+                    if (syncOrderItems.size == orderItems.size) {
+                        Log.i("syncToServerWarehouseData", "moveOrder = ${it.id}")
+                        val orderResponse = warehouseApiService.setMoveOrderStatus(
+                            MoveOrderStatus(
+                                moveOrderId = it.id.toLong(),
+                                status = "G",
+                                isComplete = "Y"
+                            )
+                        ).execute()
+
+                        if (orderResponse.errorBody() != null) {
+                            val error = parseError(orderResponse.errorBody()!!.string())
+                            Log.e("syncToServerWarehouseData", "$error")
+                            return SyncResultModel(
+                                isSyncSuccess = orderResponse.isSuccessful,
+                                errorData = error,
+                            )
+                        } else {
+                            moveOrdersToDel.add(it.id)
+                        }
+                    }
+                }
+
+                serials.forEach {
                     database.itemsSerialDao().delete(it)
                     database.moveOrderItemDao().deleteById(it.moveOrderItemId)
                 }
                 moveOrdersItemToDel.forEach {
                     database.moveOrderItemDao().delete(it)
+                }
+                moveOrdersToDel.forEach {
+                    Log.d("syncToServerWarehouseData", "delete moveOrder = $it")
+                    database.moveOrderDao().deleteById(it)
                 }
 
                 return SyncResultModel(

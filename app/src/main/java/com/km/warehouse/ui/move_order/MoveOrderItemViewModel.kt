@@ -1,12 +1,9 @@
 package com.km.warehouse.ui.move_order
 
 import android.util.Log
-import android.view.ViewParent
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.km.warehouse.R
 import com.km.warehouse.data.network.entity.ErrorData
 import com.km.warehouse.domain.usecase.CheckInputSerialsUseCase
 import com.km.warehouse.domain.usecase.DeleteSerialNumberUseCase
@@ -450,5 +447,14 @@ class MoveOrderItemViewModel(
             }
         }
         return itemsDone == moveOrderItems.size
+    }
+
+    fun setSelectedScrollIndex(idx: Int) {
+        Log.i("SelectedScrollIndex", "$idx")
+        _viewState.update { state ->
+            state.copy(
+                selectedIndexForScroll = idx
+            )
+        }
     }
 }

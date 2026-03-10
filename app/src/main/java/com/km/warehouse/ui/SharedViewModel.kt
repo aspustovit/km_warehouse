@@ -28,7 +28,7 @@ class SharedViewModel(
     private var barcode: String = ""
 
     private var barcodeJob: Job? = null
-    fun observeBarcodes() {
+    fun observeBarcodes(isAddNewLineAfterScan: Boolean = false) {
         barcodeJob?.cancel()
 
         barcodeJob = observeBarcodeDataUseCase.observe().onEach { bar ->
@@ -36,7 +36,7 @@ class SharedViewModel(
             _barcodeState.update {
                 it.copy(
                     lastBarcode = bar,
-                    barcodeData = "${it.barcodeData}$bar"
+                    barcodeData = if(isAddNewLineAfterScan) "${it.barcodeData}\n$bar" else "${it.barcodeData}$bar"
                 )
             }
         }.launchIn(viewModelScope)

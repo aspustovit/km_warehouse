@@ -33,7 +33,9 @@ data class MoveOrderItem(
     @ColumnInfo(name = "no_serials")
     val noSerials: String,
     @ColumnInfo(name = "item_segment")
-    val itemSegment: String?
+    val itemSegment: String?,
+    @ColumnInfo(name = "is_synced")
+    val isSynced: Int = 0 //
 ) {
     companion object {
         const val TABLE_NAME = "move_order_item"

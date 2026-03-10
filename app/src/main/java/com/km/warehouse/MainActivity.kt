@@ -4,6 +4,10 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
+import android.view.KeyEvent.KEYCODE_BACK
+import android.view.KeyEvent.KEYCODE_SHIFT_LEFT
+import android.view.KeyEvent.KEYCODE_SHIFT_RIGHT
+import android.view.KeyEvent.KEYCODE_TV_SATELLITE_SERVICE
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
@@ -36,10 +40,12 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(e: KeyEvent): Boolean {
         Log.d("NAV_CONTROLLER", "$e")
-        if (e.action == KeyEvent.ACTION_DOWN) {
+        if (e.action == KeyEvent.ACTION_DOWN && e.keyCode != KEYCODE_TV_SATELLITE_SERVICE
+            && e.keyCode != KEYCODE_SHIFT_LEFT && e.keyCode != KEYCODE_SHIFT_RIGHT
+            && e.keyCode != KEYCODE_BACK) {
             val pressedKey = e.unicodeChar.toChar()
             Log.i("NAV_CONTROLLER", "$pressedKey")
-            if(e.keyCode != KeyEvent.KEYCODE_ENTER)
+            if (e.keyCode != KeyEvent.KEYCODE_ENTER)
                 viewModel.onBarcodeScan(pressedKey)
         }
         if (e.action == KeyEvent.ACTION_DOWN && e.keyCode == KeyEvent.KEYCODE_ENTER) {
@@ -72,11 +78,13 @@ fun MenuScreen(
 ) {
     var showDialog by remember { mutableStateOf(false) }
     if (showDialog) {
-        SyncDialog(onDismissRequest = {
-            showDialog = false
-        },
+        SyncDialog(
+            onDismissRequest = {
+                showDialog = false
+            },
             painter = painterResource(R.drawable.ic_internet_connection_phone),
-            imageDescription = "")
+            imageDescription = ""
+        )
     }
     Column(
         modifier = Modifier
@@ -89,7 +97,7 @@ fun MenuScreen(
         CustomOutlinedImageButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             startIcon = {
                 Icon(
                     painterResource(id = R.drawable.ic_barcode_scanner),
@@ -101,14 +109,14 @@ fun MenuScreen(
             text = {
                 Text(
                     text = stringResource(id = R.string.approved_documents),
-                    fontSize = 18.sp
+                    fontSize = 16.sp
                 )
             })
 
         CustomOutlinedImageButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             startIcon = {
                 Icon(
                     painterResource(id = R.drawable.ic_document),
@@ -122,14 +130,14 @@ fun MenuScreen(
             text = {
                 Text(
                     text = stringResource(id = R.string.issued_documents),
-                    fontSize = 18.sp
+                    fontSize = 16.sp
                 )
             })
 
         CustomOutlinedImageButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             startIcon = {
                 Icon(
                     painterResource(id = R.drawable.ic_income_documents),
@@ -143,14 +151,14 @@ fun MenuScreen(
             text = {
                 Text(
                     text = stringResource(id = R.string.income_documents),
-                    fontSize = 18.sp
+                    fontSize = 16.sp
                 )
             })
 
         CustomOutlinedImageButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             startIcon = {
                 Icon(
                     painterResource(id = R.drawable.ic_barcode_reader),
@@ -164,14 +172,14 @@ fun MenuScreen(
             text = {
                 Text(
                     text = stringResource(id = R.string.scan_to_file),
-                    fontSize = 18.sp
+                    fontSize = 16.sp
                 )
             })
 
         CustomOutlinedImageButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             startIcon = {
                 Icon(
                     painterResource(id = R.drawable.ic_cloud_sync),
@@ -186,14 +194,14 @@ fun MenuScreen(
             text = {
                 Text(
                     text = stringResource(id = R.string.sync),
-                    fontSize = 18.sp
+                    fontSize = 16.sp
                 )
             })
 
         CustomOutlinedImageButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             startIcon = {
                 Icon(
                     painterResource(id = R.drawable.ic_arrow_left),
@@ -207,7 +215,7 @@ fun MenuScreen(
             text = {
                 Text(
                     text = stringResource(id = R.string.exit),
-                    fontSize = 18.sp
+                    fontSize = 16.sp
                 )
             })
         //

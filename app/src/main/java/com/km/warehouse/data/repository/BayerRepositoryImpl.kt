@@ -46,7 +46,7 @@ class BayerRepositoryImpl(val database: KmWarehouseDatabase) : LocalWarehouseRep
                         moveOrderItemsModels = orderItems.map { items -> items.toMoveOrderItemsModel() })
                 )
             }
-            if(orderModelList.isNotEmpty())
+            if (orderModelList.isNotEmpty())
                 res.put(it.description, orderModelList)
         }
         return res
@@ -54,17 +54,18 @@ class BayerRepositoryImpl(val database: KmWarehouseDatabase) : LocalWarehouseRep
 
     override suspend fun setSerialNumberToDB(seralNumberModel: ItemSerialModel): String {
         try {
-            val moveOrderItem = database.moveOrderItemDao().getMoveOrderItem(seralNumberModel.moveOrderItemId)
+            val moveOrderItem =
+                database.moveOrderItemDao().getMoveOrderItem(seralNumberModel.moveOrderItemId)
             database.itemsSerialDao().insert(seralNumberModel.toItemSerialDb())
             moveOrderItem?.let {
                 val moveOrderItem = database.moveOrderDao().getMoveOrderById(it.moveOrderId)
-                if(moveOrderItem.isComplete == "N") {
+                if (moveOrderItem.isComplete == "N") {
                     val updateItem = it.copy(qtyGiven = it.qtyGiven + 1)
                     database.moveOrderItemDao().update(updateItem)
                 }
             }
             return ""
-        } catch (ex: Exception){
+        } catch (ex: Exception) {
             return ex.toString()
         }
 
@@ -76,11 +77,12 @@ class BayerRepositoryImpl(val database: KmWarehouseDatabase) : LocalWarehouseRep
 
     override suspend fun deleteSerialNumber(seralNumberModel: ItemSerialModel): Int {
         val result = database.itemsSerialDao().deleteBySerial(seralNumberModel.serial)
-        if(result > 0) {
-            val moveOrderItem = database.moveOrderItemDao().getMoveOrderItem(seralNumberModel.moveOrderItemId)
+        if (result > 0) {
+            val moveOrderItem =
+                database.moveOrderItemDao().getMoveOrderItem(seralNumberModel.moveOrderItemId)
             moveOrderItem?.let {
                 val moveOrder = database.moveOrderDao().getMoveOrderById(it.moveOrderId)
-                if(moveOrder.isComplete == "N") {
+                if (moveOrder.isComplete == "N") {
                     val updateItem = it.copy(qtyGiven = it.qtyGiven - 1)
                     database.moveOrderItemDao().update(updateItem)
                 }
@@ -91,7 +93,8 @@ class BayerRepositoryImpl(val database: KmWarehouseDatabase) : LocalWarehouseRep
 
     override suspend fun setQuantityGiven(quantityGivenModel: QuantityGivenModel): Int {
         var result = 0
-        val moveOrderItem = database.moveOrderItemDao().getMoveOrderItem(quantityGivenModel.moveOrderItemId)
+        val moveOrderItem =
+            database.moveOrderItemDao().getMoveOrderItem(quantityGivenModel.moveOrderItemId)
         moveOrderItem?.let {
             val updateItem = it.copy(qtyGiven = quantityGivenModel.quantityGiven.toDouble())
             result = database.moveOrderItemDao().update(updateItem)
@@ -112,13 +115,24 @@ class BayerRepositoryImpl(val database: KmWarehouseDatabase) : LocalWarehouseRep
     override suspend fun checkSerialAlreadyEnter(serialNumber: String): ErrorData {
         val serial = database.itemsSerialDao().checkSerialAlreadyAdded(serialNumber)
         val item = database.moveOrderItemDao().checkMtfPartNumber(serialNumber)
-        if(item != null) {
-            return ErrorData(1001, "Код не є серійним номером! Номер виробу -${serialNumber}", "Невірний серійний номер!")
+        Log.e("checkSerialAlreadyEnter", "$serialNumber")
+        if (item != null && item.mfgPartNumExp != null) {
+            Log.e("checkSerialAlreadyEnter", "$item")
+            if (item.mfgPartNumExp.contains(serialNumber))
+                return ErrorData(
+                    1001,
+                    "Код не є серійним номером! Номер виробу -${serialNumber}",
+                    "Невірний серійний номер!"
+                )
         }
         Log.d("checkSerialAlreadyEnter", "$serialNumber = $serial")
-        if(serial != null) {
+        if (serial != null) {
             val moi = database.moveOrderItemDao().getMoveOrderItem(serial.moveOrderItemId)
-            return ErrorData(1001, "Серійний номер вже додано в документ! ${moi?.mfrCode} - Серійний номер:${serial.serial}", "Повторення серійного номеру")
+            return ErrorData(
+                1001,
+                "Серійний номер вже додано в документ! ${moi?.mfrCode} - Серійний номер:${serial.serial}",
+                "Повторення серійного номеру"
+            )
         }
         return ErrorData(status = 0, message = "", error = "")
     }

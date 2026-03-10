@@ -20,7 +20,9 @@ data class ItemsSerial(
     val id: Int = 0,
     val serial: String,
     @ColumnInfo(name = "move_order_item_id")
-    val moveOrderItemId: Int
+    val moveOrderItemId: Int,
+    @ColumnInfo(name = "is_synced")
+    val isSynced: Int = 0
 ){
     companion object {
         const val TABLE_NAME = "items_serial"

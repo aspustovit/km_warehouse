@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.km.warehouse.R
 import com.km.warehouse.ui.OutlinedIconButton
 
@@ -25,16 +26,15 @@ import com.km.warehouse.ui.OutlinedIconButton
 fun NoSerialsView(
     onAcceptClick: (Boolean) -> Unit,
     onQuantityClick: () -> Unit,
-    onCancelClick: () -> Unit
+    onManualBarcodeEnterClick: () -> Unit
 ) {
     var checkedState by remember { mutableStateOf(false) }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
             // Make the entire row clickable to toggle the checkbox
             .clickable { checkedState = !checkedState }
-            .padding(16.dp),
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(
@@ -45,15 +45,36 @@ fun NoSerialsView(
         )
         Text(
             text = stringResource(R.string.no_barcode_for_scan),
-            modifier = Modifier.padding(start = 8.dp)
+            fontSize = 13.sp
         )
-        SerialActionButton(
-            onCancelClick = onCancelClick,
-            onAcceptClick = onAcceptClick,
-            onQuantityClick = onQuantityClick,
-            isBarcodeNeed = checkedState
+
+        //Spacer(modifier = Modifier.width(32.dp))
+
+        OutlinedIconButton(
+            onClick = { onAcceptClick.invoke(checkedState) },
+            resDrawable = R.drawable.ic_check,
+            resDescription = R.string.finish_sync,
+
+        )
+
+        OutlinedIconButton(
+            onClick = { onQuantityClick.invoke() },
+            resDrawable = R.drawable.ic_qnt_count,
+            resDescription = R.string.quantity
+        )
+
+        OutlinedIconButton(
+            onClick = { onManualBarcodeEnterClick.invoke() },
+            resDrawable = R.drawable.ic_barcode_manual,
+            resDescription = R.string.manual_barcode
         )
     }
+    /*SerialActionButton(
+        onCancelClick = onCancelClick,
+        onAcceptClick = onAcceptClick,
+        onQuantityClick = onQuantityClick,
+        isBarcodeNeed = checkedState
+    )*/
 }
 
 @Composable

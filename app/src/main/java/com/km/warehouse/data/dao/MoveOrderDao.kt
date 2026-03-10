@@ -18,4 +18,8 @@ abstract class MoveOrderDao: BaseDao<MoveOrder>() {
 
     @Query("SELECT b.* FROM move_order b")
     abstract fun getMoveOrders(): List<MoveOrder>
+
+    @Query("DELETE FROM move_order  where id = :moveOrderId")
+    abstract fun deleteById(moveOrderId: Int): Int
+
 }

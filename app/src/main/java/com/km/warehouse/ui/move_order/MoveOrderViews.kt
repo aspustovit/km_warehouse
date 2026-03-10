@@ -1,5 +1,6 @@
 package com.km.warehouse.ui.move_order
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
@@ -13,8 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -26,27 +27,27 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 //import androidx.compose.ui.input.key.KeyEvent
-import android.view.KeyEvent
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
-import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.km.warehouse.R
 import com.km.warehouse.domain.usecase.model.ItemSerialModel
 import com.km.warehouse.domain.usecase.model.MoveOrderItemsModel
-import com.km.warehouse.domain.usecase.model.MoveOrderModel
 import com.km.warehouse.domain.usecase.model.OrderModel
-import com.km.warehouse.ui.SharedViewModel
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel.Companion.SERIAL_NUMBER_NOT_FOUND
 import com.km.warehouse.ui.move_order.scan.ScanMoveOrderView
 import com.km.warehouse.ui.sync.ErrorDialog
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -107,7 +108,8 @@ fun MoveOrderView(
                 viewModel.setManualOrderItemForScan(it)
             },
             onMoveOrderClick = {
-                viewModel.postSelectedMoveOrder(it)
+                viewModel.setSelectedScrollIndex(it.second)
+                viewModel.postSelectedMoveOrder(it.first)
             },
             viewModel = viewModel)
         if (state.value.itemSerials.isNotEmpty()) {
@@ -122,7 +124,8 @@ fun MoveOrderView(
                     viewModel.setManualOrderItemForScan(it)
                 },
                 onMoveOrderClick = {
-                    viewModel.postSelectedMoveOrder(it)
+                    viewModel.setSelectedScrollIndex(it.second)
+                    viewModel.postSelectedMoveOrder(it.first)
                 },
                 viewModel = viewModel)
         }
@@ -148,21 +151,36 @@ fun MoveOrderView(
     }
 }
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun MoveOrdersList(
     moveOrders: HashMap<String, List<OrderModel>>,
     serials: List<ItemSerialModel>,
     headerStateList: List<HeaderState>,
     onHeaderClick: (String) -> Unit,
-    onMoveOrderClick: (OrderModel) -> Unit,
+    onMoveOrderClick: (Pair<OrderModel,Int>) -> Unit,
     onSelectMoveOrderItem: (MoveOrderItemsModel) -> Unit,
     viewModel: MoveOrderItemViewModel
 ) {
+    val state = viewModel.viewState.collectAsState()
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    coroutineScope.launch {
+        // Use animateScrollToItem() for a smooth animation
+        // or scrollToItem() for immediate snapping
+        listState.animateScrollToItem(index = state.value.selectedIndexForScroll)
+    }
+    val firstVisibleIndex by remember {
+        derivedStateOf { listState.firstVisibleItemIndex }
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .focusable()
+            .focusable(),
+        state = listState
     ) {
+        var idx = 0
         moveOrders.forEach {
             val headerState = headerStateList.find { h -> h.header == it.key }!!
             item {
@@ -172,31 +190,11 @@ fun MoveOrdersList(
                     .padding(vertical = 16.dp),
                     isExpand = headerState.isExpand,
                     showExpand = true, key = it.key)
-                /*Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(onClick = { onHeaderClick(it.key) })
-                        .padding(vertical = 16.dp)
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        text = it.key,
-                        color = colorResource(R.color.black),
-                        fontSize = 20.sp,
-                        fontFamily = FontFamily.SansSerif
-                    )
-                    Icon(
-                        painter = painterResource(id = if (headerState.isExpand) R.drawable.ic_expand else R.drawable.ic_expand_more),
-                        contentDescription = null, modifier = Modifier.weight(weight = 0.2f)
-                    )
-                }*/
                 HorizontalDivider(
                     color = MaterialTheme.colorScheme.outlineVariant,
                     thickness = 1.dp
                 )
-
+                idx++
                 if (!headerState.isExpand)
                     return@item
 
@@ -204,19 +202,13 @@ fun MoveOrdersList(
                     Spacer(modifier = Modifier.height(8.dp))
                     val isOrderDone = viewModel.isAllMoveOrdersItemDone(moveOrder.moveOrderItemsModels,
                         serials)
+                    idx++
                     MoveOrderHeader(
                         order = moveOrder,
                         onMoveOrderClick = onMoveOrderClick,
-                        isOrderDone = isOrderDone
+                        isOrderDone = isOrderDone,
+                        idx = firstVisibleIndex
                     )
-
-                    /*moveOrder.moveOrderItemsModels.forEach { item ->
-                        MoveOrderItemView(
-                            item,
-                            serials,
-                            onDeleteSerial = {},
-                            onSelectMoveOrderItem = onSelectMoveOrderItem)
-                    }*/
 
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -234,14 +226,15 @@ fun MoveOrdersList(
 @Composable
 fun MoveOrderHeader(
     order: OrderModel,
-    onMoveOrderClick: (OrderModel) -> Unit,
-    isOrderDone: Boolean
+    onMoveOrderClick: (Pair<OrderModel,Int>) -> Unit,
+    isOrderDone: Boolean,
+    idx: Int
 ) {
     val moveOrder = order.moveOrderModel
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = { onMoveOrderClick(order) }),
+            .clickable(onClick = { onMoveOrderClick(Pair(order, idx)) }),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isOrderDone) colorResource(R.color.move_order_complete) else colorResource(
@@ -265,26 +258,26 @@ fun MoveOrderHeader(
                 fontStyle = FontStyle.Normal,
                 fontWeight = FontWeight.Bold
             )
-
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                text = moveOrder.creationDate.replace("T", " "),
-                color = colorResource(R.color.black),
-                fontStyle = FontStyle.Normal,
-                textAlign = TextAlign.Right
-            )
         }
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 16.dp, vertical = 2.dp),
+            text = moveOrder.creationDate.replace("T", " "),
+            color = colorResource(R.color.black),
+            fontStyle = FontStyle.Normal,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
             text = moveOrder.description,
             color = colorResource(R.color.black),
             fontSize = 12.sp
         )
-        Row {
+        /*Row {
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 text = stringResource(R.string.move_order_update_date),
@@ -299,7 +292,7 @@ fun MoveOrderHeader(
                 color = colorResource(R.color.black),
                 fontStyle = FontStyle.Normal
             )
-        }
-        Spacer(modifier = Modifier.height(4.dp))
+        }*/
+        Spacer(modifier = Modifier.height(2.dp))
     }
 }

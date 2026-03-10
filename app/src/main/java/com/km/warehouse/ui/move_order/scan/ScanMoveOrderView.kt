@@ -1,11 +1,7 @@
 package com.km.warehouse.ui.move_order.scan
 
-import android.util.Log
-import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,20 +17,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.km.warehouse.R
 import com.km.warehouse.domain.usecase.model.ItemSerialModel
 import com.km.warehouse.domain.usecase.model.MoveOrderItemsModel
 import com.km.warehouse.domain.usecase.model.MoveOrderModel
-import com.km.warehouse.ui.SharedViewModel
-import com.km.warehouse.ui.move_order.BayerView
+import com.km.warehouse.ui.move_order.BayerViewSmall
+import com.km.warehouse.ui.move_order.ManualBarcodeEnterDialog
 import com.km.warehouse.ui.move_order.MoveOrderItemView
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel.Companion.SERIAL_NUMBER_NOT_FOUND
@@ -65,15 +59,21 @@ fun ScanMoveOrderView(
         }, viewModel = viewModel)
     }
     state.value.selectedOrder?.let {
-        ManualSerialSearchView(viewModel)
+        //ManualSerialSearchView(viewModel)
+        if(state.value.showManualEnterBarcode) {
+            ManualBarcodeEnterDialog(viewModel = viewModel, onDismiss = {
+                viewModel.cancelManualBarcodeEntering()
+            })
+        }
         NoSerialsView(onAcceptClick = { isNoSerials ->
             if(isNoSerials)
                 viewModel.setNoSerials()
-        }, onCancelClick = {
-            onBackClick.invoke()
+        }, onManualBarcodeEnterClick = {
+            viewModel.showManualBarcodeEntering()
+            /*onBackClick.invoke()
             viewModel.viewState.value.documentType?.let { dt ->
                 viewModel.loadMoveOrders(dt)
-            }
+            }*/
         },onQuantityClick = {
             viewModel.showQuantityEntering()
         })
@@ -81,9 +81,9 @@ fun ScanMoveOrderView(
             color = MaterialTheme.colorScheme.outlineVariant,
             thickness = 1.dp
         )
-        BayerView(isExpand = false, showExpand = false, key = bayerName, modifier = Modifier
+        BayerViewSmall(isExpand = false, showExpand = false, key = bayerName, modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp, horizontal = 16.dp))
+            .padding(vertical = 8.dp, horizontal = 16.dp))
         MoveOrderHeaderView(moveOrder = it.moveOrderModel)
         ScanMoveOrderItemList(
             viewModel = viewModel,
@@ -123,35 +123,36 @@ fun MoveOrderHeaderView(moveOrder: MoveOrderModel) {
             contentColor = colorResource(R.color.black)
         )
     ) {
-        Spacer(modifier = Modifier.height(4.dp))
-        Row {
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                text = moveOrder.number,
-                color = colorResource(R.color.black),
-                fontStyle = FontStyle.Normal,
-                fontWeight = FontWeight.Bold
-            )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            text = moveOrder.number,
+            color = colorResource(R.color.black),
+            fontStyle = FontStyle.Normal,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp
+        )
 
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                text = moveOrder.creationDate.replace("T", " "),
-                color = colorResource(R.color.black),
-                fontStyle = FontStyle.Normal,
-                textAlign = TextAlign.Right
-            )
-        }
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 16.dp),
+            text = moveOrder.creationDate.replace("T", " "),
+            color = colorResource(R.color.black),
+            fontStyle = FontStyle.Normal,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 2.dp),
             text = moveOrder.description,
             color = colorResource(R.color.black),
             fontSize = 12.sp
         )
-        Row {
+        /*Row {
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 text = stringResource(R.string.move_order_update_date),
@@ -166,8 +167,8 @@ fun MoveOrderHeaderView(moveOrder: MoveOrderModel) {
                 color = colorResource(R.color.black),
                 fontStyle = FontStyle.Normal
             )
-        }
-        Spacer(modifier = Modifier.height(4.dp))
+        }*/
+        Spacer(modifier = Modifier.height(2.dp))
     }
 }
 

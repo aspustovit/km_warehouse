@@ -7,6 +7,7 @@ import android.view.KeyEvent
 import android.view.KeyEvent.KEYCODE_BACK
 import android.view.KeyEvent.KEYCODE_SHIFT_LEFT
 import android.view.KeyEvent.KEYCODE_SHIFT_RIGHT
+import android.view.KeyEvent.KEYCODE_TV_ANTENNA_CABLE
 import android.view.KeyEvent.KEYCODE_TV_SATELLITE_SERVICE
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -42,7 +43,7 @@ class MainActivity : ComponentActivity() {
         Log.d("NAV_CONTROLLER", "$e")
         if (e.action == KeyEvent.ACTION_DOWN && e.keyCode != KEYCODE_TV_SATELLITE_SERVICE
             && e.keyCode != KEYCODE_SHIFT_LEFT && e.keyCode != KEYCODE_SHIFT_RIGHT
-            && e.keyCode != KEYCODE_BACK) {
+            && e.keyCode != KEYCODE_BACK && e.keyCode != KEYCODE_TV_ANTENNA_CABLE) {
             val pressedKey = e.unicodeChar.toChar()
             Log.i("NAV_CONTROLLER", "$pressedKey")
             if (e.keyCode != KeyEvent.KEYCODE_ENTER)

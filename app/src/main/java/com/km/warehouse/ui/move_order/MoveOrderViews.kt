@@ -102,6 +102,7 @@ fun MoveOrderView(
             serials = state.value.itemSerials,
             headerStateList = state.value.headerStateList,
             onHeaderClick = { groupName ->
+                viewModel.setSelectedScrollIndex(-1)
                 viewModel.changeGroupState(groupName)
             },
             onSelectMoveOrderItem = {
@@ -168,7 +169,8 @@ fun MoveOrdersList(
     coroutineScope.launch {
         // Use animateScrollToItem() for a smooth animation
         // or scrollToItem() for immediate snapping
-        listState.animateScrollToItem(index = state.value.selectedIndexForScroll)
+        if(state.value.selectedIndexForScroll != -1)
+            listState.animateScrollToItem(index = state.value.selectedIndexForScroll)
     }
     val firstVisibleIndex by remember {
         derivedStateOf { listState.firstVisibleItemIndex }
@@ -180,7 +182,6 @@ fun MoveOrdersList(
             .focusable(),
         state = listState
     ) {
-        var idx = 0
         moveOrders.forEach {
             val headerState = headerStateList.find { h -> h.header == it.key }!!
             item {
@@ -194,7 +195,6 @@ fun MoveOrdersList(
                     color = MaterialTheme.colorScheme.outlineVariant,
                     thickness = 1.dp
                 )
-                idx++
                 if (!headerState.isExpand)
                     return@item
 
@@ -202,7 +202,6 @@ fun MoveOrdersList(
                     Spacer(modifier = Modifier.height(8.dp))
                     val isOrderDone = viewModel.isAllMoveOrdersItemDone(moveOrder.moveOrderItemsModels,
                         serials)
-                    idx++
                     MoveOrderHeader(
                         order = moveOrder,
                         onMoveOrderClick = onMoveOrderClick,

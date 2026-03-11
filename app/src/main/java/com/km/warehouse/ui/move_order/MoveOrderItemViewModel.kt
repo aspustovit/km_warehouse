@@ -82,6 +82,17 @@ class MoveOrderItemViewModel(
 
     fun setManualOrderItemForScan(orderItem: MoveOrderItemsModel) {
         val selectedOrder = _viewState.value.selectedOrder
+        val prevOrderForScan = _viewState.value.orderItemForScan
+        if(prevOrderForScan?.id == orderItem.id){
+            _viewState.update {
+                _viewState.value.copy(
+                    orderItemForScan = null,
+                    showManualEnterBarcode = false
+                )
+            }
+            return
+        }
+
         if(selectedOrder != null) {
             _viewState.update {
                 _viewState.value.copy(
@@ -93,17 +104,25 @@ class MoveOrderItemViewModel(
     }
     fun searchOrderItem(barcode: String) {
         var searchedOrderItem :MoveOrderItemsModel? = null
-        viewState.value.selectedOrder?.moveOrderItemsModels?.forEach { orderItem ->
+        val moveOrderItems = viewState.value.selectedOrder?.moveOrderItemsModels
+        moveOrderItems?.forEach { orderItem ->
             orderItem.mfgPartNumExp?.apply {
-                val barcodePatterns = this.split("/")
+                val barcodePatterns = this.split("/").toMutableList()
+                barcodePatterns.add(orderItem.mfrCode)
                 barcodePatterns.forEach { pattern ->
                     if (barcode.contains(pattern)) {
                         Log.e("onKeyDown_SCAN_4", "$orderItem")
                         searchedOrderItem = orderItem
+                        val selectedOrder = _viewState.value.selectedOrder
+                        val orderItems = selectedOrder!!.moveOrderItemsModels.toMutableList()
+                        orderItems.remove(orderItem)
+                        orderItems.add(0,orderItem)
+                        val order = selectedOrder.copy(moveOrderItemsModels = orderItems.toList())
                         _viewState.update {
                             _viewState.value.copy(
                                 orderItemForScan = orderItem,
-                                showManualEnterBarcode = false
+                                showManualEnterBarcode = false,
+                                selectedOrder = order
                             )
                         }
                     }
@@ -180,8 +199,8 @@ class MoveOrderItemViewModel(
             val list = orderItems.toMutableList()
             orderItemForDelete = list.find { it.id == updatedMoveOrderItem.id }
             list.remove(orderItemForDelete)
-            list.add(updatedMoveOrderItem)
-            val order = selectedOrder.copy(moveOrderItemsModels = list.sortedBy { it.id }.toList())
+            list.add(0,updatedMoveOrderItem)
+            val order = selectedOrder.copy(moveOrderItemsModels = list.toList()) //.sortedBy { it.id }
             _viewState.update { state ->
                 state.copy(
                     itemSerials = serials.toList(),
@@ -351,6 +370,15 @@ class MoveOrderItemViewModel(
     fun deleteSerial(itemSerialModel: ItemSerialModel) {
         viewModelScope.launch {
             deleteSerialNumberUseCase.invoke(itemSerialModel).onSuccess {
+                val selectedOrder = _viewState.value.selectedOrder
+                val orderItems = selectedOrder?.moveOrderItemsModels
+                orderItems?.forEach { item ->
+                    if(item.id == itemSerialModel.moveOrderItemId) {
+                        if(item.qtyGiven >= 1) {
+                            setQuantityGiven(item, (item.qtyGiven - 1).toInt())
+                        }
+                    }
+                }
                 getSavedSerials()
             }
         }
@@ -429,7 +457,10 @@ class MoveOrderItemViewModel(
                             )
                         }
                     }
-
+                    orderItemForScan?.let {
+                        if(it.quantity == 1.0)
+                            setQuantityGiven(it,1)
+                    }
                 }
             }
         }

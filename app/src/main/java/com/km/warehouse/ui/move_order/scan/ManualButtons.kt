@@ -28,17 +28,17 @@ fun ManualButtons(
     ) {
         TextButton(
             onClick = { onDismiss() },
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier.padding(4.dp),
         ) {
-            Text(text = stringResource(R.string.cancel), fontSize = 18.sp)
+            Text(text = stringResource(R.string.cancel), fontSize = 16.sp)
         }
         TextButton(
             onClick = { onAccept() },
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(4.dp)
         ) {
             Text(
                 text = stringResource(R.string.barcode_accept),
-                fontSize = 18.sp
+                fontSize = 16.sp
             )
         }
     }

@@ -63,10 +63,10 @@ viewModel: MoveOrderItemViewModel
             ) {
                 Text(
                     text = stringResource(R.string.manual_quantity_input),
-                    modifier = Modifier.padding(16.dp),
-                    fontSize = 20.sp
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    fontSize = 18.sp
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
                     modifier = Modifier

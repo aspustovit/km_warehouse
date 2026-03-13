@@ -37,7 +37,7 @@ fun ManualBarcodeEnterDialog(
     onDismiss: () -> Unit,
     viewModel: MoveOrderItemViewModel
 ) {
-    var searchNumber by remember { mutableStateOf("0192545175982") }
+    var searchNumber by remember { mutableStateOf("") }
 
     Dialog(
         onDismissRequest = { onDismiss() },
@@ -62,10 +62,10 @@ fun ManualBarcodeEnterDialog(
             ) {
                 Text(
                     text = stringResource(R.string.manual_barcode_header),
-                    modifier = Modifier.padding(16.dp),
-                    fontSize = 20.sp
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    fontSize = 18.sp
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
                     modifier = Modifier

@@ -42,6 +42,7 @@ class SyncWarehouseRepositoryImpl(
             val moveOrderData = moveOrderResponse.body()?.data
             moveOrderData?.apply {
                 forEach {
+                    Log.d("syncWarehouseData", "orderId = ${it.id}")
                     val bayer = database.bayerDao().getById(it.bayerId)
 
                     if (bayer == null) {

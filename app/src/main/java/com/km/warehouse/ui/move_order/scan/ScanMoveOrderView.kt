@@ -1,5 +1,6 @@
 package com.km.warehouse.ui.move_order.scan
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Spacer
@@ -53,44 +54,10 @@ fun ScanMoveOrderView(
     LaunchedEffect(viewModel) {
         viewModel.observeBarcodes()
     }
-    if(state.value.showQuantityEntering) {
+    if (state.value.showQuantityEntering) {
         EnterQuantityDialog(onDismiss = {
             viewModel.cancelQuantityEntering()
         }, viewModel = viewModel)
-    }
-    state.value.selectedOrder?.let {
-        //ManualSerialSearchView(viewModel)
-        if(state.value.showManualEnterBarcode) {
-            ManualBarcodeEnterDialog(viewModel = viewModel, onDismiss = {
-                viewModel.cancelManualBarcodeEntering()
-            })
-        }
-        NoSerialsView(onAcceptClick = { isNoSerials ->
-            if(isNoSerials)
-                viewModel.setNoSerials()
-        }, onManualBarcodeEnterClick = {
-            viewModel.showManualBarcodeEntering()
-            /*onBackClick.invoke()
-            viewModel.viewState.value.documentType?.let { dt ->
-                viewModel.loadMoveOrders(dt)
-            }*/
-        },onQuantityClick = {
-            viewModel.showQuantityEntering()
-        })
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant,
-            thickness = 1.dp
-        )
-        BayerViewSmall(isExpand = false, showExpand = false, key = bayerName, modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 16.dp))
-        MoveOrderHeaderView(moveOrder = it.moveOrderModel)
-        ScanMoveOrderItemList(
-            viewModel = viewModel,
-            moveOrderItemsModels = it.moveOrderItemsModels,
-            serials = state.value.itemSerials,
-            orderItemForScan = state.value.orderItemForScan
-        )
     }
     state.value.errorData?.let {
         if (it.status == SERIAL_NUMBER_NOT_FOUND) {
@@ -110,6 +77,50 @@ fun ScanMoveOrderView(
     }
     if (state.value.error.isNotBlank()) {
         ErrorDialog(errorMessage = state.value.error, onDismiss = { viewModel.cancelError() })
+    }
+
+    state.value.selectedOrder?.let {
+        //ManualSerialSearchView(viewModel)
+        val orderItemForScan = state.value.orderItemForScan
+        if (orderItemForScan != null) {
+            SerialView(
+                onBackClick = { viewModel.clearOrderItemForScan() },
+                viewModel = viewModel,
+                serials = state.value.itemSerials,
+                orderItemForScan = orderItemForScan
+            )
+            return
+        }
+
+        if (state.value.showManualEnterBarcode) {
+            ManualBarcodeEnterDialog(viewModel = viewModel, onDismiss = {
+                viewModel.cancelManualBarcodeEntering()
+            })
+        }
+        /*NoSerialsView(onAcceptClick = { isNoSerials ->
+            if(isNoSerials)
+                viewModel.setNoSerials()
+        }, onManualBarcodeEnterClick = {
+            viewModel.showManualBarcodeEntering()
+        },onQuantityClick = {
+            viewModel.showQuantityEntering()
+        })
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant,
+            thickness = 1.dp
+        )*/
+        BayerViewSmall(
+            isExpand = false, showExpand = false, key = bayerName, modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp, horizontal = 16.dp)
+        )
+        MoveOrderHeaderView(moveOrder = it.moveOrderModel)
+        ScanMoveOrderItemList(
+            viewModel = viewModel,
+            moveOrderItemsModels = it.moveOrderItemsModels,
+            serials = state.value.itemSerials,
+            orderItemForScan = state.value.orderItemForScan
+        )
     }
 }
 
@@ -182,18 +193,20 @@ fun ScanMoveOrderItemList(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .focusable()) {
-        moveOrderItemsModels.forEach { serilas ->
+            .focusable()
+    ) {
+        Log.i("SERIALS_S_", "${serials.size}")
+        moveOrderItemsModels.forEach { itemModel ->
             item {
                 MoveOrderItemView(
-                    item = serilas,
-                    serials,
+                    item = itemModel,
+                    serials = serials,
                     showDeleteBtn = true,
                     orderItemForScan = orderItemForScan,
                     onDeleteSerial = {
                         viewModel.deleteSerial(it)
                     },
-                    onSelectMoveOrderItem ={
+                    onSelectMoveOrderItem = {
                         viewModel.setManualOrderItemForScan(it)
                     })
 

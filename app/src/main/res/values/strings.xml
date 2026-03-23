@@ -37,4 +37,8 @@
     <string name="quantity">Кількість:</string>
     <string name="no_barcode_for_scan">Серійні не потрібні</string>
     <string name="manual_quantity_input">Введіть кількість.</string>
+    <string name="version">Версія: </string>
+    <string name="sync_start_error_message">Є несинхронізовані завершені документи! При повторній синхронізації локальні данні будуть втрачені.\nСинхронізуйте завершені документи на сервер!</string>
+    <string name="ok_cancel">Ok</string>
+    <string name="warning">Попередження!</string>
 </resources>

@@ -33,6 +33,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fieldbee.core.ui.compose.utils.playSound
 import com.km.warehouse.R
 import com.km.warehouse.domain.usecase.model.ItemSerialModel
 import com.km.warehouse.domain.usecase.model.MoveOrderItemsModel
@@ -65,9 +67,13 @@ fun MoveOrderView(
     }
     val viewModel: MoveOrderItemViewModel = koinViewModel()
     val state = viewModel.viewState.collectAsState()
-
+    val soundState = viewModel.soundViewState.collectAsState()
     LaunchedEffect(viewModel) {
         viewModel.loadMoveOrders(documentType)
+    }
+    if(soundState.value) {
+        LocalContext.current.playSound(R.raw.serial_scan_done)
+        viewModel.setSoundPlayed()
     }
     if (state.value.selectedOrder != null) {
         var bayerName = ""

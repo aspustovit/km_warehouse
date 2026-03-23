@@ -1,6 +1,8 @@
 package com.km.warehouse
 
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -29,6 +31,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fieldbee.core.ui.compose.utils.getAppVersionName
 import com.km.warehouse.ui.CustomOutlinedImageButton
 import com.km.warehouse.ui.DarkTopAppBar
 import com.km.warehouse.ui.SharedViewModel
@@ -37,7 +40,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
     val viewModel: SharedViewModel by viewModel()
-
+    val supportedSymbols : CharArray = charArrayOf('-','/',':',';','_','(',')','*','&','%','#','!','?','|','\\','[',']','{','}')
     @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(e: KeyEvent): Boolean {
         Log.d("NAV_CONTROLLER", "$e")
@@ -46,7 +49,7 @@ class MainActivity : ComponentActivity() {
             && e.keyCode != KEYCODE_BACK && e.keyCode != KEYCODE_TV_ANTENNA_CABLE) {
             val pressedKey = e.unicodeChar.toChar()
             Log.i("NAV_CONTROLLER", "$pressedKey")
-            if (e.keyCode != KeyEvent.KEYCODE_ENTER)
+            if (e.keyCode != KeyEvent.KEYCODE_ENTER && Character.isLetterOrDigit(pressedKey) || supportedSymbols.contains(pressedKey))
                 viewModel.onBarcodeScan(pressedKey)
         }
         if (e.action == KeyEvent.ACTION_DOWN && e.keyCode == KeyEvent.KEYCODE_ENTER) {
@@ -219,6 +222,8 @@ fun MenuScreen(
                     fontSize = 16.sp
                 )
             })
+
+        Text(modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp), text = "${stringResource(id = R.string.version)} ${activity.getAppVersionName()}" )
         //
         // Add more UI elements here, like Buttons, Images, etc.
     }

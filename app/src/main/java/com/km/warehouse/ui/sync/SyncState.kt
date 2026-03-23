@@ -8,5 +8,7 @@ import com.km.warehouse.data.entity.Bayer
 data class SyncState(
     val syncStatus: SyncStatus,
     val syncError: String? = null,
-    val documentForSyncCount: Int = 0
+    val documentForSyncCount: Int = 0,
+    val errorCode: Int = 0,
+    val syncType: SyncType = SyncType.FROM_SERVER
 )

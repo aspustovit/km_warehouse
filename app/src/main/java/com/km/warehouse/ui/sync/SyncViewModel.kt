@@ -38,24 +38,34 @@ class SyncViewModel(
         }
     }
 
-    fun runSync() {
-        Log.v("syncWarehouseData_S", "START")
+    fun runSync(syncIgnoreWarning: Boolean = false) {
+        if(_viewState.value.documentForSyncCount != 0 && !syncIgnoreWarning) {
+            _viewState.update { state ->
+                state.copy(
+                    syncStatus = SyncStatus.HAS_DOCUMENT_TO_SEND,
+                    errorCode = 0,
+                    syncError = null,
+                    syncType = SyncType.FROM_SERVER
+                )
+            }
+            return
+        }
+
         _viewState.update { state -> state.copy(syncStatus = SyncStatus.STARTED, syncError = null) }
         viewModelScope.launch {
             syncWarehouseDataUseCase.invoke(Unit).onSuccess {
-                Log.i("syncWarehouseData_", "$it")
                 if (it.isSyncSuccess) {
                     _viewState.update { state -> state.copy(syncStatus = SyncStatus.FINISHED) }
                 } else {
                     _viewState.update { state ->
                         state.copy(
+                            errorCode = if (it.errorData != null) it.errorData.status else 0,
                             syncStatus = SyncStatus.ERROR,
                             syncError = if (it.errorData != null) it.errorData.getErrorMessage() else ""
                         )
                     }
                 }
             }.onFailure {
-                Log.e("syncWarehouseData_E", "$it")
                 _viewState.update { state ->
                     state.copy(
                         syncStatus = SyncStatus.ERROR,
@@ -67,9 +77,8 @@ class SyncViewModel(
     }
 
     fun runSyncToServer() {
-        _viewState.update { state -> state.copy(syncStatus = SyncStatus.STARTED, syncError = null) }
+        _viewState.update { state -> state.copy(syncStatus = SyncStatus.STARTED, syncError = null, errorCode = 0, syncType = SyncType.TO_SERVER) }
         viewModelScope.launch {
-            delay(1000L)
             syncToServerSerialsUseCase.invoke(Unit).onSuccess {
                 if (it.isSyncSuccess) {
                     _viewState.update { state -> state.copy(syncStatus = SyncStatus.FINISHED) }
@@ -89,6 +98,16 @@ class SyncViewModel(
                     )
                 }
             }
+        }
+    }
+
+    fun cancelError() {
+        _viewState.update { state ->
+            state.copy(
+                syncStatus = SyncStatus.NOT_STARTED,
+                errorCode = 0,
+                syncError = null
+            )
         }
     }
 }

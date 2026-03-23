@@ -1,5 +1,10 @@
 package com.fieldbee.core.ui.compose.utils
 
+import android.app.Activity
+import android.content.Context
+import android.content.pm.PackageManager
+import android.media.MediaPlayer
+import android.os.Build
 import android.text.TextUtils
 import androidx.annotation.DimenRes
 import androidx.compose.runtime.Composable
@@ -75,4 +80,24 @@ fun <T> ObserveAsEvents(flow: Flow<T>, onEvent: (T) -> Unit) {
             }
         }
     }
+}
+
+fun Activity.getAppVersionName(): String {
+    try {
+        val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            packageManager.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0L))
+        } else {
+            @Suppress("DEPRECATION")
+            packageManager.getPackageInfo(packageName, 0)
+        }
+        return "${packageInfo.versionName} (${packageInfo.versionCode})"
+    } catch (e: PackageManager.NameNotFoundException) {
+        e.printStackTrace()
+        return "Unknown"
+    }
+}
+
+fun Context.playSound(soundResources: Int) {
+    val mediaPlayer = MediaPlayer.create(this, soundResources)
+    mediaPlayer.start()
 }

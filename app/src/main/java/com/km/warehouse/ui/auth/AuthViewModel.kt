@@ -65,6 +65,11 @@ class AuthViewModel(
         }
     }
 
+    fun logIn(password: String) {
+        if(_authState.value.prevLogin != null)
+            logIn(_authState.value.prevLogin!!.userName, password)
+    }
+
     fun cancelError() {
         _authState.update { state ->
             state.copy(loginModel = LoginModel(isLoggedIn = false, error = null), isLoading = false)

@@ -60,7 +60,7 @@ class BayerRepositoryImpl(val database: KmWarehouseDatabase) : LocalWarehouseRep
             moveOrderItem?.let {
                 val moveOrderItem = database.moveOrderDao().getMoveOrderById(it.moveOrderId)
                 if (moveOrderItem.isComplete == "N") {
-                    val updateItem = it.copy(qtyGiven = it.qtyGiven + 1)
+                    val updateItem = it.copy(qtyGiven = if(it.qtyGiven == it.quantity) it.qtyGiven else it.qtyGiven + 1)
                     database.moveOrderItemDao().update(updateItem)
                 }
             }

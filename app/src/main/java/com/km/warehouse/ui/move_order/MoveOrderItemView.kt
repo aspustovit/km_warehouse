@@ -47,9 +47,10 @@ fun MoveOrderItemView(
     onDeleteSerial: (ItemSerialModel) -> Unit,
     showDeleteBtn: Boolean = false,
     onSelectMoveOrderItem: (MoveOrderItemsModel) -> Unit,
+    itemInEditMode: Boolean = false
 ) {
     var qtyGiven= item.qtyGiven.toInt()
-    var color = if (orderItemForScan != null && orderItemForScan.id == item.id) {
+    var color = if (orderItemForScan != null && orderItemForScan.id == item.id && !itemInEditMode) {
         qtyGiven = orderItemForScan.qtyGiven.toInt()
         colorResource(R.color.move_order_complete)
     } else {
@@ -58,6 +59,7 @@ fun MoveOrderItemView(
     var headerIcon = painterResource(id = R.drawable.ic_not_start_order)
     var tintColor = colorResource(R.color.new_order)
     val serialsList = serials.filter { it.moveOrderItemId == item.id }
+    Log.v("SERIALS_S_", "${item.id} = ${serialsList}")
 
     if(item.qtyGiven == item.quantity && item.noSerials) {
         headerIcon = painterResource(id = R.drawable.ic_order_finished)
@@ -120,45 +122,51 @@ fun MoveOrderItemView(
         }
         // Spacer(modifier = Modifier.height(8.dp))
         Log.i("SERIALS", "${item.moveOrderId} = list $serials")
-        serialsList.forEach { serial ->
-            Log.e("_SERIALS_", "Upadte list $serials")
-            Column {
-                Spacer(
-                    modifier = Modifier
-                        .height(1.dp)
-                        .fillMaxWidth()
-                        .background(colorResource(R.color.color_text_secondary))
-                )
-                Row(modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        modifier = Modifier.weight(1f,false).padding(horizontal = 16.dp, vertical = 8.dp),
-                        text = serial.serial,
-                        fontSize = 14.sp,
-                        color = colorResource(R.color.color_text_secondary),
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+        if(orderItemForScan != null) {
+            serialsList.forEach { serial ->
+                Log.e("_SERIALS_", "Upadte list $serials")
+                Column {
+                    Spacer(
+                        modifier = Modifier
+                            .height(1.dp)
+                            .fillMaxWidth()
+                            .background(colorResource(R.color.color_text_secondary))
                     )
-                    if (showDeleteBtn) {
-                        IconButton(
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
                             modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .size(24.dp),
-                            onClick = {
-                                onDeleteSerial(serial)
-                            }) {
-                            Icon(
-                                painterResource(id = R.drawable.ic_delete),
-                                contentDescription = null
-                            )
+                                .weight(1f, false)
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            text = serial.serial,
+                            fontSize = 14.sp,
+                            color = colorResource(R.color.color_text_secondary),
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        if (showDeleteBtn) {
+                            IconButton(
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .size(24.dp),
+                                onClick = {
+                                    onDeleteSerial(serial)
+                                }) {
+                                Icon(
+                                    painterResource(id = R.drawable.ic_delete),
+                                    contentDescription = null
+                                )
+                            }
                         }
                     }
+
                 }
 
             }
-
         }
     }
 }

@@ -72,7 +72,7 @@ fun ScanToFileView(activity: Activity) {
                 text = it
             },
             label = { Text(stringResource(id = R.string.file_data), fontSize = 20.sp) },
-            enabled = false
+            enabled = true
         )
     }
 }

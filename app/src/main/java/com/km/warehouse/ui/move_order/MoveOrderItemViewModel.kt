@@ -14,6 +14,7 @@ import com.km.warehouse.domain.usecase.SaveSerialToDBUseCase
 import com.km.warehouse.domain.usecase.SetNoSerialsUseCase
 import com.km.warehouse.domain.usecase.SetQuantityGivenUseCase
 import com.km.warehouse.domain.usecase.SyncToServerSerialsUseCase
+import com.km.warehouse.domain.usecase.UpdateSerialNumberUseCase
 import com.km.warehouse.domain.usecase.auth.GetPrevLoginUseCase
 import com.km.warehouse.domain.usecase.model.ItemSerialModel
 import com.km.warehouse.domain.usecase.model.MoveOrderItemsModel
@@ -42,7 +43,8 @@ class MoveOrderItemViewModel(
     private val deleteSerialNumberUseCase: DeleteSerialNumberUseCase,
     private val setQuantityGivenUseCase: SetQuantityGivenUseCase,
     private val setNoSerialsUseCase: SetNoSerialsUseCase,
-    private val checkInputSerialsUseCase: CheckInputSerialsUseCase
+    private val checkInputSerialsUseCase: CheckInputSerialsUseCase,
+    private val updateSerialNumberUseCase: UpdateSerialNumberUseCase
 ) : ViewModel() {
     companion object {
         val SERIAL_NUMBER_NOT_FOUND = 1024
@@ -113,8 +115,8 @@ class MoveOrderItemViewModel(
         val moveOrderItems = viewState.value.selectedOrder?.moveOrderItemsModels
         moveOrderItems?.forEach { orderItem ->
             val barcodePatterns = ArrayList<String>()
-                if(orderItem.mfgPartNumExp != null)
-                    barcodePatterns.addAll(orderItem.mfgPartNumExp!!.split("/").toMutableList())
+            if (orderItem.mfgPartNumExp != null)
+                barcodePatterns.addAll(orderItem.mfgPartNumExp!!.split("/").toMutableList())
             barcodePatterns.add(orderItem.mfrCode)
             barcodePatterns.forEach { pattern ->
                 if (barcode.contains(pattern)) {
@@ -162,6 +164,31 @@ class MoveOrderItemViewModel(
         }
     }
 
+    fun editSerialNumber(editedBarcode: String) {
+        val edit = viewState.value.editingItemSerialModel
+        edit?.let {
+            val prevSerialModel = edit.copy()
+            val serials = viewState.value.itemSerials.toMutableList()
+            serials.forEach {
+                if(it.serial == edit.serial) {
+                    it.serial = editedBarcode
+                    viewModelScope.launch {
+                        updateSerialNumberUseCase.invoke(Pair(prevSerialModel, editedBarcode)).onSuccess {
+                            _viewState.update { state ->
+                                state.copy(
+                                    itemSerials = serials.toList(),
+                                    showManualEnterBarcode = false,
+                                    editingItemSerialModel = null
+                                )
+                            }
+                        }
+                    }
+                    return@forEach
+                }
+            }
+        }
+    }
+
     fun addSerial(orderItemForScan: MoveOrderItemsModel, barcodeSerial: String) {
         val serials = viewState.value.itemSerials.toMutableList()
         val orders = viewState.value.moveOrders
@@ -182,7 +209,7 @@ class MoveOrderItemViewModel(
             }
         }
         order?.let {
-            if(it.isComplete){
+            if (it.isComplete) {
                 if (orderItemForScan.quantity <= itemSerials.size) {
                     _viewState.update {
                         _viewState.value.copy(error = "Перевищено кількість додаданих серійних номерів, максимальна кількість ${orderItemForScan.quantity.toInt()}")
@@ -206,10 +233,8 @@ class MoveOrderItemViewModel(
         )
         serials.add(itemSerial)
         saveItemSerialToDb(itemSerial)
-        Log.i("SERIALS_", "${order?.isComplete}")
         val updatedMoveOrderItem: MoveOrderItemsModel =
             orderItemForScan.copy(qtyGiven = if (order != null && order.isComplete) orderItemForScan.qtyGiven else orderItemForScan.qtyGiven + 1)
-        Log.d("SERIALS_S", "${updatedMoveOrderItem.qtyGiven}")
         var unselectItemForScan = if (order?.isComplete == null) true else !order.isComplete
         val selectedOrder = _viewState.value.selectedOrder
         val orderItems = selectedOrder?.moveOrderItemsModels
@@ -296,12 +321,17 @@ class MoveOrderItemViewModel(
         _viewState.update { it.copy(error = "", errorData = null) }
     }
 
-    fun showManualBarcodeEntering() {
-        _viewState.update { it.copy(showManualEnterBarcode = true) }
+    fun showManualBarcodeEntering(itemSerialModel: ItemSerialModel?) {
+        _viewState.update {
+            it.copy(
+                showManualEnterBarcode = true,
+                editingItemSerialModel = itemSerialModel
+            )
+        }
     }
 
     fun cancelManualBarcodeEntering() {
-        _viewState.update { it.copy(showManualEnterBarcode = false) }
+        _viewState.update { it.copy(showManualEnterBarcode = false, editingItemSerialModel = null) }
     }
 
     fun showQuantityEntering() {

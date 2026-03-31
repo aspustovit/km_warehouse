@@ -29,4 +29,6 @@ interface LocalWarehouseRepository {
     suspend fun setNoSerials(moveOrderItemId: Int): Int
 
     suspend fun checkSerialAlreadyEnter(serialNumber: String): ErrorData
+
+    suspend fun updateSerial(serialNumber: String, prevSeralNumberModel: ItemSerialModel): Int
 }

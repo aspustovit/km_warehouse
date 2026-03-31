@@ -13,6 +13,7 @@ import com.km.warehouse.domain.usecase.SetNoSerialsUseCase
 import com.km.warehouse.domain.usecase.SetQuantityGivenUseCase
 import com.km.warehouse.domain.usecase.SyncToServerSerialsUseCase
 import com.km.warehouse.domain.usecase.SyncWarehouseDataUseCase
+import com.km.warehouse.domain.usecase.UpdateSerialNumberUseCase
 import com.km.warehouse.domain.usecase.auth.GetPrevLoginUseCase
 import org.koin.dsl.module
 
@@ -40,6 +41,7 @@ object DomainKoinModule {
         factory { SetQuantityGivenUseCase(localWarehouseRepository = get()) }
         factory { SetNoSerialsUseCase(localWarehouseRepository = get()) }
         factory { CheckInputSerialsUseCase(localWarehouseRepository = get()) }
+        factory { UpdateSerialNumberUseCase(localWarehouseRepository = get()) }
     }
 
     val parentModule = module {

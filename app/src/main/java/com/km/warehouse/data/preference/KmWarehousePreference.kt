@@ -12,6 +12,7 @@ object KmWarehousePreference {
     val REFRESH_TOKEN_KEY: String = "jwt_refresh_token"
     val TOKEN_KEY: String = "jwt_token"
     val LAST_LOGIN: String = "last_login"
+    val TERMINAL_ID: String = "terminal_id"
 
     lateinit var tokenPrefs: SharedPreferences
 

@@ -1,5 +1,7 @@
 package com.km.warehouse.data.repository
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonParser
@@ -9,6 +11,8 @@ import com.km.warehouse.data.entity.MoveOrderItem
 import com.km.warehouse.data.network.WarehouseApiService
 import com.km.warehouse.data.network.entity.ErrorData
 import com.km.warehouse.data.network.entity.MoveOrderStatus
+import com.km.warehouse.data.preference.KmWarehousePreference
+import com.km.warehouse.data.preference.KmWarehousePreference.TERMINAL_ID
 import com.km.warehouse.domain.repository.SyncWarehouseRepository
 import com.km.warehouse.domain.usecase.model.SyncResultModel
 
@@ -18,12 +22,25 @@ import com.km.warehouse.domain.usecase.model.SyncResultModel
  */
 class SyncWarehouseRepositoryImpl(
     private val warehouseApiService: WarehouseApiService,
-    private val database: KmWarehouseDatabase
+    private val database: KmWarehouseDatabase,
+    private val context: Context
 ) :
     SyncWarehouseRepository {
 
     override suspend fun syncWarehouseData(): SyncResultModel {
         try {
+            val terminalId = getPreferences().getString(TERMINAL_ID, "")!!
+            if(terminalId.isEmpty()){
+                return SyncResultModel(
+                    isSyncSuccess = false,
+                    errorData = ErrorData(
+                        status = 601,
+                        message = "",
+                        error = "syncWarehouseData"
+                    )
+                )
+            }
+
             val response = warehouseApiService.getBuyers().execute()
             var errorData: ErrorData? = null
             if (!response.isSuccessful)
@@ -33,7 +50,6 @@ class SyncWarehouseRepositoryImpl(
                 forEach {
                     val bayer = Bayer(id = it.key.toInt(), description = it.value)
                     val id = database.bayerDao().insert(bayer)
-                    Log.d("syncWarehouseData", "BuyerID = $id")
                 }
             }
             val moveOrderResponse = warehouseApiService.getMoveOrders().execute()
@@ -42,25 +58,21 @@ class SyncWarehouseRepositoryImpl(
             val moveOrderData = moveOrderResponse.body()?.data
             moveOrderData?.apply {
                 forEach {
-                    Log.d("syncWarehouseData", "orderId = ${it.id}")
-                    val bayer = database.bayerDao().getById(it.bayerId)
-
-                    if (bayer == null) {
-                        database.bayerDao()
-                            .insert(Bayer(id = it.bayerId, description = it.bayerName))
-                    }
-                    Log.v("_syncWarehouseData", "${it.toMoveOrderDb()}")
-                    val id = database.moveOrderDao().insert(it.toMoveOrderDb())
-                    if (id != 0L) {
-                        errorData = syncMoveOrderItems(id)
+                    if(terminalId.toInt() == it.scannerId) {
+                        val bayer = database.bayerDao().getById(it.bayerId)
+                        if (bayer == null) {
+                            database.bayerDao()
+                                .insert(Bayer(id = it.bayerId, description = it.bayerName))
+                        }
+                        val id = database.moveOrderDao().insert(it.toMoveOrderDb())
+                        if (id != 0L) {
+                            errorData = syncMoveOrderItems(id)
+                        }
                     }
                 }
             }
-
-            Log.d("syncWarehouseData", "Buyers = $data")
             return SyncResultModel(isSyncSuccess = response.isSuccessful, errorData = errorData)
         } catch (ex: Exception) {
-            Log.e("syncWarehouseData", "$ex")
             return SyncResultModel(
                 isSyncSuccess = false,
                 errorData = ErrorData(
@@ -202,5 +214,9 @@ class SyncWarehouseRepositoryImpl(
 
     override suspend fun getDocumentCountForSync(): Int {
         return database.itemsSerialDao().getSerialsToSync().size
+    }
+
+    private fun getPreferences(): SharedPreferences {
+        return context.getSharedPreferences(KmWarehousePreference.TOKENS_PREF, Context.MODE_PRIVATE)
     }
 }

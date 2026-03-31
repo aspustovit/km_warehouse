@@ -189,189 +189,204 @@ fun SyncDialog(
                     )
                 }
                 if (state.value.syncStatus == SyncStatus.ERROR) {
-                    if (state.value.errorCode == 401) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.End
-                        ) {
-                            OutlinedTextField(
-                                value = password,
-                                onValueChange = { password = it },
-                                label = { Text(stringResource(R.string.password)) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp, horizontal = 16.dp)
-                                    .focusRequester(focusRequester),
-                                visualTransformation = PasswordVisualTransformation(),
-                                isError = showPasswordIsEmptyError,
-                                supportingText = {
-                                    if (showPasswordIsEmptyError) Text(
-                                        stringResource(
-                                            R.string.password_is_empty
+                    when (state.value.errorCode) {
+                        401 -> {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.End
+                            ) {
+                                OutlinedTextField(
+                                    value = password,
+                                    onValueChange = { password = it },
+                                    label = { Text(stringResource(R.string.password)) },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp, horizontal = 16.dp)
+                                        .focusRequester(focusRequester),
+                                    visualTransformation = PasswordVisualTransformation(),
+                                    isError = showPasswordIsEmptyError,
+                                    supportingText = {
+                                        if (showPasswordIsEmptyError) Text(
+                                            stringResource(
+                                                R.string.password_is_empty
+                                            )
                                         )
+                                    }
+                                )
+                                TextButton(
+                                    onClick = {
+                                        if (password.isEmpty()) {
+                                            showPasswordIsEmptyError = true
+                                            return@TextButton
+                                        }
+                                        showPasswordIsEmptyError = false
+                                        authViewModel.logIn(password)
+                                    },
+                                    modifier = Modifier.padding(4.dp)
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.log_in),
+                                        fontSize = 18.sp
                                     )
                                 }
-                            )
-                            TextButton(
-                                onClick = {
-                                    if (password.isEmpty()) {
-                                        showPasswordIsEmptyError = true
-                                        return@TextButton
-                                    }
-                                    showPasswordIsEmptyError = false
-                                    authViewModel.logIn(password)
-                                },
-                                modifier = Modifier.padding(4.dp)
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.log_in),
-                                    fontSize = 18.sp
-                                )
                             }
+                            return@Card
                         }
-                        return@Card
-                    } else {
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .heightIn(max = 150.dp)
-                                .verticalScroll(errorScrollState),
-                            text = state.value.syncError!!,
-                            fontSize = 11.sp,
-                            color = colorResource(R.color.error)
-                        )
+                        601 -> {
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .heightIn(max = 150.dp)
+                                    .verticalScroll(errorScrollState),
+                                text = stringResource(R.string.terminal_id_error),
+                                fontSize = 11.sp,
+                                color = colorResource(R.color.error)
+                            )
+                        }
+                        else -> {
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .heightIn(max = 150.dp)
+                                    .verticalScroll(errorScrollState),
+                                text = state.value.syncError!!,
+                                fontSize = 11.sp,
+                                color = colorResource(R.color.error)
+                            )
+                        }
                     }
                 } else if (state.value.documentForSyncCount != 0) {
-                    Text(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp, vertical = 16.dp)
-                            .fillMaxWidth(),
-                        text = "${stringResource(R.string.document_for_sync)} ${state.value.documentForSyncCount}",
-                        fontSize = 14.sp,
-                        color = colorResource(R.color.sync_count)
-                    )
-                }
-                when (state.value.syncStatus) {
-                    SyncStatus.HAS_DOCUMENT_TO_SEND -> {
-                        WarningDialog(
-                            warningMessage = stringResource(R.string.sync_start_error_message),
-                            onDismiss = {
-                                viewModel.cancelError()
-                            },
-                            onOk = {
-                                viewModel.runSync(syncIgnoreWarning = true)
-                            }
+                        Text(
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp, vertical = 16.dp)
+                                .fillMaxWidth(),
+                            text = "${stringResource(R.string.document_for_sync)} ${state.value.documentForSyncCount}",
+                            fontSize = 14.sp,
+                            color = colorResource(R.color.sync_count)
                         )
                     }
+                    when (state.value.syncStatus) {
+                        SyncStatus.HAS_DOCUMENT_TO_SEND -> {
+                            WarningDialog(
+                                warningMessage = stringResource(R.string.sync_start_error_message),
+                                onDismiss = {
+                                    viewModel.cancelError()
+                                },
+                                onOk = {
+                                    viewModel.runSync(syncIgnoreWarning = true)
+                                }
+                            )
+                        }
 
-                    SyncStatus.NOT_STARTED -> {
-                        SyncButtons(
-                            onDismissRequest = onDismissRequest,
-                            viewModel = viewModel,
-                            enabledSync = true
-                        )
-                    }
+                        SyncStatus.NOT_STARTED -> {
+                            SyncButtons(
+                                onDismissRequest = onDismissRequest,
+                                viewModel = viewModel,
+                                enabledSync = true
+                            )
+                        }
 
-                    SyncStatus.STARTED -> {
-                        SyncButtons(onDismissRequest = onDismissRequest, viewModel = viewModel)
-                    }
+                        SyncStatus.STARTED -> {
+                            SyncButtons(onDismissRequest = onDismissRequest, viewModel = viewModel)
+                        }
 
-                    SyncStatus.FINISHED -> {
-                        FinishButtons(
-                            onDismissRequest = onDismissRequest,
-                            viewModel = viewModel
-                        )
-                    }
+                        SyncStatus.FINISHED -> {
+                            FinishButtons(
+                                onDismissRequest = onDismissRequest,
+                                viewModel = viewModel
+                            )
+                        }
 
-                    SyncStatus.ERROR -> {
-                        SyncButtons(
-                            onDismissRequest = onDismissRequest,
-                            viewModel = viewModel,
-                            enabledSync = true
-                        )
+                        SyncStatus.ERROR -> {
+                            SyncButtons(
+                                onDismissRequest = onDismissRequest,
+                                viewModel = viewModel,
+                                enabledSync = true
+                            )
+                        }
                     }
                 }
             }
         }
     }
-}
 
-@Composable
-fun SyncButtons(
-    onDismissRequest: () -> Unit,
-    viewModel: SyncViewModel,
-    enabledSync: Boolean = false
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.End
+    @Composable
+    fun SyncButtons(
+        onDismissRequest: () -> Unit,
+        viewModel: SyncViewModel,
+        enabledSync: Boolean = false
     ) {
-        TextButton(
-            onClick = { onDismissRequest() },
-            modifier = Modifier.padding(4.dp),
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.End
         ) {
-            Text(text = stringResource(R.string.cancel), fontSize = 18.sp)
-        }
-        TextButton(
-            onClick = { viewModel.runSync() },
-            modifier = Modifier.padding(4.dp),
-            enabled = enabledSync
-        ) {
-            Text(
-                text = stringResource(R.string.sync_data),
-                fontSize = 18.sp
-            )
-        }
-        TextButton(
-            onClick = { viewModel.runSyncToServer() },
-            modifier = Modifier.padding(4.dp),
-            enabled = enabledSync
-        ) {
-            Text(
-                text = stringResource(R.string.sync_data_to_server),
-                fontSize = 18.sp
-            )
+            TextButton(
+                onClick = { onDismissRequest() },
+                modifier = Modifier.padding(4.dp),
+            ) {
+                Text(text = stringResource(R.string.cancel), fontSize = 18.sp)
+            }
+            TextButton(
+                onClick = { viewModel.runSync() },
+                modifier = Modifier.padding(4.dp),
+                enabled = enabledSync
+            ) {
+                Text(
+                    text = stringResource(R.string.sync_data),
+                    fontSize = 18.sp
+                )
+            }
+            TextButton(
+                onClick = { viewModel.runSyncToServer() },
+                modifier = Modifier.padding(4.dp),
+                enabled = enabledSync
+            ) {
+                Text(
+                    text = stringResource(R.string.sync_data_to_server),
+                    fontSize = 18.sp
+                )
+            }
         }
     }
-}
 
-@Composable
-fun FinishButtons(onDismissRequest: () -> Unit, viewModel: SyncViewModel) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.End
-    ) {
-        TextButton(
-            onClick = { onDismissRequest() },
-            modifier = Modifier.padding(8.dp),
+    @Composable
+    fun FinishButtons(onDismissRequest: () -> Unit, viewModel: SyncViewModel) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.End
         ) {
-            Text(text = stringResource(R.string.finish_sync), fontSize = 18.sp)
+            TextButton(
+                onClick = { onDismissRequest() },
+                modifier = Modifier.padding(8.dp),
+            ) {
+                Text(text = stringResource(R.string.finish_sync), fontSize = 18.sp)
+            }
         }
     }
-}
 
-@Composable
-fun SyncLoader(modifier: Modifier = Modifier) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.internet_connection_in_progress))
-    val progress by animateLottieCompositionAsState(
-        composition,
-        iterations = LottieConstants.IterateForever
-    )
-    LottieAnimation(
-        modifier = modifier,
-        composition = composition,
-        progress = { progress }
-    )
-}
+    @Composable
+    fun SyncLoader(modifier: Modifier = Modifier) {
+        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.internet_connection_in_progress))
+        val progress by animateLottieCompositionAsState(
+            composition,
+            iterations = LottieConstants.IterateForever
+        )
+        LottieAnimation(
+            modifier = modifier,
+            composition = composition,
+            progress = { progress }
+        )
+    }
 
-@Composable
-fun SyncLoaderFinish(modifier: Modifier = Modifier) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.internet_connection_success))
-    val progress by animateLottieCompositionAsState(composition)
-    LottieAnimation(
-        modifier = modifier,
-        composition = composition,
-        progress = { progress }
-    )
-}
+    @Composable
+    fun SyncLoaderFinish(modifier: Modifier = Modifier) {
+        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.internet_connection_success))
+        val progress by animateLottieCompositionAsState(composition)
+        LottieAnimation(
+            modifier = modifier,
+            composition = composition,
+            progress = { progress }
+        )
+    }

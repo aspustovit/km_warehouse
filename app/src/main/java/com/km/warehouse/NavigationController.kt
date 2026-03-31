@@ -24,6 +24,7 @@ import com.km.warehouse.ui.NavigationStep
 import com.km.warehouse.ui.move_order.DocumentType
 import com.km.warehouse.ui.move_order.MoveOrderView
 import com.km.warehouse.ui.scan_to_file.ScanToFileView
+import com.km.warehouse.ui.settings.SettingsView
 
 /**
  * Create by Pustovit Oleksandr on 9/18/2025
@@ -89,12 +90,13 @@ fun NavigationController(modifier: Modifier) {
         }
 
         composable<NavigationStep.IncomeDocumentScreen> {
-            Column(modifier = Modifier.fillMaxSize()) {
+            SettingsView(context)
+            /*Column(modifier = Modifier.fillMaxSize()) {
                 DarkTopAppBar(
                     title = { Text(stringResource(id = R.string.income_documents)) },
                     modifier = Modifier.fillMaxWidth()
                 )
-            }
+            }*/
         }
     }
 }

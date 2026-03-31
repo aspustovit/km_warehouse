@@ -252,7 +252,7 @@ fun MoveOrderHeader(
         var tintColor = if(isOrderDone) colorResource(R.color.finished_order) else colorResource(R.color.new_order)
 
         Row(verticalAlignment = Alignment.CenterVertically){
-            Icon(modifier = Modifier.padding(horizontal = 16.dp),
+            Icon(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 painter = headerIcon,
                 contentDescription = null,
                 tint = tintColor
@@ -264,7 +264,7 @@ fun MoveOrderHeader(
                 fontWeight = FontWeight.Bold
             )
         }
-        Text(
+      /*  Text(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 2.dp),
@@ -273,15 +273,15 @@ fun MoveOrderHeader(
             fontStyle = FontStyle.Normal,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold
-        )
-        Text(
+        )*/
+        /*Text(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 4.dp),
             text = moveOrder.description,
             color = colorResource(R.color.black),
             fontSize = 12.sp
-        )
+        )*/
         /*Row {
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),

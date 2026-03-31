@@ -1,15 +1,14 @@
-package com.km.warehouse.ui.scan_to_file
+package com.km.warehouse.ui.settings
 
 import android.app.Activity
 import android.content.Intent
-import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -18,7 +17,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -27,55 +25,50 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
-import com.km.warehouse.MainActivity
 import com.km.warehouse.R
 import com.km.warehouse.ui.DarkTopAppBar
-import com.km.warehouse.ui.SharedViewModel
 import org.koin.androidx.compose.koinViewModel
 
 /**
- * Create by Pustovit Oleksandr on 9/26/2025
- */
+* Create by Pustovit Oleksandr on 30/03/2026
+*/
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScanToFileView(activity: Activity) {
-    val viewModel: SharedViewModel = koinViewModel()
-    val state = viewModel.viewState.collectAsState()
-    viewModel.observeBarcodes(isAddNewLineAfterScan = true)
+fun SettingsView(activity: Activity) {
+    val viewModel: SettingsViewModel = koinViewModel()
+    viewModel.loadTerminalId()
     Column(modifier = Modifier.fillMaxSize()) {
+        var state by rememberSaveable { mutableStateOf(viewModel.viewState.value.terminalId) }
         DarkTopAppBar(
-            title = { Text(stringResource(id = R.string.scan_to_file)) },
+            title = { Text(stringResource(id = R.string.settings)) },
             modifier = Modifier.fillMaxWidth(),
             actions = {
                 IconButton(onClick = {
-                    val sendIntent: Intent = Intent().apply {
-                        action = Intent.ACTION_SEND
-                        putExtra(Intent.EXTRA_TEXT, state.value.barcodeData)
-                        type = "text/plain"
-                    }
-                    val shareIntent = Intent.createChooser(sendIntent, null)
-                    activity.startActivity(shareIntent)
+                    viewModel.putTerminalId(state)
+                    activity.onBackPressed()
                 }) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_share_scaned_file),
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_save),
                         contentDescription = "",
                         tint = MaterialTheme.colorScheme.surface
                     )
                 }
             }
         )
-        var text by rememberSaveable { mutableStateOf("") }
-        TextField(
-            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
-            value = state.value.barcodeData,
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            value = state,
             onValueChange = {
-                text = it
+                state = it
             },
-            label = { Text(stringResource(id = R.string.file_data), fontSize = 20.sp) },
-            enabled = true
+            label = { Text(stringResource(id = R.string.terminal_id), fontSize = 20.sp) },
+            enabled = true,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
     }
 }

@@ -65,7 +65,8 @@ object AppDataModule {
         single<SyncWarehouseRepository> {
             SyncWarehouseRepositoryImpl(
                 warehouseApiService = get(),
-                database = get()
+                database = get(),
+                context = get()
             )
         }
         single<LocalWarehouseRepository> {

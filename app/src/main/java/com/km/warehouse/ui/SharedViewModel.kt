@@ -1,10 +1,8 @@
 package com.km.warehouse.ui
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.km.warehouse.domain.usecase.ObserveBarcodeDataUseCase
-import com.km.warehouse.domain.usecase.SyncWarehouseDataUseCase
 import com.km.warehouse.domain.usecase.base.DataHub
 import com.km.warehouse.ui.scan_to_file.BarcodeReadState
 import kotlinx.coroutines.Job
@@ -32,7 +30,6 @@ class SharedViewModel(
         barcodeJob?.cancel()
 
         barcodeJob = observeBarcodeDataUseCase.observe().onEach { bar ->
-            //Log.e("onKeyDown_SCAN_3", bar)
             _barcodeState.update {
                 it.copy(
                     lastBarcode = bar,
@@ -48,7 +45,6 @@ class SharedViewModel(
     }
 
     fun postBarcode() {
-        Log.i("onKeyDown_SCAN", "barcode = $barcode")
         viewModelScope.launch {
             DataHub.emitBarcodeData(barcode.replace("\n",""))
         }

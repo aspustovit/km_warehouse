@@ -146,6 +146,18 @@ class BayerRepositoryImpl(val database: KmWarehouseDatabase) : LocalWarehouseRep
         return ErrorData(status = 0, message = "", error = "")
     }
 
+    override suspend fun updateSerial(
+        serialNumber: String,
+        prevSeralNumberModel: ItemSerialModel
+    ): Int {
+        val prevSerial = database.itemsSerialDao().getSerial(prevSeralNumberModel.serial)
+        prevSerial?.let {
+            val updatedSerial = it.copy(serial = serialNumber)
+            return database.itemsSerialDao().update(updatedSerial)
+        }
+        return -1
+    }
+
     private fun getBayerName(bayerId: Int, bayers: List<Bayer>): String {
         var bayer = bayers.find { it.id == bayerId }
         if (bayer == null)

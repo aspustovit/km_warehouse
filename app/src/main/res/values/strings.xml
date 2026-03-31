@@ -4,6 +4,7 @@
     <string name="approved_documents">1. Підтверджені документи</string>
     <string name="issued_documents">2. Видані документи</string>
     <string name="income_documents">3. Прихідні документи</string>
+    <string name="settings">3. Налаштування</string>
     <string name="scan_to_file">4. Сканувати в файл</string>
     <string name="sync">5. Синхронізація</string>
     <string name="exit">0. Вихід</string>
@@ -41,4 +42,6 @@
     <string name="sync_start_error_message">Є несинхронізовані завершені документи! При повторній синхронізації локальні данні будуть втрачені.\nСинхронізуйте завершені документи на сервер!</string>
     <string name="ok_cancel">Ok</string>
     <string name="warning">Попередження!</string>
+    <string name="terminal_id">Номер терміналу</string>
+    <string name="terminal_id_error">Для синхронізації потрібно ввести номер терміналу!\nПерейдіть в налаштування та введіть номер.</string>
 </resources>

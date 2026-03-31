@@ -27,6 +27,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.km.warehouse.R
 import com.km.warehouse.ui.move_order.scan.ManualButtons
+import androidx.compose.runtime.collectAsState
 
 /**
  * Create by Pustovit Oleksandr on 1/29/2026
@@ -37,7 +38,8 @@ fun ManualBarcodeEnterDialog(
     onDismiss: () -> Unit,
     viewModel: MoveOrderItemViewModel
 ) {
-    var searchNumber by remember { mutableStateOf("") }
+    val serial = viewModel.viewState.collectAsState().value.editingItemSerialModel?.serial ?: ""
+    var searchNumber by remember { mutableStateOf(serial) }
 
     Dialog(
         onDismissRequest = { onDismiss() },
@@ -81,10 +83,14 @@ fun ManualBarcodeEnterDialog(
                     if (viewModel.viewState.value.orderItemForScan == null) {
                         viewModel.searchOrderItem(searchNumber)
                     } else {
-                        viewModel.addSerial(
-                            orderItemForScan = viewModel.viewState.value.orderItemForScan!!,
-                            barcodeSerial = searchNumber
-                        )
+                        if(viewModel.viewState.value.editingItemSerialModel != null){
+                            viewModel.editSerialNumber(searchNumber)
+                        } else {
+                            viewModel.addSerial(
+                                orderItemForScan = viewModel.viewState.value.orderItemForScan!!,
+                                barcodeSerial = searchNumber
+                            )
+                        }
                     }
                 })
             }

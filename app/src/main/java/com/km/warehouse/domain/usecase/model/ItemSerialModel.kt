@@ -5,6 +5,6 @@ package com.km.warehouse.domain.usecase.model
  */
 data class ItemSerialModel(
     val id: Int = 0,
-    val serial: String,
+    var serial: String,
     val moveOrderItemId: Int
 )

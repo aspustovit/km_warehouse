@@ -19,6 +19,9 @@ abstract class ItemsSerialDao : BaseDao<ItemsSerial>() {
     @Query("SELECT b.* FROM items_serial b where b.serial == :serial ")
     abstract fun checkSerialAlreadyAdded(serial: String): ItemsSerial?
 
+    @Query("SELECT b.* FROM items_serial b where b.serial == :serial ")
+    abstract fun getSerial(serial: String): ItemsSerial?
+
     @Query("UPDATE items_serial SET is_synced = 1 WHERE id = :id")
     abstract fun setSynced(id: Int): Int
 }

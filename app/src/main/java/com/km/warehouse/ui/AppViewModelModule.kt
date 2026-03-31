@@ -2,6 +2,7 @@ package com.km.warehouse.ui
 
 import com.km.warehouse.ui.auth.AuthViewModel
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel
+import com.km.warehouse.ui.settings.SettingsViewModel
 import com.km.warehouse.ui.sync.SyncViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -27,7 +28,8 @@ object AppViewModelModule {
                 deleteSerialNumberUseCase = get(),
                 setQuantityGivenUseCase = get(),
                 setNoSerialsUseCase = get(),
-                checkInputSerialsUseCase = get()
+                checkInputSerialsUseCase = get(),
+                updateSerialNumberUseCase = get()
             )
         }
         viewModel {
@@ -38,6 +40,7 @@ object AppViewModelModule {
             )
         }
         viewModel { AuthViewModel(loginUseCase = get(), getPrevLoginUseCase = get()) }
+        viewModel { SettingsViewModel(context = get()) }
     }
 
     val parentModule =

@@ -29,7 +29,7 @@ fun SerialView(
         if (isNoSerials)
             viewModel.setNoSerials()
     }, onManualBarcodeEnterClick = {
-        viewModel.showManualBarcodeEntering()
+        viewModel.showManualBarcodeEntering(null)
     }, onQuantityClick = {
         viewModel.showQuantityEntering()
     })
@@ -48,5 +48,9 @@ fun SerialView(
         },
         onSelectMoveOrderItem = {
         },
-        itemInEditMode = true)
+        itemInEditMode = true,
+        onEditSerial = {
+            viewModel.showManualBarcodeEntering(it)
+            Log.e("onEditSerial", "$it")
+        })
 }

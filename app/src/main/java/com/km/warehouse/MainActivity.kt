@@ -144,7 +144,7 @@ fun MenuScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             startIcon = {
                 Icon(
-                    painterResource(id = R.drawable.ic_income_documents),
+                    painterResource(id = R.drawable.ic_settings),
                     contentDescription = null
                 )
             },
@@ -154,7 +154,7 @@ fun MenuScreen(
             enabled = true,
             text = {
                 Text(
-                    text = stringResource(id = R.string.income_documents),
+                    text = stringResource(id = R.string.settings),
                     fontSize = 16.sp
                 )
             })

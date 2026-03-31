@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -79,6 +80,12 @@ fun ScanMoveOrderView(
         ErrorDialog(errorMessage = state.value.error, onDismiss = { viewModel.cancelError() })
     }
 
+    if (state.value.showManualEnterBarcode) {
+        ManualBarcodeEnterDialog(viewModel = viewModel, onDismiss = {
+            viewModel.cancelManualBarcodeEntering()
+        })
+    }
+
     state.value.selectedOrder?.let {
         //ManualSerialSearchView(viewModel)
         val orderItemForScan = state.value.orderItemForScan
@@ -92,11 +99,6 @@ fun ScanMoveOrderView(
             return
         }
 
-        if (state.value.showManualEnterBarcode) {
-            ManualBarcodeEnterDialog(viewModel = viewModel, onDismiss = {
-                viewModel.cancelManualBarcodeEntering()
-            })
-        }
         /*NoSerialsView(onAcceptClick = { isNoSerials ->
             if(isNoSerials)
                 viewModel.setNoSerials()
@@ -144,25 +146,25 @@ fun MoveOrderHeaderView(moveOrder: MoveOrderModel) {
             fontSize = 14.sp
         )
 
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            text = moveOrder.creationDate.replace("T", " "),
-            color = colorResource(R.color.black),
-            fontStyle = FontStyle.Normal,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold
-        )
+        /*    Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                text = moveOrder.creationDate.replace("T", " "),
+                color = colorResource(R.color.black),
+                fontStyle = FontStyle.Normal,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
 
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 2.dp),
-            text = moveOrder.description,
-            color = colorResource(R.color.black),
-            fontSize = 12.sp
-        )
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 2.dp),
+                text = moveOrder.description,
+                color = colorResource(R.color.black),
+                fontSize = 12.sp
+            )*/
         /*Row {
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -190,14 +192,30 @@ fun ScanMoveOrderItemList(
     orderItemForScan: MoveOrderItemsModel? = null,
     serials: List<ItemSerialModel>
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .focusable()
-    ) {
-        Log.i("SERIALS_S_", "${serials.size}")
-        moveOrderItemsModels.forEach { itemModel ->
-            item {
+    if (moveOrderItemsModels.size == 1) {
+        Log.e("SERIALS_S_H", "${serials.size}")
+        MoveOrderItemView(
+            item = moveOrderItemsModels.first(),
+            serials = serials,
+            showDeleteBtn = true,
+            orderItemForScan = orderItemForScan,
+            onDeleteSerial = {
+                viewModel.deleteSerial(it)
+            },
+            onSelectMoveOrderItem = {
+                viewModel.setManualOrderItemForScan(it)
+            },
+            onEditSerial = {
+                viewModel.showManualBarcodeEntering(it)
+            })
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .focusable()
+        ) {
+            Log.i("SERIALS_S_", "${serials.size}")
+            items(moveOrderItemsModels) { itemModel ->
                 MoveOrderItemView(
                     item = itemModel,
                     serials = serials,
@@ -208,8 +226,10 @@ fun ScanMoveOrderItemList(
                     },
                     onSelectMoveOrderItem = {
                         viewModel.setManualOrderItemForScan(it)
+                    },
+                    onEditSerial = {
+                        viewModel.showManualBarcodeEntering(it)
                     })
-
             }
         }
     }

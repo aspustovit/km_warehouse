@@ -29,7 +29,7 @@ fun ManualSerialSearchView(viewModel: MoveOrderItemViewModel) {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
             onClick = {
-                viewModel.showManualBarcodeEntering()
+                viewModel.showManualBarcodeEntering(null)
             },
         ) {
             Text(text = stringResource(R.string.manual_barcode), fontSize = 16.sp)

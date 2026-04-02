@@ -2,8 +2,11 @@ package com.km.warehouse.ui.move_order
 
 import android.util.Log
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.km.warehouse.R
 import com.km.warehouse.data.network.entity.ErrorData
 import com.km.warehouse.domain.usecase.CheckInputSerialsUseCase
 import com.km.warehouse.domain.usecase.DeleteSerialNumberUseCase
@@ -48,6 +51,7 @@ class MoveOrderItemViewModel(
 ) : ViewModel() {
     companion object {
         val SERIAL_NUMBER_NOT_FOUND = 1024
+        val SERIAL_NUMBER_ALREDY_FINISH = 1025
     }
 
     private var _viewState: MutableStateFlow<MoveOrderState> = MutableStateFlow(
@@ -116,10 +120,26 @@ class MoveOrderItemViewModel(
         moveOrderItems?.forEach { orderItem ->
             val barcodePatterns = ArrayList<String>()
             if (orderItem.mfgPartNumExp != null)
-                barcodePatterns.addAll(orderItem.mfgPartNumExp!!.split("/").toMutableList())
+                barcodePatterns.addAll(orderItem.mfgPartNumExp.split("/").toMutableList())
             barcodePatterns.add(orderItem.mfrCode)
             barcodePatterns.forEach { pattern ->
                 if (barcode.contains(pattern)) {
+                    if (orderItem.qtyGiven == orderItem.quantity && orderItem.noSerials) {
+                        _viewState.update{
+                            _viewState.value.copy(errorData = ErrorData(status = SERIAL_NUMBER_ALREDY_FINISH, message = barcode, error = ""),
+                                showManualEnterBarcode = false)
+                        }
+                        return
+                    }
+                    val orderSerials = _viewState.value.itemSerials.filter { it.moveOrderItemId == orderItem.id }
+                    if (orderItem.qtyGiven == orderItem.quantity && orderSerials.size == orderItem.qtyGiven.toInt()){
+                        _viewState.update{
+                            _viewState.value.copy(errorData = ErrorData(status = SERIAL_NUMBER_ALREDY_FINISH, message = barcode, error = ""),
+                                showManualEnterBarcode = false)
+                        }
+                        return
+                    }
+
                     searchedOrderItem = orderItem
                     val selectedOrder = _viewState.value.selectedOrder
                     val orderItems = selectedOrder!!.moveOrderItemsModels.toMutableList()
@@ -231,7 +251,7 @@ class MoveOrderItemViewModel(
             serial = barcodeSerial,
             moveOrderItemId = orderItemForScan.id
         )
-        serials.add(itemSerial)
+        serials.add(0,itemSerial)
         saveItemSerialToDb(itemSerial)
         val updatedMoveOrderItem: MoveOrderItemsModel =
             orderItemForScan.copy(qtyGiven = if (order != null && order.isComplete) orderItemForScan.qtyGiven else orderItemForScan.qtyGiven + 1)
@@ -431,7 +451,6 @@ class MoveOrderItemViewModel(
                     if (noSerials)
                         _soundViewState.update { true }
                 }
-                //getSavedSerials()
             }
         }
     }
@@ -498,7 +517,6 @@ class MoveOrderItemViewModel(
     }
 
     fun setSelectedScrollIndex(idx: Int) {
-        Log.i("SelectedScrollIndex", "$idx")
         _viewState.update { state ->
             state.copy(
                 selectedIndexForScroll = idx

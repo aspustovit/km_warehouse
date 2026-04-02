@@ -44,4 +44,5 @@
     <string name="warning">Попередження!</string>
     <string name="terminal_id">Номер терміналу</string>
     <string name="terminal_id_error">Для синхронізації потрібно ввести номер терміналу!\nПерейдіть в налаштування та введіть номер.</string>
+    <string name="barcode_already_done">вже опрацьовано!</string>
 </resources>

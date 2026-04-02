@@ -33,6 +33,7 @@ import com.km.warehouse.ui.move_order.BayerViewSmall
 import com.km.warehouse.ui.move_order.ManualBarcodeEnterDialog
 import com.km.warehouse.ui.move_order.MoveOrderItemView
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel
+import com.km.warehouse.ui.move_order.MoveOrderItemViewModel.Companion.SERIAL_NUMBER_ALREDY_FINISH
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel.Companion.SERIAL_NUMBER_NOT_FOUND
 import com.km.warehouse.ui.sync.ErrorDialog
 import org.koin.androidx.compose.koinViewModel
@@ -61,19 +62,32 @@ fun ScanMoveOrderView(
         }, viewModel = viewModel)
     }
     state.value.errorData?.let {
-        if (it.status == SERIAL_NUMBER_NOT_FOUND) {
-            ErrorDialog(
-                errorMessage = "${stringResource(R.string.barcode)} ${it.message} ${
-                    stringResource(
-                        R.string.barcode_not_found_error
-                    )
-                }", onDismiss = {
+        when (it.status) {
+            SERIAL_NUMBER_NOT_FOUND -> {
+                ErrorDialog(
+                    errorMessage = "${stringResource(R.string.barcode)} ${it.message} ${
+                        stringResource(
+                            R.string.barcode_not_found_error
+                        )
+                    }", onDismiss = {
+                        viewModel.cancelError()
+                    })
+            }
+
+            SERIAL_NUMBER_ALREDY_FINISH -> {
+                ErrorDialog(
+                    errorMessage = "${stringResource(R.string.barcode)} ${it.message} ${
+                        stringResource(R.string.barcode_already_done)
+                    }", onDismiss = {
+                        viewModel.cancelError()
+                    })
+            }
+
+            else -> {
+                ErrorDialog(errorMessage = it.getErrorMessage(), onDismiss = {
                     viewModel.cancelError()
                 })
-        } else {
-            ErrorDialog(errorMessage = it.getErrorMessage(), onDismiss = {
-                viewModel.cancelError()
-            })
+            }
         }
     }
     if (state.value.error.isNotBlank()) {

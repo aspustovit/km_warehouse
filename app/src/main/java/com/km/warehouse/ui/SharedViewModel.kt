@@ -44,6 +44,10 @@ class SharedViewModel(
         barcode += scanChar
     }
 
+    fun addBarcodeFromNFC(nfcData: String) {
+        barcode = nfcData
+    }
+
     fun postBarcode() {
         viewModelScope.launch {
             DataHub.emitBarcodeData(barcode.replace("\n",""))

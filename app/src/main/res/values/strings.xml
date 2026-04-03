@@ -45,4 +45,7 @@
     <string name="terminal_id">Номер терміналу</string>
     <string name="terminal_id_error">Для синхронізації потрібно ввести номер терміналу!\nПерейдіть в налаштування та введіть номер.</string>
     <string name="barcode_already_done">вже опрацьовано!</string>
+    <string name="text_warning_nfc_is_off">Попередження. Обмін данними за допомогою NFC не дозволений</string>
+    <string name="text_turn_on_nfc">Активуйте використання NFC</string>
+    <string name="text_update_settings">Перейти в налаштування</string>
 </resources>

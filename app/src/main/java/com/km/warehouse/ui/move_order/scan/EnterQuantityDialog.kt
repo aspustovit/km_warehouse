@@ -35,8 +35,8 @@ import com.km.warehouse.ui.move_order.MoveOrderItemViewModel
  */
 @Composable
 fun EnterQuantityDialog(
-onDismiss: () -> Unit,
-viewModel: MoveOrderItemViewModel
+    onDismiss: () -> Unit,
+    viewModel: MoveOrderItemViewModel
 ) {
     var qtyGiven by remember { mutableStateOf("") }
 
@@ -80,8 +80,11 @@ viewModel: MoveOrderItemViewModel
                 )
 
                 ManualButtons(onDismiss = onDismiss, onAccept = {
-                    if(viewModel.viewState.value.orderItemForScan != null && qtyGiven.isNotEmpty())
-                        viewModel.setQuantityGiven(moveOrderItemsModel = viewModel.viewState.value.orderItemForScan!!, qtyGiven = qtyGiven.toInt())
+                    if (viewModel.viewState.value.orderItemForScan != null && qtyGiven.isNotEmpty())
+                        viewModel.setQuantityGiven(
+                            moveOrderItemsModel = viewModel.viewState.value.orderItemForScan!!,
+                            qtyGiven = qtyGiven.toInt()
+                        )
                 })
             }
         }

@@ -52,6 +52,7 @@ class MoveOrderItemViewModel(
     companion object {
         val SERIAL_NUMBER_NOT_FOUND = 1024
         val SERIAL_NUMBER_ALREDY_FINISH = 1025
+        val SERIAL_NUMBER_ALREDY_ADD = 1005
     }
 
     private var _viewState: MutableStateFlow<MoveOrderState> = MutableStateFlow(
@@ -72,6 +73,7 @@ class MoveOrderItemViewModel(
         barcodeJob?.cancel()
         Log.e("onKeyDown_SCAN_3", "LAUNCH")
         barcodeJob = observeBarcodeDataUseCase.observe().onEach { bar ->
+            cancelError()
             Log.e("onKeyDown_SCAN_4", bar)
             Log.e("onKeyDown_SCAN_4", "${_viewState.value.orderItemForScan}")
             if (_viewState.value.orderItemForScan == null) {
@@ -171,13 +173,17 @@ class MoveOrderItemViewModel(
     }
 
     fun checkInputSerials(orderItemForScan: MoveOrderItemsModel, barcodeSerial: String) {
-        viewModelScope.launch {
-            checkInputSerialsUseCase.invoke(barcodeSerial).onSuccess { error ->
-                if (error.status == 0) {
-                    addSerial(orderItemForScan, barcodeSerial)
-                } else {
-                    _viewState.update {
-                        _viewState.value.copy(errorData = error)
+        if(orderItemForScan.noSerials) {
+            setQuantityGiven(moveOrderItemsModel = orderItemForScan, qtyGiven = orderItemForScan.qtyGiven.toInt()+1)
+        } else {
+            viewModelScope.launch {
+                checkInputSerialsUseCase.invoke(barcodeSerial).onSuccess { error ->
+                    if (error.status == 0) {
+                        addSerial(orderItemForScan, barcodeSerial)
+                    } else {
+                        _viewState.update {
+                            _viewState.value.copy(errorData = error)
+                        }
                     }
                 }
             }
@@ -441,15 +447,15 @@ class MoveOrderItemViewModel(
                     list.add(updateOrderForScan)
                     val order =
                         selectedOrder.copy(moveOrderItemsModels = list.sortedBy { it.id }.toList())
+                    val isComplete = updateOrderForScan.noSerials && updateOrderForScan.quantity == updateOrderForScan.qtyGiven
                     _viewState.update { state ->
                         state.copy(
-                            orderItemForScan = if (noSerials) null else orderItemForScan,
+                            orderItemForScan = if (noSerials || isComplete) null else orderItemForScan,
                             selectedOrder = order,
                             showQuantityEntering = false
                         )
                     }
-                    if (noSerials)
-                        _soundViewState.update { true }
+                    _soundViewState.update { isComplete }
                 }
             }
         }
@@ -479,12 +485,14 @@ class MoveOrderItemViewModel(
                         val order =
                             selectedOrder.copy(moveOrderItemsModels = list.sortedBy { it.id }
                                 .toList())
+                        val isComplete = updateOrderForScan.noSerials && updateOrderForScan.quantity == updateOrderForScan.qtyGiven
                         _viewState.update { state ->
                             state.copy(
-                                orderItemForScan = updateOrderForScan,
-                                selectedOrder = order
+                                orderItemForScan = if(isComplete) null else updateOrderForScan,
+                                selectedOrder = order,
                             )
                         }
+                        _soundViewState.update { isComplete }
                     }
                     orderItemForScan?.let {
                         if (it.quantity == 1.0)

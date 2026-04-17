@@ -138,7 +138,7 @@ class BayerRepositoryImpl(val database: KmWarehouseDatabase) : LocalWarehouseRep
         if (serial != null) {
             val moi = database.moveOrderItemDao().getMoveOrderItem(serial.moveOrderItemId)
             return ErrorData(
-                1001,
+                1005,
                 "Серійний номер вже додано в документ! ${moi?.mfrCode} - Серійний номер:${serial.serial}",
                 "Повторення серійного номеру"
             )

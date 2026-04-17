@@ -1,6 +1,7 @@
 package com.km.warehouse.ui.move_order.scan
 
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Spacer
@@ -19,24 +20,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fieldbee.core.ui.compose.utils.playSound
 import com.km.warehouse.R
 import com.km.warehouse.domain.usecase.model.ItemSerialModel
 import com.km.warehouse.domain.usecase.model.MoveOrderItemsModel
 import com.km.warehouse.domain.usecase.model.MoveOrderModel
+import com.km.warehouse.ui.SharedViewModel
 import com.km.warehouse.ui.move_order.BayerViewSmall
 import com.km.warehouse.ui.move_order.ManualBarcodeEnterDialog
 import com.km.warehouse.ui.move_order.MoveOrderItemView
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel
+import com.km.warehouse.ui.move_order.MoveOrderItemViewModel.Companion.SERIAL_NUMBER_ALREDY_ADD
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel.Companion.SERIAL_NUMBER_ALREDY_FINISH
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel.Companion.SERIAL_NUMBER_NOT_FOUND
 import com.km.warehouse.ui.sync.ErrorDialog
 import org.koin.androidx.compose.koinViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import kotlin.getValue
 
 /**
  * Create by Pustovit Oleksandr on 2/5/2026
@@ -57,9 +64,12 @@ fun ScanMoveOrderView(
         viewModel.observeBarcodes()
     }
     if (state.value.showQuantityEntering) {
-        EnterQuantityDialog(onDismiss = {
-            viewModel.cancelQuantityEntering()
-        }, viewModel = viewModel)
+        EnterQuantityDialog(
+            onDismiss = {
+                viewModel.cancelQuantityEntering()
+            },
+            viewModel = viewModel
+        )
     }
     state.value.errorData?.let {
         when (it.status) {
@@ -81,6 +91,11 @@ fun ScanMoveOrderView(
                     }", onDismiss = {
                         viewModel.cancelError()
                     })
+            }
+
+            SERIAL_NUMBER_ALREDY_ADD -> {
+                LocalContext.current.playSound(R.raw.windows_error)
+                Toast.makeText(LocalContext.current, it.message, Toast.LENGTH_SHORT).show()
             }
 
             else -> {

@@ -30,7 +30,9 @@ fun SerialView(
             viewModel.setNoSerials()
     }, onManualBarcodeEnterClick = {
         viewModel.showManualBarcodeEntering(null)
-    }, onQuantityClick = {
+    }, onQuantityClick = { isNoSerials ->
+        if (isNoSerials)
+            viewModel.setNoSerials()
         viewModel.showQuantityEntering()
     })
     HorizontalDivider(

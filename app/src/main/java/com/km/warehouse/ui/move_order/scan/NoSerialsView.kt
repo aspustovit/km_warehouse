@@ -25,7 +25,7 @@ import com.km.warehouse.ui.OutlinedIconButton
 @Composable
 fun NoSerialsView(
     onAcceptClick: (Boolean) -> Unit,
-    onQuantityClick: () -> Unit,
+    onQuantityClick: (Boolean) -> Unit,
     onManualBarcodeEnterClick: () -> Unit
 ) {
     var checkedState by remember { mutableStateOf(false) }
@@ -58,7 +58,7 @@ fun NoSerialsView(
         )
 
         OutlinedIconButton(
-            onClick = { onQuantityClick.invoke() },
+            onClick = { onQuantityClick.invoke(checkedState) },
             resDrawable = R.drawable.ic_qnt_count,
             resDescription = R.string.quantity
         )

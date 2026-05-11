@@ -24,4 +24,7 @@ abstract class ItemsSerialDao : BaseDao<ItemsSerial>() {
 
     @Query("UPDATE items_serial SET is_synced = 1 WHERE id = :id")
     abstract fun setSynced(id: Int): Int
+
+    @Query("DELETE FROM items_serial where move_order_item_id == :orderItemId ")
+    abstract fun deleteSerialsByOrderItemId(orderItemId: Int): Int
 }

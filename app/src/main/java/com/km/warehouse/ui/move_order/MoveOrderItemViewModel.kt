@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.km.warehouse.R
 import com.km.warehouse.data.network.entity.ErrorData
 import com.km.warehouse.domain.usecase.CheckInputSerialsUseCase
+import com.km.warehouse.domain.usecase.DeleteMoveOrderUseCase
 import com.km.warehouse.domain.usecase.DeleteSerialNumberUseCase
 import com.km.warehouse.domain.usecase.GetItemSerialFromDBUseCase
 import com.km.warehouse.domain.usecase.LoadMoveOrdersUseCase
@@ -47,7 +48,8 @@ class MoveOrderItemViewModel(
     private val setQuantityGivenUseCase: SetQuantityGivenUseCase,
     private val setNoSerialsUseCase: SetNoSerialsUseCase,
     private val checkInputSerialsUseCase: CheckInputSerialsUseCase,
-    private val updateSerialNumberUseCase: UpdateSerialNumberUseCase
+    private val updateSerialNumberUseCase: UpdateSerialNumberUseCase,
+    private val deleteMoveOrderUseCase: DeleteMoveOrderUseCase
 ) : ViewModel() {
     companion object {
         val SERIAL_NUMBER_NOT_FOUND = 1024
@@ -534,5 +536,33 @@ class MoveOrderItemViewModel(
 
     fun setSoundPlayed() {
         _soundViewState.update { false }
+    }
+
+    fun showOrderDeleteDialog(id: Int) {
+        _viewState.update { state ->
+            state.copy(
+                moveOrderIdForDelete = id
+            )
+        }
+    }
+
+    fun cancelOrderDeleteDialog() {
+        _viewState.update { state ->
+            state.copy(
+                moveOrderIdForDelete = -1
+            )
+        }
+    }
+
+    fun deleteMoveOrder(moveOrderId: Int) {
+        viewModelScope.launch {
+            deleteMoveOrderUseCase.invoke(moveOrderId).onSuccess {
+                _viewState.value.documentType?.let {
+                    loadMoveOrders(it)
+                }
+            }.onFailure {
+                _viewState.value.copy(error = it.message!!)
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -29,6 +31,7 @@ import androidx.compose.ui.Modifier
 //import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -39,6 +42,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fieldbee.core.ui.compose.utils.playSound
@@ -49,6 +53,7 @@ import com.km.warehouse.domain.usecase.model.OrderModel
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel.Companion.SERIAL_NUMBER_NOT_FOUND
 import com.km.warehouse.ui.move_order.scan.ScanMoveOrderView
 import com.km.warehouse.ui.sync.ErrorDialog
+import com.km.warehouse.ui.sync.WarningDialog
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -181,6 +186,18 @@ fun MoveOrdersList(
     val firstVisibleIndex by remember {
         derivedStateOf { listState.firstVisibleItemIndex }
     }
+    if(state.value.moveOrderIdForDelete != -1) {
+        WarningDialog(
+            warningMessage = stringResource(R.string.delete_order_dialog_message),
+            onDismiss = {
+                viewModel.cancelOrderDeleteDialog()
+            },
+            onOk = {
+                viewModel.deleteMoveOrder(state.value.moveOrderIdForDelete)
+                viewModel.cancelOrderDeleteDialog()
+            }
+        )
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -212,7 +229,10 @@ fun MoveOrdersList(
                         order = moveOrder,
                         onMoveOrderClick = onMoveOrderClick,
                         isOrderDone = isOrderDone,
-                        idx = firstVisibleIndex
+                        idx = firstVisibleIndex,
+                        onMOveOrderDeleteClick = { moveOrderId ->
+                            viewModel.showOrderDeleteDialog(moveOrderId)
+                        }
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -233,7 +253,8 @@ fun MoveOrderHeader(
     order: OrderModel,
     onMoveOrderClick: (Pair<OrderModel,Int>) -> Unit,
     isOrderDone: Boolean,
-    idx: Int
+    idx: Int,
+    onMOveOrderDeleteClick: (Int) -> Unit
 ) {
     val moveOrder = order.moveOrderModel
     Card(
@@ -252,52 +273,41 @@ fun MoveOrderHeader(
         var tintColor = if(isOrderDone) colorResource(R.color.finished_order) else colorResource(R.color.new_order)
 
         Row(verticalAlignment = Alignment.CenterVertically){
-            Icon(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            Icon(modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
                 painter = headerIcon,
                 contentDescription = null,
                 tint = tintColor
             )
-            Text(
-                text = moveOrder.number,
-                color = colorResource(R.color.black),
-                fontStyle = FontStyle.Normal,
-                fontWeight = FontWeight.Bold
-            )
-        }
-      /*  Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 2.dp),
-            text = moveOrder.creationDate.replace("T", " "),
-            color = colorResource(R.color.black),
-            fontStyle = FontStyle.Normal,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Bold
-        )*/
-        /*Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-            text = moveOrder.description,
-            color = colorResource(R.color.black),
-            fontSize = 12.sp
-        )*/
-        /*Row {
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                text = stringResource(R.string.move_order_update_date),
-                color = colorResource(R.color.black),
-                fontStyle = FontStyle.Normal
-            )
-
-            Text(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth(),
-                text = moveOrder.moveDate,
-                color = colorResource(R.color.black),
-                fontStyle = FontStyle.Normal
-            )
-        }*/
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    modifier = Modifier
+                        .weight(1f, false),
+                    text = moveOrder.number,
+                    color = colorResource(R.color.black),
+                    fontStyle = FontStyle.Normal,
+                    fontWeight = FontWeight.Bold,
+                    overflow = TextOverflow.Ellipsis
+                )
+                    IconButton(
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .size(24.dp),
+                        onClick = {
+                            onMOveOrderDeleteClick(order.moveOrderModel.id)
+                        }) {
+                        Icon(
+                            painterResource(id = R.drawable.ic_delete),
+                            contentDescription = null
+                        )
+                    }
+
+            }
+        }
         Spacer(modifier = Modifier.height(2.dp))
     }
 }

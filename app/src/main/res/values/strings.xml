@@ -48,4 +48,5 @@
     <string name="text_warning_nfc_is_off">Попередження. Обмін данними за допомогою NFC не дозволений</string>
     <string name="text_turn_on_nfc">Активуйте використання NFC</string>
     <string name="text_update_settings">Перейти в налаштування</string>
+    <string name="delete_order_dialog_message">Ви дійсно бажаєте видалити Документ.\nВсі данні будуть втрачені!</string>
 </resources>

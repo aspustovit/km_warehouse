@@ -29,7 +29,8 @@ object AppViewModelModule {
                 setQuantityGivenUseCase = get(),
                 setNoSerialsUseCase = get(),
                 checkInputSerialsUseCase = get(),
-                updateSerialNumberUseCase = get()
+                updateSerialNumberUseCase = get(),
+                deleteMoveOrderUseCase = get()
             )
         }
         viewModel {

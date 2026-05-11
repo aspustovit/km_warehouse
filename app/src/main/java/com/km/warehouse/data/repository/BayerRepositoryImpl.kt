@@ -158,10 +158,21 @@ class BayerRepositoryImpl(val database: KmWarehouseDatabase) : LocalWarehouseRep
         return -1
     }
 
+    override suspend fun deleteMoveOrder(orderId: Int): Int {
+        val orderItemsForDel = database.moveOrderItemDao().getMoveOrderItemsByOrderId(orderId)
+        orderItemsForDel.forEach {
+            database.itemsSerialDao().deleteSerialsByOrderItemId(it.id)
+            database.moveOrderItemDao().deleteById(it.id)
+        }
+        return database.moveOrderDao().deleteById(orderId)
+    }
+
     private fun getBayerName(bayerId: Int, bayers: List<Bayer>): String {
         var bayer = bayers.find { it.id == bayerId }
         if (bayer == null)
             bayer = bayers.find { it.id == -1 }
         return bayer!!.description
     }
+
+
 }

@@ -23,5 +23,6 @@ data class MoveOrderState(
     val documentType: DocumentType? = null,
     val showQuantityEntering: Boolean = false,
     val selectedIndexForScroll: Int = 0,
-    val editingItemSerialModel: ItemSerialModel? = null
+    val editingItemSerialModel: ItemSerialModel? = null,
+    val moveOrderIdForDelete: Int = -1
 )

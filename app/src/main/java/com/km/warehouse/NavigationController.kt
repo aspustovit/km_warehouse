@@ -21,6 +21,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.km.warehouse.ui.DarkTopAppBar
 import com.km.warehouse.ui.NavigationStep
+import com.km.warehouse.ui.SharedViewModel
 import com.km.warehouse.ui.move_order.DocumentType
 import com.km.warehouse.ui.move_order.MoveOrderView
 import com.km.warehouse.ui.scan_to_file.ScanToFileView
@@ -32,7 +33,7 @@ import com.km.warehouse.ui.settings.SettingsView
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("ContextCastToActivity")
 @Composable
-fun NavigationController(modifier: Modifier) {
+fun NavigationController(viewModel: SharedViewModel) {
     val navController = rememberNavController()
     val context = LocalContext.current as MainActivity
 
@@ -59,7 +60,8 @@ fun NavigationController(modifier: Modifier) {
                 },
                 onScanToFileClick = {
                     navController.navigate(route = NavigationStep.ScanToFileScreen)
-                })
+                },
+                viewModel = viewModel)
         }
         composable<NavigationStep.ApprovedDocumentScreen> {
             Column(modifier = Modifier.fillMaxSize()) {

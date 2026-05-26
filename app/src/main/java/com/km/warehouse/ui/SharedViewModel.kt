@@ -3,6 +3,7 @@ package com.km.warehouse.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.km.warehouse.domain.usecase.ObserveBarcodeDataUseCase
+import com.km.warehouse.domain.usecase.auth.LogoutUseCase
 import com.km.warehouse.domain.usecase.base.DataHub
 import com.km.warehouse.ui.scan_to_file.BarcodeReadState
 import kotlinx.coroutines.Job
@@ -17,7 +18,8 @@ import kotlinx.coroutines.launch
  * Create by Pustovit Oleksandr on 9/26/2025
  */
 class SharedViewModel(
-    private val observeBarcodeDataUseCase: ObserveBarcodeDataUseCase
+    private val observeBarcodeDataUseCase: ObserveBarcodeDataUseCase,
+    private val logoutUseCase: LogoutUseCase
 ) : ViewModel() {
     private var _barcodeState: MutableStateFlow<BarcodeReadState> =
         MutableStateFlow(BarcodeReadState(lastBarcode = ""))
@@ -53,5 +55,11 @@ class SharedViewModel(
             DataHub.emitBarcodeData(barcode.replace("\n",""))
         }
         barcode = ""
+    }
+
+    fun exit() {
+        viewModelScope.launch {
+            logoutUseCase.invoke(Unit)
+        }
     }
 }

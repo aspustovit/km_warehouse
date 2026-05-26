@@ -3,6 +3,7 @@ package com.km.warehouse.data.repository
 import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
+import com.km.warehouse.data.KmWarehouseDatabase
 import com.km.warehouse.data.network.AuthApiService
 import com.km.warehouse.data.network.auth.TokenManager
 import com.km.warehouse.data.network.auth.AuthRequest
@@ -14,7 +15,8 @@ import com.km.warehouse.domain.usecase.model.PrevAuthModel
 /**
  * Create by Pustovit Oleksandr on 1/5/2026
  */
-class AuthRepositoryImpl(val authApiService: AuthApiService, val context: Context) :
+class AuthRepositoryImpl(val authApiService: AuthApiService, val context: Context,
+                         val database: KmWarehouseDatabase) :
     AuthRepository {
     override suspend fun login(auth: AuthRequest): LoginModel {
         try {
@@ -74,6 +76,13 @@ class AuthRepositoryImpl(val authApiService: AuthApiService, val context: Contex
             refreshToken = tokenManager.getRefreshToken(),
             userName = tokenManager.getLastLogin()
         )
+    }
+
+    override suspend fun logout() {
+        val tokenManager = TokenManager(context)
+        tokenManager.deleteToken()
+        tokenManager.deleteRefreshToken()
+        database.clearAllTables()
     }
 
     private fun parseError(errorBody: String): ErrorData? {

@@ -108,7 +108,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme { // Apply your app's theme
-                NavigationController(modifier = Modifier.fillMaxSize()) // Call your screen's composable
+                NavigationController(viewModel) // Call your screen's composable
                 if (nfcAdapter == null) {
                     ErrorDialog(errorMessage = "This device doesn't support NFC.") {}
                 }
@@ -201,8 +201,10 @@ fun MenuScreen(
     onApprovedDocumentClick: () -> Unit = {},
     onIssuedDocumentClick: () -> Unit = {},
     onIncomeDocumentClick: () -> Unit = {},
-    onScanToFileClick: () -> Unit = {}
+    onScanToFileClick: () -> Unit = {},
+    viewModel: SharedViewModel
 ) {
+
     var showDialog by remember { mutableStateOf(false) }
     if (showDialog) {
         SyncDialog(
@@ -336,6 +338,7 @@ fun MenuScreen(
                 )
             },
             onClick = {
+                viewModel.exit()
                 activity.finish()
             },
             enabled = true,

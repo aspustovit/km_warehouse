@@ -11,4 +11,6 @@ interface AuthRepository {
       suspend fun login(auth: AuthRequest): LoginModel
 
       suspend fun getRefreshLoginToken(): PrevAuthModel
+
+      suspend fun logout()
 }

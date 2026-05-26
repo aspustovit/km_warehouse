@@ -121,6 +121,7 @@ class MoveOrderItemViewModel(
     fun searchOrderItem(barcode: String) {
         var searchedOrderItem: MoveOrderItemsModel? = null
         val moveOrderItems = viewState.value.selectedOrder?.moveOrderItemsModels
+        var finishedDocumentCount = 0
         moveOrderItems?.forEach { orderItem ->
             val barcodePatterns = ArrayList<String>()
             if (orderItem.mfgPartNumExp != null)
@@ -129,19 +130,13 @@ class MoveOrderItemViewModel(
             barcodePatterns.forEach { pattern ->
                 if (barcode.contains(pattern)) {
                     if (orderItem.qtyGiven == orderItem.quantity && orderItem.noSerials) {
-                        _viewState.update{
-                            _viewState.value.copy(errorData = ErrorData(status = SERIAL_NUMBER_ALREDY_FINISH, message = barcode, error = ""),
-                                showManualEnterBarcode = false)
-                        }
-                        return
+                        finishedDocumentCount += 1
+                        return@forEach
                     }
                     val orderSerials = _viewState.value.itemSerials.filter { it.moveOrderItemId == orderItem.id }
-                    if (orderItem.qtyGiven == orderItem.quantity && orderSerials.size == orderItem.qtyGiven.toInt()){
-                        _viewState.update{
-                            _viewState.value.copy(errorData = ErrorData(status = SERIAL_NUMBER_ALREDY_FINISH, message = barcode, error = ""),
-                                showManualEnterBarcode = false)
-                        }
-                        return
+                    if (orderItem.qtyGiven == orderItem.quantity && orderSerials.size == orderItem.qtyGiven.toInt()) {
+                        finishedDocumentCount += 1
+                        return@forEach
                     }
 
                     searchedOrderItem = orderItem
@@ -158,6 +153,12 @@ class MoveOrderItemViewModel(
                         )
                     }
                 }
+            }
+        }
+        if(finishedDocumentCount == moveOrderItems?.size){
+            _viewState.update{
+                _viewState.value.copy(errorData = ErrorData(status = SERIAL_NUMBER_ALREDY_FINISH, message = barcode, error = ""),
+                    showManualEnterBarcode = false)
             }
         }
         if (searchedOrderItem == null) {

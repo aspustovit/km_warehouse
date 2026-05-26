@@ -14,7 +14,8 @@ object AppViewModelModule {
     private val viewModulesModule = module {
         viewModel {
             SharedViewModel(
-                observeBarcodeDataUseCase = get()
+                observeBarcodeDataUseCase = get(),
+                logoutUseCase = get()
             )
         }
         viewModel {

@@ -55,6 +55,7 @@ class MoveOrderItemViewModel(
         val SERIAL_NUMBER_NOT_FOUND = 1024
         val SERIAL_NUMBER_ALREDY_FINISH = 1025
         val SERIAL_NUMBER_ALREDY_ADD = 1005
+        val NO_SERIAL_NUMBER_CONFLICT = 1006
     }
 
     private var _viewState: MutableStateFlow<MoveOrderState> = MutableStateFlow(
@@ -177,7 +178,22 @@ class MoveOrderItemViewModel(
 
     fun checkInputSerials(orderItemForScan: MoveOrderItemsModel, barcodeSerial: String) {
         if(orderItemForScan.noSerials) {
-            setQuantityGiven(moveOrderItemsModel = orderItemForScan, qtyGiven = orderItemForScan.qtyGiven.toInt()+1)
+            if(_viewState.value.lastNoSerialScannedBarcode == null) {
+                _viewState.update {
+                    _viewState.value.copy(lastNoSerialScannedBarcode = barcodeSerial)
+                }
+                setQuantityGiven(moveOrderItemsModel = orderItemForScan, qtyGiven = orderItemForScan.qtyGiven.toInt()+1)
+            } else {
+                if(_viewState.value.lastNoSerialScannedBarcode == barcodeSerial){
+                    setQuantityGiven(moveOrderItemsModel = orderItemForScan, qtyGiven = orderItemForScan.qtyGiven.toInt()+1)
+                } else {
+                    _viewState.update{
+                        _viewState.value.copy(errorData = ErrorData(status = NO_SERIAL_NUMBER_CONFLICT, message = barcodeSerial, error = ""),
+                            showManualEnterBarcode = false)
+                    }
+                }
+            }
+
         } else {
             viewModelScope.launch {
                 checkInputSerialsUseCase.invoke(barcodeSerial).onSuccess { error ->
@@ -223,6 +239,7 @@ class MoveOrderItemViewModel(
         val orders = viewState.value.moveOrders
         var order: MoveOrderModel? = null
         var orderItemForDelete: MoveOrderItemsModel? = null
+
         orders.forEach {
             it.value.forEach { o ->
                 if (o.moveOrderModel.id == orderItemForScan.moveOrderId) {

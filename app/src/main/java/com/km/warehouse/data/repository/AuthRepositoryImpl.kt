@@ -82,7 +82,7 @@ class AuthRepositoryImpl(val authApiService: AuthApiService, val context: Contex
         val tokenManager = TokenManager(context)
         tokenManager.deleteToken()
         tokenManager.deleteRefreshToken()
-        database.clearAllTables()
+        //database.clearAllTables()
     }
 
     private fun parseError(errorBody: String): ErrorData? {

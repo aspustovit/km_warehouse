@@ -37,6 +37,7 @@ import com.km.warehouse.ui.move_order.BayerViewSmall
 import com.km.warehouse.ui.move_order.ManualBarcodeEnterDialog
 import com.km.warehouse.ui.move_order.MoveOrderItemView
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel
+import com.km.warehouse.ui.move_order.MoveOrderItemViewModel.Companion.NO_SERIAL_NUMBER_CONFLICT
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel.Companion.SERIAL_NUMBER_ALREDY_ADD
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel.Companion.SERIAL_NUMBER_ALREDY_FINISH
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel.Companion.SERIAL_NUMBER_NOT_FOUND
@@ -96,6 +97,15 @@ fun ScanMoveOrderView(
             SERIAL_NUMBER_ALREDY_ADD -> {
                 LocalContext.current.playSound(R.raw.windows_error)
                 Toast.makeText(LocalContext.current, it.message, Toast.LENGTH_SHORT).show()
+            }
+
+            NO_SERIAL_NUMBER_CONFLICT -> {
+                ErrorDialog(
+                    errorMessage = "${stringResource(R.string.barcode)} ${it.message} ${
+                        stringResource(R.string.no_barcode_scan_error)
+                    }", onDismiss = {
+                        viewModel.cancelError()
+                    })
             }
 
             else -> {

@@ -24,5 +24,6 @@ data class MoveOrderState(
     val showQuantityEntering: Boolean = false,
     val selectedIndexForScroll: Int = 0,
     val editingItemSerialModel: ItemSerialModel? = null,
-    val moveOrderIdForDelete: Int = -1
+    val moveOrderIdForDelete: Int = -1,
+    val lastNoSerialScannedBarcode: String? = null //Використовується для перевірки одинаковості штрихкодів коли сканується при статусі - "Серійник непотрібен"
 )

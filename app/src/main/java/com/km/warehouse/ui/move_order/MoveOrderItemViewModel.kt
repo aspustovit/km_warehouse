@@ -93,7 +93,7 @@ class MoveOrderItemViewModel(
 
     fun clearOrderItemForScan() {
         Log.e("onKeyDown_SCAN_4", "CLEAR !!")
-        _viewState.update { _viewState.value.copy(orderItemForScan = null) }
+        _viewState.update { _viewState.value.copy(orderItemForScan = null, lastNoSerialScannedBarcode = null) }
     }
 
     fun setManualOrderItemForScan(orderItem: MoveOrderItemsModel) {
@@ -103,7 +103,8 @@ class MoveOrderItemViewModel(
             _viewState.update {
                 _viewState.value.copy(
                     orderItemForScan = null,
-                    showManualEnterBarcode = false
+                    showManualEnterBarcode = false,
+                    lastNoSerialScannedBarcode = null
                 )
             }
             return
@@ -113,7 +114,8 @@ class MoveOrderItemViewModel(
             _viewState.update {
                 _viewState.value.copy(
                     orderItemForScan = orderItem,
-                    showManualEnterBarcode = false
+                    showManualEnterBarcode = false,
+                    lastNoSerialScannedBarcode = null
                 )
             }
         }
@@ -150,7 +152,8 @@ class MoveOrderItemViewModel(
                         _viewState.value.copy(
                             orderItemForScan = orderItem,
                             showManualEnterBarcode = false,
-                            selectedOrder = order
+                            selectedOrder = order,
+                            lastNoSerialScannedBarcode = null
                         )
                     }
                 }
@@ -294,12 +297,14 @@ class MoveOrderItemViewModel(
             val serialSize = serials.filter { it.moveOrderItemId == updatedMoveOrderItem.id }.size
             if (serialSize == updatedMoveOrderItem.qtyGiven.toInt() && serialSize == updatedMoveOrderItem.quantity.toInt())
                 unselectItemForScan = true
+            val prevNoSerialScannedBarcode = _viewState.value.lastNoSerialScannedBarcode
             _viewState.update { state ->
                 state.copy(
                     itemSerials = serials.toList(),
                     showManualEnterBarcode = false,
                     orderItemForScan = if (unselectItemForScan) null else updatedMoveOrderItem,
-                    selectedOrder = order
+                    selectedOrder = order,
+                    lastNoSerialScannedBarcode = if (unselectItemForScan) null else prevNoSerialScannedBarcode
                 )
             }
             if (unselectItemForScan)
@@ -506,10 +511,12 @@ class MoveOrderItemViewModel(
                             selectedOrder.copy(moveOrderItemsModels = list.sortedBy { it.id }
                                 .toList())
                         val isComplete = updateOrderForScan.noSerials && updateOrderForScan.quantity == updateOrderForScan.qtyGiven
+                        val prevNoSerialScannedBarcode = _viewState.value.lastNoSerialScannedBarcode
                         _viewState.update { state ->
                             state.copy(
                                 orderItemForScan = if(isComplete) null else updateOrderForScan,
                                 selectedOrder = order,
+                                lastNoSerialScannedBarcode = if(isComplete) null else prevNoSerialScannedBarcode
                             )
                         }
                         _soundViewState.update { isComplete }

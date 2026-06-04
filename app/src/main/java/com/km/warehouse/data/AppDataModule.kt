@@ -7,8 +7,10 @@ import com.km.warehouse.data.network.AuthInterceptor
 import com.km.warehouse.data.network.WarehouseApiService
 import com.km.warehouse.data.repository.AuthRepositoryImpl
 import com.km.warehouse.data.repository.BayerRepositoryImpl
+import com.km.warehouse.data.repository.InventoryRepositoryImpl
 import com.km.warehouse.data.repository.SyncWarehouseRepositoryImpl
 import com.km.warehouse.domain.repository.AuthRepository
+import com.km.warehouse.domain.repository.InventoryRepository
 import com.km.warehouse.domain.repository.LocalWarehouseRepository
 import com.km.warehouse.domain.repository.SyncWarehouseRepository
 import okhttp3.OkHttpClient
@@ -26,8 +28,8 @@ object AppDataModule {
     private val retrofitClient = named("warehouseRetrofitClient")
     private val retrofitClientTimeout = 10L
 
-        private val baseUrl = "http://172.18.0.60:8081/api/"
-        //private val baseUrl = "http://192.168.0.167:8081/api/" // Test server
+        //private val baseUrl = "http://172.18.0.60:8081/api/"
+        private val baseUrl = "http://192.168.0.167:8081/api/" // Test server
 
     private val networkModule = module {
         koinApplication()
@@ -79,6 +81,12 @@ object AppDataModule {
         single<LocalWarehouseRepository> {
             BayerRepositoryImpl(
                 database = get()
+            )
+        }
+
+        single<InventoryRepository> {
+            InventoryRepositoryImpl(
+                warehouseApiService = get()
             )
         }
     }

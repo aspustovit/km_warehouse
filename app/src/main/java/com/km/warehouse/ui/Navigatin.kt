@@ -8,6 +8,10 @@ import kotlinx.serialization.Serializable
 sealed class NavigationStep {
 
     @Serializable
+    data object InventoryScreen : NavigationStep()
+
+
+    @Serializable
     data object InitialScreen : NavigationStep()
 
     @Serializable

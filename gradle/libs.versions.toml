@@ -24,6 +24,8 @@ jwt = "4.5.0"
 lottie = "6.7.1"
 material3Version = "1.4.0"
 
+xls = "2.6.12"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -44,6 +46,7 @@ androidx-room = { group = "androidx.room", name = "room-ktx", version.ref = "roo
 androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "room" }
 androidx-room-runtime = { group = "androidx.room", name="room-runtime", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name="room-compiler", version.ref = "room" }
+exel = {group = "net.sourceforge.jexcelapi", name="jxl", version.ref = "xls"}
 
 # DI
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }

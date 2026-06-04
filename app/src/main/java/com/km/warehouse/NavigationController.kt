@@ -22,6 +22,7 @@ import androidx.navigation.compose.rememberNavController
 import com.km.warehouse.ui.DarkTopAppBar
 import com.km.warehouse.ui.NavigationStep
 import com.km.warehouse.ui.SharedViewModel
+import com.km.warehouse.ui.inventory.InventoryView
 import com.km.warehouse.ui.move_order.DocumentType
 import com.km.warehouse.ui.move_order.MoveOrderView
 import com.km.warehouse.ui.scan_to_file.ScanToFileView
@@ -61,7 +62,11 @@ fun NavigationController(viewModel: SharedViewModel) {
                 onScanToFileClick = {
                     navController.navigate(route = NavigationStep.ScanToFileScreen)
                 },
-                viewModel = viewModel)
+                onInventoryClick = {
+                    navController.navigate(route = NavigationStep.InventoryScreen)
+                },
+                viewModel = viewModel
+            )
         }
         composable<NavigationStep.ApprovedDocumentScreen> {
             Column(modifier = Modifier.fillMaxSize()) {
@@ -69,9 +74,12 @@ fun NavigationController(viewModel: SharedViewModel) {
                     title = { Text(stringResource(id = R.string.approved_documents)) },
                     modifier = Modifier.fillMaxWidth()
                 )
-                MoveOrderView(modifier = Modifier.fillMaxWidth(), documentType = DocumentType.APPROVED, onBackClick ={
-                    navController.popBackStack()
-                })
+                MoveOrderView(
+                    modifier = Modifier.fillMaxWidth(),
+                    documentType = DocumentType.APPROVED,
+                    onBackClick = {
+                        navController.popBackStack()
+                    })
 
             }
         }
@@ -85,9 +93,12 @@ fun NavigationController(viewModel: SharedViewModel) {
                     title = { Text(stringResource(id = R.string.issued_documents)) },
                     modifier = Modifier.fillMaxWidth()
                 )
-                MoveOrderView(modifier = Modifier.fillMaxWidth(), documentType = DocumentType.SEND, onBackClick ={
-                    navController.popBackStack()
-                })
+                MoveOrderView(
+                    modifier = Modifier.fillMaxWidth(),
+                    documentType = DocumentType.SEND,
+                    onBackClick = {
+                        navController.popBackStack()
+                    })
             }
         }
 
@@ -99,6 +110,10 @@ fun NavigationController(viewModel: SharedViewModel) {
                     modifier = Modifier.fillMaxWidth()
                 )
             }*/
+        }
+
+        composable<NavigationStep.InventoryScreen> {
+            InventoryView(onBackClick = { navController.popBackStack() })
         }
     }
 }

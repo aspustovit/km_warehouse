@@ -50,4 +50,27 @@
     <string name="text_update_settings">Перейти в налаштування</string>
     <string name="delete_order_dialog_message">Ви дійсно бажаєте видалити Документ.\nВсі данні будуть втрачені!</string>
     <string name="no_barcode_scan_error">не однаковий з вже відсканованими серійними номерами!</string>
+
+    //Інвентарізація
+    <string name="inventory">3. Інвентаризація</string>
+    <string name="inventory_segment_code">Код КМ</string>
+    <string name="find">Знайти</string>
+    <string name="inventory_find_message">Відскануйте QR або штрихкод!</string>
+    <string name="inventory_search">Виконується пошук за номером - </string>
+    <string name="comment">Коментар:</string>
+    <string name="fact">Фактична кількість:</string>
+    <string name="save">Зберегти</string>
+    <string name="part_inventory">Часткова інвентаризація.</string>
+    <string name="send_mail_title">Відправити eMail</string>
+    <string name="exit_dialog_message">Ви дійсно хочете вийти. Після виходу всі введені данні будуть втрачені. Сформуйте XLS файл щоб не втратити данні!</string>
+    //XLS
+    <string name="xls_substock">Підзапас</string>
+    <string name="xls_code">Код</string>
+    <string name="xls_manufacture_id">Код виробника</string>
+    <string name="xls_model">Модель</string>
+    <string name="xls_total">Кількість</string>
+    <string name="xls_free">Вільно</string>
+    <string name="xls_fact">Фактично</string>
+    <string name="xls_comments">SN/коментар</string>
+    <string name="xls_sheet">Сторінка</string>
 </resources>

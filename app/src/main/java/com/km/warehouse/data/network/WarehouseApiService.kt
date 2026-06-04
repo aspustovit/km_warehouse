@@ -2,6 +2,7 @@ package com.km.warehouse.data.network
 
 import com.km.warehouse.data.network.entity.BaseResponse
 import com.km.warehouse.data.network.entity.BayerEntity
+import com.km.warehouse.data.network.entity.InventoryEntity
 import com.km.warehouse.data.network.entity.ItemSerialEntity
 import com.km.warehouse.data.network.entity.ItemSerialSync
 import com.km.warehouse.data.network.entity.MoveOrderEntity
@@ -106,4 +107,9 @@ interface WarehouseApiService {
     fun setMoveOrderStatus(
         @Body moveOrderStatus: MoveOrderStatus
     ): Call<BaseResponse<Unit>>
+
+    //Інвентарізація
+    @Headers("Content-Type: application/json")
+    @GET("/api/main/item_onhand_quantity")
+    fun getInventoryBySegment(@Query("itemSegment1") itemSegment: String): Call<BaseResponse<List<InventoryEntity>>>
 }

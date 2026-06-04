@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,8 +37,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fieldbee.core.ui.compose.utils.getAppVersionName
@@ -202,6 +205,7 @@ fun MenuScreen(
     onIssuedDocumentClick: () -> Unit = {},
     onIncomeDocumentClick: () -> Unit = {},
     onScanToFileClick: () -> Unit = {},
+    onInventoryClick: () -> Unit = {},
     viewModel: SharedViewModel
 ) {
 
@@ -221,7 +225,18 @@ fun MenuScreen(
     ) {
         DarkTopAppBar(
             title = { Text(stringResource(id = R.string.main_screen_title)) },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            actions = {
+                IconButton(onClick = {
+                    onIncomeDocumentClick.invoke()
+                }) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_settings),
+                        contentDescription = "",
+                        tint = MaterialTheme.colorScheme.surface
+                    )
+                }
+            }
         )
         CustomOutlinedImageButton(
             modifier = Modifier
@@ -269,17 +284,17 @@ fun MenuScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             startIcon = {
                 Icon(
-                    painterResource(id = R.drawable.ic_settings),
+                    painterResource(id = R.drawable.ic_inventory),
                     contentDescription = null
                 )
             },
             onClick = {
-                onIncomeDocumentClick.invoke()
+                onInventoryClick.invoke()
             },
             enabled = true,
             text = {
                 Text(
-                    text = stringResource(id = R.string.settings),
+                    text = stringResource(id = R.string.inventory),
                     fontSize = 16.sp
                 )
             })

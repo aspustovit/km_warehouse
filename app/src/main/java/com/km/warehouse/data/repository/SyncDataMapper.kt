@@ -1,11 +1,14 @@
 package com.km.warehouse.data.repository
 
+import androidx.compose.ui.res.integerResource
 import com.km.warehouse.data.entity.ItemsSerial
 import com.km.warehouse.data.entity.MoveOrder
 import com.km.warehouse.data.entity.MoveOrderItem
+import com.km.warehouse.data.network.entity.InventoryEntity
 import com.km.warehouse.data.network.entity.ItemSerialSync
 import com.km.warehouse.data.network.entity.MoveOrderEntity
 import com.km.warehouse.data.network.entity.MoveOrderItemsEntity
+import com.km.warehouse.domain.usecase.inventory.InventoryModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -49,7 +52,8 @@ fun ItemsSerial.toItemSerialSync(): ItemSerialSync {
 }
 
 fun MoveOrderItem.toMoveOrderItemSync(): MoveOrderItemsEntity {
-    return MoveOrderItemsEntity(id = id,
+    return MoveOrderItemsEntity(
+        id = id,
         moveOrderId = moveOrderId,
         quantity = quantity,
         qtyGiven = qtyGiven,
@@ -58,5 +62,19 @@ fun MoveOrderItem.toMoveOrderItemSync(): MoveOrderItemsEntity {
         description = description,
         itemSegment1 = itemSegment ?: "",
         mfgPartNum = mfrCode,
-        mfgPartNumExp = mfgPartNumExp)
+        mfgPartNumExp = mfgPartNumExp
+    )
+}
+
+fun InventoryEntity.toInventoryModel(): InventoryModel {
+    return InventoryModel(
+        inventoryItemId = inventoryItemId,
+        itemSegment = itemSegment,
+        mfgPartNumber = mfgPartNumber,
+        freeQuantity = freeQuantity,
+        quantity = quantity,
+        itemDescription = itemDescription,
+        subInventoryCode = subInvintoryCode,
+        organizationName = organizationName
+    )
 }

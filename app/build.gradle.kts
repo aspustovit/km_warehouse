@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.lottie.compose)
     implementation(libs.material3)
 
+    implementation(libs.exel)
     // KSP for Room compiler (for each target platform in KMP)
     ksp(libs.androidx.room.compiler)
 /*    add("kspAndroid", libs.androidx.room.compiler)

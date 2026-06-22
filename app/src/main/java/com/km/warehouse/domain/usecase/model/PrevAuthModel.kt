@@ -6,5 +6,6 @@ package com.km.warehouse.domain.usecase.model
 data class PrevAuthModel(
     val token: String,
     val refreshToken: String,
-    val userName: String
+    val userName: String,
+    val pass: String
 )

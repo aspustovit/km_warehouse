@@ -13,5 +13,8 @@ data class InventoryState(
     val errorData: ErrorData? = null,
     val error: String? = null,
     val selectedInventory: InventoryModel? = null,
-    val showExitDialog: Boolean = false
+    val showExitDialog: Boolean = false,
+    val showLoadFileDialog: Boolean = false,
+    val parseExelProgress: Boolean = false,
+    val showFullInventoryScreen: Boolean = false
 )

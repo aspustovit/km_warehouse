@@ -2,10 +2,12 @@ package com.km.warehouse
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.app.ComponentCaller
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
 import android.os.Build
@@ -22,6 +24,7 @@ import android.view.KeyEvent.KEYCODE_TV_SATELLITE_SERVICE
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -64,7 +67,31 @@ class MainActivity : ComponentActivity() {
     private var dataToWrite: String = ""
     private lateinit var writeTagFilters: Array<IntentFilter>
 
-    @SuppressLint("RestrictedApi")
+    // Register the launcher and handle the result URI
+    private val selectFileLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        Log.d("EXEL", "$uri")
+        if (uri != null) {
+            // Process the selected file URI
+            viewModel.onFileSelect(uri)
+        } else {
+            // User canceled the operation
+        }
+    }
+
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?,
+        caller: ComponentCaller
+    ) {
+        super.onActivityResult(requestCode, resultCode, data, caller)
+        Log.d("EXEL", "$resultCode - $requestCode --> $data")
+    }
+
+
+            @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(e: KeyEvent): Boolean {
         Log.d("NAV_CONTROLLER", "$e")
         if (e.action == KeyEvent.ACTION_DOWN && e.keyCode != KEYCODE_TV_SATELLITE_SERVICE

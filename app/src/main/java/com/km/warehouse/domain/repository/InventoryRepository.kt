@@ -1,5 +1,8 @@
 package com.km.warehouse.domain.repository
 
+import android.net.Uri
+import com.km.warehouse.domain.usecase.inventory.InventoryFileModel
+import com.km.warehouse.domain.usecase.inventory.InventoryModel
 import com.km.warehouse.domain.usecase.inventory.InventorySegmentModel
 
 /**
@@ -7,4 +10,18 @@ import com.km.warehouse.domain.usecase.inventory.InventorySegmentModel
  */
 interface InventoryRepository {
     suspend fun loadInventoryBySegment(itemSegment: String): InventorySegmentModel
+
+    suspend fun loadInventoryByExel(fileUri: Uri, fileName: String): Boolean
+
+    suspend fun geInventoryByFile(fileId: Int, mfgPartNumber: String): InventorySegmentModel
+
+    suspend fun getInventoryFiles(): List<InventoryFileModel>
+
+    suspend fun deleteInventoryFile(fileId: Int): Boolean
+
+    suspend fun renameFile(fileId: Int, newName: String): Boolean
+
+    suspend fun updateInventoryModelInFile(inventoryModel: InventoryModel): Boolean
+
+    suspend fun exportAllInventoryModelFileData(fileId: Int): Uri?
 }

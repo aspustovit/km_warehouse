@@ -56,6 +56,7 @@ class MoveOrderItemViewModel(
         val SERIAL_NUMBER_ALREDY_FINISH = 1025
         val SERIAL_NUMBER_ALREDY_ADD = 1005
         val NO_SERIAL_NUMBER_CONFLICT = 1006
+        val PARCE_FILE_ERROR = 1007
     }
 
     private var _viewState: MutableStateFlow<MoveOrderState> = MutableStateFlow(

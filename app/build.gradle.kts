@@ -18,8 +18,8 @@ android {
         applicationId = "com.km.warehouse"
         minSdk = 28
         targetSdk = 36
-        versionCode = 21
-        versionName = "1.1.4"
+        versionCode = 23
+        versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -77,6 +77,7 @@ dependencies {
     implementation(libs.material3)
 
     implementation(libs.exel)
+    implementation(libs.exel.apache)
     // KSP for Room compiler (for each target platform in KMP)
     ksp(libs.androidx.room.compiler)
 /*    add("kspAndroid", libs.androidx.room.compiler)

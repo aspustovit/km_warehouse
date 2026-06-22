@@ -1,8 +1,13 @@
 package com.km.warehouse.ui.inventory
 
+import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,8 +35,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat.startActivityForResult
+import com.km.warehouse.MainActivity
 import com.km.warehouse.R
 import com.km.warehouse.ui.DarkTopAppBar
+import com.km.warehouse.ui.inventory.full.FilesInventoryList
 import com.km.warehouse.ui.sync.ErrorDialog
 import com.km.warehouse.ui.sync.Loader
 import com.km.warehouse.ui.sync.WarningDialog
@@ -81,86 +89,109 @@ fun InventoryView(onBackClick: () -> Unit) {
             viewModel.cancelError()
         })
     }
-    if (state.value.selectedInventory != null) {
-        EditInventoryView(
-            state.value.selectedInventory!!,
-            onInventorySaveClick = { fact ->
-                viewModel.updateInventory(fact)
-            },
-            onBackClick = {
-                viewModel.editInventory(null)
-            })
+
+    if(state.value.showFullInventoryScreen) {
+        FilesInventoryList(onBackClick = {
+            viewModel.cancelFullInventoryScreen()
+        })
     } else {
-        Column(modifier = Modifier.fillMaxSize()) {
-            DarkTopAppBar(
-                title = { Text(stringResource(id = R.string.inventory)) },
-                modifier = Modifier.fillMaxWidth(),
-                actions = {
-                    IconButton(onClick = {
-                        val dataForXls = viewModel.viewState.value
-                        val fileUri = ExcelExporter.export(
-                            context,
-                            dataForXls.inventory,
-                            dataForXls.inventoryBarcode
-                        )
-                        Log.v("EXECEL", "$fileUri")
-                        val emailIntent = ExcelExporter.getIntentForMail(
-                            subject = context.getString(R.string.part_inventory),
-                            uri = fileUri,
-                            context = context
-                        )
-                        val openInChooser = Intent.createChooser(
-                            emailIntent,
-                            context.getString(R.string.send_mail_title)
-                        )
-                        openInChooser.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        context.startActivity(openInChooser)
-                        //viewModel.exportToXLS()
-                    }) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_xsl),
-                            contentDescription = "",
-                            tint = MaterialTheme.colorScheme.surface
-                        )
+        if (state.value.selectedInventory != null) {
+            EditInventoryView(
+                state.value.selectedInventory!!,
+                onInventorySaveClick = { fact ->
+                    viewModel.updateInventory(fact)
+                },
+                onBackClick = {
+                    viewModel.editInventory(null)
+                })
+        } else {
+            Column(modifier = Modifier.fillMaxSize()) {
+                DarkTopAppBar(
+                    title = { Text(stringResource(id = R.string.inventory)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    actions = {
+                        IconButton(onClick = {
+                            val dataForXls = viewModel.viewState.value
+                            val fileUri = ExcelExporter.export(
+                                context,
+                                dataForXls.inventory,
+                                dataForXls.inventoryBarcode
+                            )
+                            val emailIntent = ExcelExporter.getIntentForMail(
+                                subject = context.getString(R.string.part_inventory),
+                                uri = fileUri,
+                                context = context
+                            )
+                            val openInChooser = Intent.createChooser(
+                                emailIntent,
+                                context.getString(R.string.send_mail_title)
+                            )
+                            openInChooser.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            context.startActivity(openInChooser)
+                            //viewModel.exportToXLS()
+                        }) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_xsl),
+                                contentDescription = "",
+                                tint = MaterialTheme.colorScheme.surface
+                            )
+                        }
+                        IconButton(onClick = {
+                            viewModel.showFullInventoryScreen()
+                            //viewModel.showImportExelFileDialog()
+                        }) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_database),
+                                contentDescription = "",
+                                tint = MaterialTheme.colorScheme.surface
+                            )
+                        }
+
+                    }
+                )
+
+                if (state.value.inventoryListLoading) {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        text = "${stringResource(id = R.string.inventory_search)} ${state.value.inventoryBarcode}",
+                        fontSize = 16.sp
+                    )
+                    Loader(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(136.dp)
+                            .width(260.dp)
+                    )
+                } else {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        text = stringResource(id = R.string.inventory_find_message),
+                        fontSize = 16.sp
+                    )
+                    if(state.value.inventoryBarcode.isNotBlank() && state.value.inventory.isEmpty()) {
+                        InventoryNotFoundView(barcode = state.value.inventoryBarcode)
                     }
                 }
-            )
 
-            if (state.value.inventoryListLoading) {
-                Text(
+                LazyColumn(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    text = "${stringResource(id = R.string.inventory_search)} ${state.value.inventoryBarcode}",
-                    fontSize = 16.sp
-                )
-                Loader(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(136.dp)
-                        .width(260.dp)
-                )
-            } else {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    text = stringResource(id = R.string.inventory_find_message),
-                    fontSize = 16.sp
-                )
-            }
-
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .focusable(),
-                state = listState
-            ) {
-                state.value.inventory.forEach {
-                    item {
-                        InventoryItemView(it, idx = firstVisibleIndex, onInventoryClick = { inv ->
-                            viewModel.editInventory(inv.first)
-                        })
+                        .fillMaxSize()
+                        .focusable(),
+                    state = listState
+                ) {
+                    state.value.inventory.forEach {
+                        item {
+                            InventoryItemView(
+                                it,
+                                idx = firstVisibleIndex,
+                                onInventoryClick = { inv ->
+                                    viewModel.editInventory(inv.first)
+                                })
+                        }
                     }
                 }
             }

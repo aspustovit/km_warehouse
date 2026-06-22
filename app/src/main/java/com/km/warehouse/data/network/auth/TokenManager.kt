@@ -6,6 +6,7 @@ import android.util.Log
 import com.auth0.jwt.JWT
 import com.km.warehouse.data.preference.KmWarehousePreference
 import com.km.warehouse.data.preference.KmWarehousePreference.LAST_LOGIN
+import com.km.warehouse.data.preference.KmWarehousePreference.PASS
 import com.km.warehouse.data.preference.KmWarehousePreference.REFRESH_TOKEN_KEY
 import com.km.warehouse.data.preference.KmWarehousePreference.TOKEN_KEY
 import java.util.Date
@@ -65,9 +66,17 @@ class TokenManager(private val context: Context) {
             .apply()
     }
 
+    fun savePass(pass: String) {
+        tokenPreferences.edit()
+            .putString(PASS, pass)
+            .apply()
+    }
+
     fun getLastLogin(): String =
         tokenPreferences.getString(LAST_LOGIN, "")!!
 
+    fun getPass(): String =
+        tokenPreferences.getString(PASS, "")!!
 
     fun deleteRefreshToken() {
         tokenPreferences.edit()

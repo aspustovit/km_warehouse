@@ -30,8 +30,12 @@ class AuthViewModel(
         Log.e("AuthLogin_INIT", "initAuthState")
         viewModelScope.launch {
             getPrevLoginUseCase.invoke(Unit).onSuccess {
-                _authState.update { state ->
-                    state.copy(prevLogin = it)
+                if(it.userName.isEmpty() && it.pass.isEmpty()) {
+                    _authState.update { state ->
+                        state.copy(prevLogin = it)
+                    }
+                } else {
+                    logIn(it.userName, it.pass)
                 }
             }
         }

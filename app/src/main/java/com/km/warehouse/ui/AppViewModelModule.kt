@@ -2,6 +2,7 @@ package com.km.warehouse.ui
 
 import com.km.warehouse.ui.auth.AuthViewModel
 import com.km.warehouse.ui.inventory.InventoryViewModel
+import com.km.warehouse.ui.inventory.full.FullInventoryViewModel
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel
 import com.km.warehouse.ui.settings.SettingsViewModel
 import com.km.warehouse.ui.sync.SyncViewModel
@@ -44,7 +45,25 @@ object AppViewModelModule {
         }
         viewModel { AuthViewModel(loginUseCase = get(), getPrevLoginUseCase = get()) }
         viewModel { SettingsViewModel(context = get()) }
-        viewModel { InventoryViewModel(getInventorySegmentUseCase = get(), observeBarcodeDataUseCase = get()) }
+        viewModel {
+            InventoryViewModel(
+                getInventorySegmentUseCase = get(),
+                observeBarcodeDataUseCase = get(),
+                uploadInventoryExelFileUseCase = get()
+            )
+        }
+        viewModel {
+            FullInventoryViewModel(
+                uploadInventoryExelFileUseCase = get(),
+                getInventoryByFileUseCase = get(),
+                getInventoryFilesUseCase = get(),
+                observeBarcodeDataUseCase = get(),
+                deleteInventoryFileUseCase = get(),
+                renameInventoryFileUseCase = get(),
+                updateFullInventoryModelUseCase = get(),
+                exportFullInventoryUseCase = get()
+            )
+        }
     }
 
     val parentModule =

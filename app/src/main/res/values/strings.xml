@@ -61,6 +61,7 @@
     <string name="fact">Фактична кількість:</string>
     <string name="save">Зберегти</string>
     <string name="part_inventory">Часткова інвентаризація.</string>
+    <string name="full_inventory">Інвентаризація.</string>
     <string name="send_mail_title">Відправити eMail</string>
     <string name="exit_dialog_message">Ви дійсно хочете вийти. Після виходу всі введені данні будуть втрачені. Сформуйте XLS файл щоб не втратити данні!</string>
     //XLS
@@ -73,4 +74,14 @@
     <string name="xls_fact">Фактично</string>
     <string name="xls_comments">SN/коментар</string>
     <string name="xls_sheet">Сторінка</string>
+
+    <string name="xls_file_date">Дата:</string>
+    <string name="inventory_not_found">"Не знайдено інвентаризаціїя з кодом - "</string>
+    <string name="delete">Видалити</string>
+    <string name="rename">Перейменувати</string>
+    <string name="file_name">Назва файлу</string>
+    <string name="delete_inventory_dialog_message">Ви дійсно бажаєте видалити Файл інвентаризації?\nВсі данні будуть втрачені!</string>
+    <string name="new_name_file">Введіть назку інвентарізації</string>
+    <string name="new_name_file_load_message">Завантаження данних з файлу…</string>
+    <string name="file_load_error">Помилка завантаження файлу! \nВпевнфться що файл фомату *.xls або *.xlsx\nТакож перевірте коректність файлу що завантажуєте.</string>
 </resources>

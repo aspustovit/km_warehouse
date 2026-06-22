@@ -1,5 +1,6 @@
 package com.km.warehouse.ui
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.km.warehouse.domain.usecase.ObserveBarcodeDataUseCase
@@ -61,5 +62,9 @@ class SharedViewModel(
         viewModelScope.launch {
             logoutUseCase.invoke(Unit)
         }
+    }
+
+    fun onFileSelect(uri: Uri) {
+
     }
 }

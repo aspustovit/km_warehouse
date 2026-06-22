@@ -20,7 +20,7 @@ class AuthRepositoryImpl(val authApiService: AuthApiService, val context: Contex
     AuthRepository {
     override suspend fun login(auth: AuthRequest): LoginModel {
         try {
-            val response = authApiService.login(auth)
+            val response = authApiService.login(auth).execute()
             val loginResponse = response.body()
             val tokenManager = TokenManager(context)
             val gson = Gson()
@@ -30,6 +30,7 @@ class AuthRepositoryImpl(val authApiService: AuthApiService, val context: Contex
                 tokenManager.saveToken(it.token)
                 tokenManager.saveRefreshToken(it.refreshToken)
                 tokenManager.saveLastLogin(it.userName)
+                tokenManager.savePass(auth.password)
             }
             Log.i("AUTH_RESPONCE", "Return")
             var errorData: ErrorData? = null
@@ -54,7 +55,7 @@ class AuthRepositoryImpl(val authApiService: AuthApiService, val context: Contex
         val tokenManager = TokenManager(context)
         try {
             Log.v("AuthLogin_S", "${tokenManager.getToken()}")
-            val response = authApiService.refreshFullToken(tokenManager.getRefreshToken())
+            val response = authApiService.refreshFullToken(tokenManager.getRefreshToken()).execute()
             val tokenResponse = response.body()
             Log.d("AuthLogin_R", "${tokenResponse}")
             if (tokenResponse != null) {
@@ -74,7 +75,8 @@ class AuthRepositoryImpl(val authApiService: AuthApiService, val context: Contex
         return PrevAuthModel(
             token = tokenManager.getToken(),
             refreshToken = tokenManager.getRefreshToken(),
-            userName = tokenManager.getLastLogin()
+            userName = tokenManager.getLastLogin(),
+            pass = tokenManager.getPass()
         )
     }
 

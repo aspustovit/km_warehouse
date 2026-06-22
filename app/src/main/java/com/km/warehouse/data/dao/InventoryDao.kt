@@ -1,0 +1,22 @@
+package com.km.warehouse.data.dao
+
+import androidx.room.Dao
+import androidx.room.Query
+import com.km.warehouse.data.entity.Inventory
+import com.km.warehouse.data.entity.ItemsSerial
+
+/**
+ * Create by Pustovit Oleksandr on 08/06/2026
+ */
+@Dao
+abstract class InventoryDao : BaseDao<Inventory>() {
+    @Query("SELECT b.* FROM inventory b where b.file_id == :fileId and b.mfg_part_number = :mfgPartNumber")
+    abstract fun getInventoryByFile(fileId: Int, mfgPartNumber: String): List<Inventory>
+
+    @Query("DELETE FROM inventory WHERE file_id = :fileId")
+    abstract fun deleteInventoryByFile(fileId: Int): Int
+
+    @Query("SELECT b.* FROM inventory b where b.file_id == :fileId")
+    abstract fun exportInventoryByFile(fileId: Int): List<Inventory>
+
+}

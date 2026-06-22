@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.km.warehouse.data.network.AuthApiService
 import com.km.warehouse.data.network.AuthInterceptor
+import com.km.warehouse.data.network.TokenAuthenticator
 import com.km.warehouse.data.network.WarehouseApiService
 import com.km.warehouse.data.repository.AuthRepositoryImpl
 import com.km.warehouse.data.repository.BayerRepositoryImpl
@@ -13,6 +14,7 @@ import com.km.warehouse.domain.repository.AuthRepository
 import com.km.warehouse.domain.repository.InventoryRepository
 import com.km.warehouse.domain.repository.LocalWarehouseRepository
 import com.km.warehouse.domain.repository.SyncWarehouseRepository
+import okhttp3.Authenticator
 import okhttp3.OkHttpClient
 import org.koin.core.qualifier.named
 import org.koin.dsl.koinApplication
@@ -33,12 +35,41 @@ object AppDataModule {
 
     private val networkModule = module {
         koinApplication()
+        /*single<AuthApiService> {
+            get<Retrofit>(qualifier = retrofitClient).create(
+                AuthApiService::class.java
+            )
+        }*/
+/*
+        single<Authenticator> {
+            TokenAuthenticator(
+                context = get(),
+                authApiService = get()
+            )
+        }*/
+
+        single<AuthApiService> {
+            Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(AuthApiService::class.java)
+        }
+
+        single<Authenticator> {
+            TokenAuthenticator(
+                context = get(),
+                authApiService = get()
+            )
+        }
+
         single(qualifier = retrofitClient) {
             OkHttpClient.Builder()
                 .addInterceptor(interceptor = AuthInterceptor(context = get()))
                 .readTimeout(timeout = retrofitClientTimeout, unit = TimeUnit.SECONDS)
                 .connectTimeout(timeout = retrofitClientTimeout, unit = TimeUnit.SECONDS)
                 .writeTimeout(timeout = retrofitClientTimeout, unit = TimeUnit.SECONDS)
+                .authenticator(authenticator = get())
                 .build()
         }
 
@@ -50,11 +81,13 @@ object AppDataModule {
                 .addConverterFactory(GsonConverterFactory.create(get(qualifier = retrofitClient)))
                 .build()
         }
+/*
         single<AuthApiService> {
             get<Retrofit>(qualifier = retrofitClient).create(
                 AuthApiService::class.java
             )
-        }
+        }*/
+
         single<WarehouseApiService> {
             get<Retrofit>(qualifier = retrofitClient).create(
                 WarehouseApiService::class.java
@@ -86,7 +119,9 @@ object AppDataModule {
 
         single<InventoryRepository> {
             InventoryRepositoryImpl(
-                warehouseApiService = get()
+                warehouseApiService = get(),
+                context = get(),
+                database = get()
             )
         }
     }

@@ -1,10 +1,12 @@
 package com.km.warehouse.ui.inventory
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.km.warehouse.domain.usecase.GetInventorySegmentUseCase
 import com.km.warehouse.domain.usecase.ObserveBarcodeDataUseCase
+import com.km.warehouse.domain.usecase.UploadInventoryExelFileUseCase
 import com.km.warehouse.domain.usecase.inventory.InventoryModel
 import com.km.warehouse.domain.usecase.inventory.UpdateInventoryModel
 import com.km.warehouse.ui.move_order.MoveOrderState
@@ -21,7 +23,8 @@ import kotlinx.coroutines.launch
  */
 class InventoryViewModel(
     private val getInventorySegmentUseCase: GetInventorySegmentUseCase,
-    private val observeBarcodeDataUseCase: ObserveBarcodeDataUseCase
+    private val observeBarcodeDataUseCase: ObserveBarcodeDataUseCase,
+    private val uploadInventoryExelFileUseCase: UploadInventoryExelFileUseCase
 ) :
     ViewModel() {
 
@@ -103,5 +106,17 @@ class InventoryViewModel(
 
     fun cancelExitWarning() {
         _viewState.update { it.copy(showExitDialog = false) }
+    }
+
+    fun showImportExelFileDialog() {
+        _viewState.update { it.copy(showLoadFileDialog = true) }
+    }
+
+    fun showFullInventoryScreen() {
+        _viewState.update { it.copy(showFullInventoryScreen = true) }
+    }
+
+    fun cancelFullInventoryScreen() {
+        _viewState.update { it.copy(showFullInventoryScreen = false) }
     }
 }

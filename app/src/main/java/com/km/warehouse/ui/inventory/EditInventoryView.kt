@@ -44,7 +44,8 @@ import com.km.warehouse.ui.DarkTopAppBar
 fun EditInventoryView(
     item: InventoryModel,
     onBackClick: () -> Unit,
-    onInventorySaveClick: (InventoryModel) -> Unit
+    onInventorySaveClick: (InventoryModel) -> Unit,
+    showToolbar: Boolean = true
 ) {
     val factQuantity = item.factQuantity.toInt()
     var fact by remember { mutableStateOf(if (factQuantity == 0) "" else factQuantity.toString()) }
@@ -55,13 +56,15 @@ fun EditInventoryView(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            DarkTopAppBar(
-                title = { Text(stringResource(id = R.string.inventory)) },
-                modifier = Modifier.fillMaxWidth(),
-                actions = {
-                }
-            )
+        if (showToolbar) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                DarkTopAppBar(
+                    title = { Text(stringResource(id = R.string.inventory)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    actions = {
+                    }
+                )
+            }
         }
 
         Card(
@@ -156,9 +159,14 @@ fun EditInventoryView(
                 )
             },
             onClick = {
-                item.factQuantity = if(fact.isNullOrEmpty()) 0.0 else fact.toDouble()
-                item.comments = comments
-                onInventorySaveClick.invoke(item)
+                /*item.factQuantity = if(fact.isNullOrEmpty()) 0.0 else fact.toDouble()
+                item.comments = comments*/
+                onInventorySaveClick.invoke(
+                    item.copy(
+                        comments = comments,
+                        factQuantity = if (fact.isNullOrEmpty()) 0.0 else fact.toDouble()
+                    )
+                )
             },
             enabled = true,
             text = {

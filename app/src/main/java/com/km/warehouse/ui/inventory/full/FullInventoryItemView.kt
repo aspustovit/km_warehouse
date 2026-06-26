@@ -14,11 +14,14 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.km.warehouse.domain.usecase.inventory.InventoryFileModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.km.warehouse.R
 import com.km.warehouse.domain.usecase.inventory.InventoryModel
 import com.km.warehouse.ui.inventory.InventoryItemView
+import com.km.warehouse.ui.inventory.InventoryNotFoundView
 
 /**
  * Create by Pustovit Oleksandr on 09/06/2026
@@ -27,8 +30,12 @@ import com.km.warehouse.ui.inventory.InventoryItemView
 fun FullInventoryItemView(
     fileInventoryModels: List<InventoryModel>,
     onBackClick: () -> Unit,
-    onInventoryClick: (Pair<InventoryModel, Int>) -> Unit
+    onInventoryClick: (Pair<InventoryModel, Int>) -> Unit,
+    barcode: String?,
+    setAsDoneClick: (InventoryModel) -> Unit,
+    showNoInventoryMessage: Boolean
 ) {
+    val quantityEqual = stringResource(R.string.quantity_equal)
     val listState = rememberLazyListState()
     val firstVisibleIndex by remember {
         derivedStateOf { listState.firstVisibleItemIndex }
@@ -38,20 +45,38 @@ fun FullInventoryItemView(
         onBackClick.invoke()
     }
     Column(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .focusable(),
-            state = listState
-        ) {
-            fileInventoryModels.forEach {
-                item {
-                    InventoryItemView(
-                        it,
-                        idx = firstVisibleIndex,
-                        onInventoryClick = { inv ->
-                            onInventoryClick(Pair(it, firstVisibleIndex))
-                        })
+        if(fileInventoryModels.isEmpty() && barcode != null && showNoInventoryMessage) {
+            InventoryNotFoundView(barcode)
+        } else {
+            if(fileInventoryModels.isEmpty()){
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    text = stringResource(id = R.string.inventory_find_message),
+                    fontSize = 16.sp
+                )
+            }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .focusable(),
+                state = listState
+            ) {
+                fileInventoryModels.forEach {
+                    item {
+                        InventoryItemView(
+                            it,
+                            idx = firstVisibleIndex,
+                            setAsDoneClick = { item ->
+                                /*item.factQuantity = item.quantity
+                                item.comments = quantityEqual*/
+                                setAsDoneClick.invoke(item.copy(comments = quantityEqual, factQuantity = item.quantity))
+                            },
+                            onInventoryClick = { inv ->
+                                onInventoryClick(Pair(it, firstVisibleIndex))
+                            })
+                    }
                 }
             }
         }

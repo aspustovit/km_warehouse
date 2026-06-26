@@ -21,5 +21,7 @@ data class FullInventoryState(
     val fileModelForDelete: InventoryFileModel? = null,
     val fileName: String = "",
     val selectedInventory: InventoryModel? = null,
-    val xlsFileUri: Uri? = null
+    val xlsFileUri: Uri? = null,
+    val barcode: String? = null,
+    val showNoInventoryMessage: Boolean = true
 )

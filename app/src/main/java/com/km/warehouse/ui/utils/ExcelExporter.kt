@@ -49,7 +49,7 @@ object ExcelExporter {
 
         try {
             val sd: File = context.getExternalFilesDir(null)!!
-            val csvFile = "inventory${barcode}.xls"
+            val csvFile = "inventory_${barcode}.xls"
 
             val directory = File(sd.absolutePath)
 

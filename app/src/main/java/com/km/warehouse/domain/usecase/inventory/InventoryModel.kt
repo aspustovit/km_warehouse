@@ -4,6 +4,7 @@ package com.km.warehouse.domain.usecase.inventory
  * Create by Pustovit Oleksandr on 01/06/2026
  */
 data class InventoryModel(
+    val id: Int,
     val inventoryItemId: Long,
     val itemSegment: String,
     val mfgPartNumber: String,
@@ -12,8 +13,10 @@ data class InventoryModel(
     val subInventoryCode: String,
     val quantity: Double,
     val freeQuantity: Double,
-    val fileId: Int = 0
+    val fileId: Int = 0,
+    val factQuantity: Double = 0.0,
+    val comments: String = ""
 ) {
-    var factQuantity: Double = 0.0
-    var comments: String = ""
+/*    var factQuantity: Double = 0.0
+    var comments: String = ""*/
 }

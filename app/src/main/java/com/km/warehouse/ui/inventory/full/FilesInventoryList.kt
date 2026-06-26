@@ -76,7 +76,8 @@ fun FilesInventoryList(onBackClick: () -> Unit) {
             PARCE_FILE_ERROR -> {
                 ErrorDialog(
                     errorMessage = "${stringResource(R.string.file_load_error)}\n ${
-                        stringResource(R.string.file_name)} - ${it.message}",
+                        stringResource(R.string.file_name)
+                    } - ${it.message}",
                     onDismiss = {
                         viewModel.cancelError()
                     })
@@ -106,11 +107,13 @@ fun FilesInventoryList(onBackClick: () -> Unit) {
 
     Column(modifier = Modifier.fillMaxSize()) {
         DarkTopAppBar(
-            title = { if (state.value.selectedInventoryFile != null) {
-                Text(text = state.value.selectedInventoryFile!!.fileName)
-            } else {
-                Text(stringResource(id = R.string.inventory))
-            } },
+            title = {
+                if (state.value.selectedInventoryFile != null) {
+                    Text(text = state.value.selectedInventoryFile!!.fileName)
+                } else {
+                    Text(stringResource(id = R.string.inventory))
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
             actions = {
                 if (state.value.selectedInventoryFile != null) {
@@ -139,6 +142,7 @@ fun FilesInventoryList(onBackClick: () -> Unit) {
         if (state.value.selectedInventory != null) {
             EditInventoryView(
                 state.value.selectedInventory!!,
+                showToolbar = false,
                 onInventorySaveClick = { fact ->
                     viewModel.updateInventory(fact)
                 },
@@ -150,9 +154,13 @@ fun FilesInventoryList(onBackClick: () -> Unit) {
             FullInventoryItemView(
                 fileInventoryModels = state.value.fileInventoryModels,
                 onBackClick = { viewModel.removeFileSelection() },
+                setAsDoneClick = { fact -> viewModel.updateInventory(fact) },
                 onInventoryClick = { inv ->
                     viewModel.editInventory(inv.first)
-                })
+                },
+                barcode = state.value.barcode,
+                showNoInventoryMessage = state.value.showNoInventoryMessage
+            )
         } else {
             if (state.value.parseExelProgress) {
                 ParseXlsFileProgressView()
@@ -174,6 +182,8 @@ fun FilesInventoryList(onBackClick: () -> Unit) {
                                     showRenameDialog = true
                                 }, onDelete = { inventoryFile ->
                                     viewModel.setInventoryFileForDelete(inventoryFile)
+                                }, onExel = { exel ->
+                                    viewModel.exportFullInventoryToExel(exel)
                                 })
                         }
                     }

@@ -63,7 +63,7 @@ class FullInventoryViewModel(
     }
 
     fun loadExelFile(uri: Uri?) {
-        if(uri != null) {
+        if (uri != null) {
             _viewState.update {
                 it.copy(
                     showLoadFileDialog = false,
@@ -75,25 +75,29 @@ class FullInventoryViewModel(
                 uploadInventoryExelFileUseCase.invoke(Pair(uri, _viewState.value.fileName))
                     .onSuccess {
                         Log.d("EXEL", "Reload $it")
-                        if(it)
+                        if (it)
                             loadSavedFiles()
                         else {
                             _viewState.update {
                                 _viewState.value.copy(
-                                    errorData = ErrorData(status = PARCE_FILE_ERROR, message = _viewState.value.fileName, error = ""),
+                                    errorData = ErrorData(
+                                        status = PARCE_FILE_ERROR,
+                                        message = _viewState.value.fileName,
+                                        error = ""
+                                    ),
                                     processNewFile = false,
                                     parseExelProgress = false
                                 )
                             }
                         }
                     }.onFailure { error ->
-                    _viewState.update {
-                        _viewState.value.copy(
-                            error = error.toString(),
-                            processNewFile = false
-                        )
+                        _viewState.update {
+                            _viewState.value.copy(
+                                error = error.toString(),
+                                processNewFile = false
+                            )
+                        }
                     }
-                }
             }
         }
     }
@@ -111,7 +115,9 @@ class FullInventoryViewModel(
             _viewState.value.copy(
                 selectedInventoryFile = null,
                 fileInventoryModels = emptyList(),
-                xlsFileUri = null
+                xlsFileUri = null,
+                barcode = null,
+                showNoInventoryMessage = true
             )
         }
     }
@@ -119,12 +125,35 @@ class FullInventoryViewModel(
     fun updateInventory(fact: InventoryModel) {
         viewModelScope.launch {
             updateFullInventoryModelUseCase.invoke(fact).onSuccess {
-                _viewState.update { it.copy(selectedInventory = null) }
+                /*_viewState.update {
+                    it.copy(
+                        fileInventoryModels = emptyList(),
+                        selectedInventory = null,
+                        showNoInventoryMessage = false
+                    )
+                }
+                _viewState.value.barcode?.let { b ->
+                    searchInventoryInFile(b)
+                }*/
+                val inventory = ArrayList(viewState.value.fileInventoryModels)
+                var factInventory: InventoryModel? = null
+                var factIndex: Int = 0
+                var modelForRemove: InventoryModel? = null
+                inventory.forEachIndexed { index, model ->
+                    if(model.id == fact.id) {
+                        modelForRemove = model
+                        factIndex = index
+                        factInventory = fact
+                    }
+                }
+                factInventory?.let {
+                    inventory.remove(modelForRemove)
+                    inventory.add(factIndex, factInventory)
+                    _viewState.update { it.copy(fileInventoryModels = inventory.toList(), selectedInventory = null) }
+                }
             }
         }
-
     }
-
 
     fun editInventory(inv: InventoryModel?) {
         _viewState.update { it.copy(selectedInventory = inv) }
@@ -140,7 +169,9 @@ class FullInventoryViewModel(
                         fileModelForRename = null,
                         fileModelForDelete = null,
                         processNewFile = false,
-                        parseExelProgress = false
+                        parseExelProgress = false,
+                        barcode = null,
+                        showNoInventoryMessage = true
                     )
                 }
             }.onFailure { ex ->
@@ -157,16 +188,24 @@ class FullInventoryViewModel(
         val file = _viewState.value.selectedInventoryFile
         if (file != null) {
             viewModelScope.launch {
+                _viewState.update {
+                    _viewState.value.copy(
+                        barcode = barcode,
+                        showNoInventoryMessage = false
+                    )
+                }
                 getInventoryByFileUseCase.invoke(Pair(file.id, barcode)).onSuccess { inventories ->
                     _viewState.update {
                         _viewState.value.copy(
-                            fileInventoryModels = inventories.inventory
+                            fileInventoryModels = inventories.inventory,
+                            showNoInventoryMessage = true
                         )
                     }
                 }.onFailure { ex ->
                     _viewState.update {
                         _viewState.value.copy(
-                            error = ex.toString()
+                            error = ex.toString(),
+                            barcode = null
                         )
                     }
                 }
@@ -174,7 +213,7 @@ class FullInventoryViewModel(
         }
     }
 
-    fun setInventoryFileForDelete(inventoryFile: InventoryFileModel){
+    fun setInventoryFileForDelete(inventoryFile: InventoryFileModel) {
         _viewState.update {
             _viewState.value.copy(
                 fileModelForDelete = inventoryFile
@@ -183,7 +222,7 @@ class FullInventoryViewModel(
     }
 
     fun deleteFile() {
-        if(_viewState.value.fileModelForDelete == null)
+        if (_viewState.value.fileModelForDelete == null)
             return
 
         viewModelScope.launch {
@@ -244,8 +283,9 @@ class FullInventoryViewModel(
         }
     }
 
-    fun exportFullInventoryToExel() {
-        _viewState.value.selectedInventoryFile?.let {
+    fun exportFullInventoryToExel(exelToExportFile: InventoryFileModel? = null) {
+        val file = exelToExportFile ?: _viewState.value.selectedInventoryFile
+        file?.let {
             viewModelScope.launch {
                 exportFullInventoryUseCase.invoke(it.id).onSuccess { f ->
                     _viewState.update {

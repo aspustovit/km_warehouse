@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.km.warehouse.R
 import com.km.warehouse.domain.usecase.inventory.InventoryModel
+import com.km.warehouse.ui.OutlinedIconButton
 
 /**
  * Create by Pustovit Oleksandr on 01/06/2026
@@ -29,7 +30,8 @@ import com.km.warehouse.domain.usecase.inventory.InventoryModel
 fun InventoryItemView(
     item: InventoryModel,
     idx: Int,
-    onInventoryClick: (Pair<InventoryModel, Int>) -> Unit
+    onInventoryClick: (Pair<InventoryModel, Int>) -> Unit,
+    setAsDoneClick: (InventoryModel) -> Unit
 ) {
     Spacer(modifier = Modifier.height(8.dp))
 
@@ -60,15 +62,21 @@ fun InventoryItemView(
                 contentDescription = null,
                 tint = tintColor
             )
-            Text(
+            /*Text(
                 modifier = Modifier.padding(start = 8.dp),
                 text = item.organizationName + ": ",
                 fontSize = 16.sp
-            )
+            )*/
             Text(
+                modifier = Modifier.weight(1f, true),
                 text = item.subInventoryCode,
                 fontSize = 16.sp,
                 color = colorResource(R.color.color_text_secondary)
+            )
+            OutlinedIconButton(
+                resDrawable = R.drawable.ic_inventory_done,
+                resDescription = R.string.inventory_set_as_done,
+                onClick = { setAsDoneClick(item) }
             )
         }
         Row(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -79,7 +87,7 @@ fun InventoryItemView(
             )
         }
         Row(modifier = Modifier.padding(horizontal = 16.dp)) {
-            Text(text = item.itemDescription, fontSize = 12.sp)
+            Text(text = item.itemDescription, fontSize = 12.sp, maxLines = 3)
             Spacer(modifier = Modifier.height(8.dp))
         }
         Row(modifier = Modifier.padding(horizontal = 16.dp)) {

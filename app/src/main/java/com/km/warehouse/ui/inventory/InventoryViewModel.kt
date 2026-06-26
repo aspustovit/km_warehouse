@@ -48,6 +48,9 @@ class InventoryViewModel(
     }
 
     fun loadInventorySegment(segmentId: String) {
+        if(_viewState.value.showFullInventoryScreen)
+            return
+
         _viewState.update {
             _viewState.value.copy(
                 inventoryListLoading = true,
@@ -84,17 +87,19 @@ class InventoryViewModel(
     }
 
     fun updateInventory(fact: InventoryModel) {
-        val inventory = viewState.value.inventory.toMutableList()
+        val inventory = ArrayList(viewState.value.inventory)
         var factInventory: InventoryModel? = null
         var factIndex: Int = 0
+        var modelForRemove: InventoryModel? = null
         inventory.forEachIndexed { index, model ->
-            if(model == fact) {
+            if(model.id == fact.id) {
+                modelForRemove = model
                 factIndex = index
                 factInventory = fact
             }
         }
         factInventory?.let {
-            inventory.remove(factInventory)
+            inventory.remove(modelForRemove)
             inventory.add(factIndex, factInventory)
             _viewState.update { it.copy(inventory = inventory.toList(), selectedInventory = null) }
         }
@@ -117,6 +122,6 @@ class InventoryViewModel(
     }
 
     fun cancelFullInventoryScreen() {
-        _viewState.update { it.copy(showFullInventoryScreen = false) }
+        _viewState.update { it.copy(showFullInventoryScreen = false, inventoryBarcode = "") }
     }
 }

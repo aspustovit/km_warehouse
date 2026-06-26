@@ -49,7 +49,8 @@ fun FilesItemView(
     onFileClick: (InventoryFileModel) -> Unit,
     item: InventoryFileModel,
     onEdit: (InventoryFileModel) -> Unit,
-    onDelete: (InventoryFileModel) -> Unit
+    onDelete: (InventoryFileModel) -> Unit,
+    onExel: (InventoryFileModel) -> Unit
 ) {
     Spacer(modifier = Modifier.height(8.dp))
 
@@ -86,7 +87,7 @@ fun FilesItemView(
                 fontSize = 16.sp,
                 color = colorResource(R.color.color_text_secondary)
             )
-            FileDropdownMenu(onEdit = {onEdit(item)}, onDelete = {onDelete(item)})
+            FileDropdownMenu(onExel = {onExel(item)}, onEdit = { onEdit(item) }, onDelete = { onDelete(item) })
         }
 
         Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {

@@ -69,7 +69,7 @@ fun MoveOrderItem.toMoveOrderItemSync(): MoveOrderItemsEntity {
     )
 }
 
-fun InventoryEntity.toInventoryModel(): InventoryModel {
+fun InventoryEntity.toInventoryModel(id: Int): InventoryModel {
     return InventoryModel(
         inventoryItemId = inventoryItemId,
         itemSegment = itemSegment,
@@ -78,11 +78,12 @@ fun InventoryEntity.toInventoryModel(): InventoryModel {
         quantity = quantity,
         itemDescription = itemDescription,
         subInventoryCode = subInvintoryCode,
-        organizationName = organizationName
+        organizationName = organizationName,
+        id = id
     )
 }
 
-fun Inventory.toInventoryModel(): InventoryModel {
+fun Inventory.toInventoryModel(_id: Int): InventoryModel {
     val im = InventoryModel(
         inventoryItemId = id.toLong(),
         itemSegment = itemSegment,
@@ -92,10 +93,13 @@ fun Inventory.toInventoryModel(): InventoryModel {
         itemDescription = itemDescription,
         subInventoryCode = itemSegment,
         organizationName = mfgPartNumber,
-        fileId = fileId
+        fileId = fileId,
+        comments = comments ?: "",
+        factQuantity = factQuantity ?: 0.0,
+        id = _id
     )
-    im.comments = comments ?: ""
-    im.factQuantity = factQuantity ?: 0.0
+    /*im.comments = comments ?: ""
+    im.factQuantity = factQuantity ?: 0.0*/
     return im
 }
 

@@ -24,7 +24,8 @@ import com.km.warehouse.R
 @Composable
 fun FileDropdownMenu(
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onExel: () -> Unit
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }
 
@@ -52,6 +53,13 @@ fun FileDropdownMenu(
                 onClick = {
                     isMenuExpanded = false
                     onDelete()
+                }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.to_exel)) },
+                onClick = {
+                    isMenuExpanded = false
+                    onExel()
                 }
             )
         }

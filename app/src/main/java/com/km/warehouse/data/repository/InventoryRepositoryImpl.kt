@@ -4,7 +4,6 @@ import android.content.Context
 import android.icu.util.Calendar
 import android.net.Uri
 import android.util.Log
-import androidx.core.net.toFile
 import com.google.gson.Gson
 import com.km.warehouse.data.KmWarehouseDatabase
 import com.km.warehouse.data.entity.Inventory
@@ -19,6 +18,8 @@ import com.km.warehouse.ui.utils.ExcelExporter
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.ss.usermodel.WorkbookFactory
+import kotlin.collections.forEachIndexed
+import kotlin.collections.orEmpty
 
 /**
  * Create by Pustovit Oleksandr on 01/06/2026
@@ -36,8 +37,10 @@ class InventoryRepositoryImpl(
             errorData = parseError(response.errorBody()!!.string())
         }
         val data = response.body()?.data
+        val result = ArrayList<InventoryModel>()
+        data.orEmpty().forEachIndexed { index, entity -> result.add(entity.toInventoryModel(index)) }
         return InventorySegmentModel(
-            inventory = data.orEmpty().map { it.toInventoryModel() },
+            inventory = result,
             errorData = errorData
         )
     }
@@ -114,7 +117,9 @@ class InventoryRepositoryImpl(
         mfgPartNumber: String
     ): InventorySegmentModel {
         val inventory = database.inventoryDao().getInventoryByFile(fileId, mfgPartNumber)
-        return InventorySegmentModel(inventory = inventory.map { it.toInventoryModel() }, errorData = null)
+        val result = ArrayList<InventoryModel>()
+        inventory.forEachIndexed { index, entity -> result.add(entity.toInventoryModel(index)) }
+        return InventorySegmentModel(inventory = result, errorData = null)
     }
 
     override suspend fun getInventoryFiles(): List<InventoryFileModel> {
@@ -138,11 +143,12 @@ class InventoryRepositoryImpl(
     }
 
     override suspend fun exportAllInventoryModelFileData(fileId: Int): Uri? {
-        val fileInventoryModels = database.inventoryDao().exportInventoryByFile(fileId).map { it.toInventoryModel() }
+        val result = ArrayList<InventoryModel>()
+        database.inventoryDao().exportInventoryByFile(fileId).forEachIndexed { index, inventory -> result.add(inventory.toInventoryModel(index)) }
         val file = database.inventoryFilesDao().getInventoryFileById(fileId)
         val fileUri = ExcelExporter.export(
             context,
-            fileInventoryModels,
+            result,
             file.fileName.replace(" ","_")
         )
         return fileUri

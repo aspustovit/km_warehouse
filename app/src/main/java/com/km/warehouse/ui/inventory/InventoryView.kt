@@ -53,6 +53,7 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InventoryView(onBackClick: () -> Unit) {
+    val quantityEqual = stringResource(R.string.quantity_equal)
     val context = LocalContext.current
     val viewModel: InventoryViewModel = koinViewModel()
     val state = viewModel.viewState.collectAsState()
@@ -90,7 +91,7 @@ fun InventoryView(onBackClick: () -> Unit) {
         })
     }
 
-    if(state.value.showFullInventoryScreen) {
+    if (state.value.showFullInventoryScreen) {
         FilesInventoryList(onBackClick = {
             viewModel.cancelFullInventoryScreen()
         })
@@ -172,10 +173,11 @@ fun InventoryView(onBackClick: () -> Unit) {
                         text = stringResource(id = R.string.inventory_find_message),
                         fontSize = 16.sp
                     )
-                    if(state.value.inventoryBarcode.isNotBlank() && state.value.inventory.isEmpty()) {
+                    if (state.value.inventoryBarcode.isNotBlank() && state.value.inventory.isEmpty()) {
                         InventoryNotFoundView(barcode = state.value.inventoryBarcode)
                     }
                 }
+
 
                 LazyColumn(
                     modifier = Modifier
@@ -188,12 +190,18 @@ fun InventoryView(onBackClick: () -> Unit) {
                             InventoryItemView(
                                 it,
                                 idx = firstVisibleIndex,
+                                setAsDoneClick = { item ->
+                                    /*item.factQuantity = item.quantity
+                                    item.comments = quantityEqual*/
+                                    viewModel.updateInventory(item.copy(comments = quantityEqual, factQuantity = item.quantity))
+                                },
                                 onInventoryClick = { inv ->
                                     viewModel.editInventory(inv.first)
                                 })
                         }
                     }
                 }
+
             }
         }
     }

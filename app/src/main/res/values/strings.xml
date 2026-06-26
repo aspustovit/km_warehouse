@@ -84,4 +84,7 @@
     <string name="new_name_file">Введіть назку інвентарізації</string>
     <string name="new_name_file_load_message">Завантаження данних з файлу…</string>
     <string name="file_load_error">Помилка завантаження файлу! \nВпевнфться що файл фомату *.xls або *.xlsx\nТакож перевірте коректність файлу що завантажуєте.</string>
+    <string name="inventory_set_as_done">Позначити зробленим</string>
+    <string name="quantity_equal">Кількість однакова</string>
+    <string name="to_exel">Експортувати в exel</string>
 </resources>

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -25,10 +26,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.km.warehouse.R
 import com.km.warehouse.domain.usecase.inventory.InventoryFileModel
 import com.km.warehouse.ui.DarkTopAppBar
@@ -117,6 +125,16 @@ fun FilesInventoryList(onBackClick: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             actions = {
                 if (state.value.selectedInventoryFile != null) {
+                    IconButton(onClick = {
+                        viewModel.searchInventoryInFile("")
+                    }) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_no_barcodes),
+                            contentDescription = "",
+                            tint = MaterialTheme.colorScheme.surface
+                        )
+                    }
+
                     IconButton(onClick = {
                         viewModel.exportFullInventoryToExel()
                     }) {
@@ -235,4 +253,39 @@ fun FilesInventoryList(onBackClick: () -> Unit) {
         }
 
     }
+}
+
+fun Modifier.verticalScrollbar(
+    state: LazyListState,
+    width: Dp = 6.dp,
+    color: Color = Color.Gray.copy(alpha = 0.5f)
+): Modifier = this.drawWithContent {
+    // Draw the list contents first
+    drawContent()
+
+    val layoutInfo = state.layoutInfo
+    val totalItemsCount = layoutInfo.totalItemsCount
+
+    // Only draw if there are items and content overflows the view
+    if (totalItemsCount > 0) {
+        val firstVisibleItem = state.firstVisibleItemIndex
+        val visibleItemsCount = layoutInfo.visibleItemsInfo.size
+
+        if (visibleItemsCount < totalItemsCount) {
+            // Calculate ratios for position and height
+            val scrollProgress = firstVisibleItem.toFloat() / totalItemsCount
+            val sizeProgress = visibleItemsCount.toFloat() / totalItemsCount
+
+            val scrollbarHeight = size.height * sizeProgress
+            val scrollbarOffsetY = size.height * scrollProgress
+
+            drawRoundRect(
+                color = color,
+                topLeft = Offset(x = size.width - width.toPx(), y = scrollbarOffsetY),
+                size = Size(width = width.toPx(), height = scrollbarHeight),
+                cornerRadius = CornerRadius(width.toPx() / 2, width.toPx() / 2)
+            )
+        }
+    }
+
 }

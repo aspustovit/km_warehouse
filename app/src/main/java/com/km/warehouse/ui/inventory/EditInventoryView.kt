@@ -95,11 +95,11 @@ fun EditInventoryView(
                         contentDescription = null,
                         tint = tintColor
                     )
-                    Text(
+                    /*Text(
                         modifier = Modifier.padding(start = 8.dp),
                         text = item.organizationName + ": ",
                         fontSize = 16.sp
-                    )
+                    )*/
                     Text(
                         text = item.subInventoryCode,
                         fontSize = 16.sp,

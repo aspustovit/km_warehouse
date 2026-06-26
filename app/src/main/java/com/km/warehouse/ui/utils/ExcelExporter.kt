@@ -76,14 +76,16 @@ object ExcelExporter {
             }
             inventory.forEachIndexed { index, model ->
                 sheetA.addCell(Label(XLS_SUBSTOCK_ID,index+1 , model.subInventoryCode))
-                sheetA.addCell(Label(XLS_CODE_ID,index+1 , model.itemSegment))
-                sheetA.addCell(Label(XLS_MANUFACTURE_ID,index+1 , model.mfgPartNumber))
+                sheetA.addCell(Label(XLS_CODE_ID,index+1 , model.mfgPartNumber))
+                sheetA.addCell(Label(XLS_MANUFACTURE_ID,index+1 , model.itemSegment))
                 sheetA.addCell(Label(XLS_MODEL_ID,index+1 , model.itemDescription))
                 sheetA.addCell(Label(XLS_TOTAL_ID,index+1 , model.quantity.toString()))
                 sheetA.addCell(Label(XLS_FREE_ID,index+1 , model.freeQuantity.toString()))
                 sheetA.addCell(Label(XLS_FACT_ID,index+1 , model.factQuantity.toString()))
                 sheetA.addCell(Label(XLS_COMMENTS_ID,index+1 , model.comments))
             }
+            sheetA.setColumnView(XLS_SUBSTOCK_ID,25)
+            sheetA.setColumnView(XLS_CODE_ID,40)
             sheetA.setColumnView(XLS_MODEL_ID, 50)
             sheetA.setColumnView(XLS_MANUFACTURE_ID, 30)
             sheetA.setColumnView(XLS_COMMENTS_ID, 70)

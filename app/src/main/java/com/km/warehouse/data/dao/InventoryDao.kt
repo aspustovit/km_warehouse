@@ -10,7 +10,7 @@ import com.km.warehouse.data.entity.ItemsSerial
  */
 @Dao
 abstract class InventoryDao : BaseDao<Inventory>() {
-    @Query("SELECT b.* FROM inventory b where b.file_id == :fileId and b.mfg_part_number = :mfgPartNumber")
+    @Query("SELECT b.* FROM inventory b where b.file_id == :fileId and b.mfg_part_number like '%' || :mfgPartNumber || '%'")
     abstract fun getInventoryByFile(fileId: Int, mfgPartNumber: String): List<Inventory>
 
     @Query("DELETE FROM inventory WHERE file_id = :fileId")
@@ -18,5 +18,8 @@ abstract class InventoryDao : BaseDao<Inventory>() {
 
     @Query("SELECT b.* FROM inventory b where b.file_id == :fileId")
     abstract fun exportInventoryByFile(fileId: Int): List<Inventory>
+
+    @Query("SELECT b.* FROM inventory b where b.file_id == :fileId and b.inventory_item_id = :mfgPartNumber")
+    abstract fun getInventoryByItemId(fileId: Int, mfgPartNumber: String): List<Inventory>
 
 }

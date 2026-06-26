@@ -75,7 +75,9 @@ class InventoryRepositoryImpl(
                             CellType.STRING -> cell.stringCellValue
                             CellType.NUMERIC -> cell.numericCellValue.toString()
                             CellType.BOOLEAN -> cell.booleanCellValue.toString()
-                            CellType.BLANK -> ""
+                            CellType.BLANK -> {
+                                ""
+                            }
                             else -> "Unknown"
                         }
                         cells.add(cellValue.toString())
@@ -83,6 +85,8 @@ class InventoryRepositoryImpl(
                     }
                     Log.i("EXEL", "#${row.rowNum}")
                     if(row.rowNum != 0) {
+                        if(cells.size == 5)
+                            cells.add(1,"")
                         inventories.add(
                             Inventory(
                                 quantity = cells[4].toDouble(),
@@ -116,7 +120,9 @@ class InventoryRepositoryImpl(
         fileId: Int,
         mfgPartNumber: String
     ): InventorySegmentModel {
-        val inventory = database.inventoryDao().getInventoryByFile(fileId, mfgPartNumber)
+        var inventory = database.inventoryDao().getInventoryByFile(fileId, mfgPartNumber)
+        if(inventory.isEmpty())
+            inventory = database.inventoryDao().getInventoryByItemId(fileId, mfgPartNumber)
         val result = ArrayList<InventoryModel>()
         inventory.forEachIndexed { index, entity -> result.add(entity.toInventoryModel(index)) }
         return InventorySegmentModel(inventory = result, errorData = null)

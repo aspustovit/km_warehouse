@@ -6,6 +6,7 @@ import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.km.warehouse.data.preference.KmWarehousePreference
+import com.km.warehouse.data.preference.KmWarehousePreference.SERCH_BY_MFR_CODE
 import com.km.warehouse.data.preference.KmWarehousePreference.TERMINAL_ID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +16,7 @@ import kotlinx.coroutines.launch
 /**
  * Create by Pustovit Oleksandr on 30/03/2026
  */
-class SettingsViewModel(val context: Context): ViewModel() {
+class SettingsViewModel(val context: Context) : ViewModel() {
     private var _settingsState: MutableStateFlow<SettingsState> =
         MutableStateFlow(SettingsState(terminalId = ""))
     val viewState: StateFlow<SettingsState> = _settingsState
@@ -23,7 +24,10 @@ class SettingsViewModel(val context: Context): ViewModel() {
     fun loadTerminalId() {
         viewModelScope.launch {
             _settingsState.update {
-                it.copy(terminalId = getPreferences().getString(TERMINAL_ID, "")!!)
+                it.copy(
+                    terminalId = getPreferences().getString(TERMINAL_ID, "")!!,
+                    searchByMfrCode = getPreferences().getBoolean(SERCH_BY_MFR_CODE, true)
+                )
             }
         }
     }

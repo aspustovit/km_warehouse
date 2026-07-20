@@ -125,9 +125,11 @@ fun FilesInventoryList(onBackClick: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             actions = {
                 if (state.value.selectedInventoryFile != null) {
-                    IconButton(onClick = {
-                        viewModel.searchInventoryInFile("")
-                    }) {
+                    IconButton(
+                        modifier = Modifier.focusable(enabled = true),
+                        onClick = {
+                            viewModel.searchInventoryInFile("")
+                        }) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_no_barcodes),
                             contentDescription = "",
@@ -135,9 +137,11 @@ fun FilesInventoryList(onBackClick: () -> Unit) {
                         )
                     }
 
-                    IconButton(onClick = {
-                        viewModel.exportFullInventoryToExel()
-                    }) {
+                    IconButton(
+                        modifier = Modifier.focusable(enabled = true),
+                        onClick = {
+                            viewModel.exportFullInventoryToExel()
+                        }) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_xsl),
                             contentDescription = "",
@@ -145,7 +149,7 @@ fun FilesInventoryList(onBackClick: () -> Unit) {
                         )
                     }
                 } else {
-                    IconButton(onClick = {
+                    IconButton(modifier = Modifier.focusable(enabled = true), onClick = {
                         showNewFileDialog = true
                     }) {
                         Icon(

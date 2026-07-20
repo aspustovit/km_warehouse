@@ -93,7 +93,7 @@ fun InventoryItemView(
         Row(modifier = Modifier.padding(horizontal = 16.dp)) {
             Text(text = stringResource(R.string.quantity), fontSize = 16.sp)
             Text(
-                text = "${item.quantity.toInt()}/${item.freeQuantity.toInt()}${if (item.factQuantity == 0.0) "" else "/" + item.factQuantity.toInt()}",
+                text = "${item.quantity}/${item.freeQuantity}${if (item.factQuantity == 0.0) "" else "/" + item.factQuantity}",
                 fontSize = 16.sp
             )
             Spacer(modifier = Modifier.height(8.dp))

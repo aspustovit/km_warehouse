@@ -84,6 +84,13 @@ class TokenManager(private val context: Context) {
             .apply()
     }
 
+    fun deleteSaveCred() {
+        tokenPreferences.edit()
+            .putString(PASS, "")
+            .putString(LAST_LOGIN,"")
+            .apply()
+    }
+
     fun saveUserRoles(token: String) {
     }
 }

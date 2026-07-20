@@ -67,6 +67,9 @@ class AuthActivity : ComponentActivity() {
             val prevLogin = state.value.prevLogin
             LaunchedEffect(prevLogin != null && prevLogin.token.isNotBlank(), state.value.loginModel.isLoggedIn) {
                 state.value.apply {
+                    /*val intent = Intent(this@AuthActivity, MainActivity::class.java)
+                    startActivity(intent)
+                    finish()*/
                     Log.d("AUTH_RESPONCE_", "${state.value.prevLogin?.userName}")
                     if (prevLogin != null && prevLogin.token.isNotBlank()) {
                         val intent = Intent(this@AuthActivity, MainActivity::class.java)

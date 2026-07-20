@@ -38,7 +38,8 @@ class InventoryRepositoryImpl(
         }
         val data = response.body()?.data
         val result = ArrayList<InventoryModel>()
-        data.orEmpty().forEachIndexed { index, entity -> result.add(entity.toInventoryModel(index)) }
+        data.orEmpty()
+            .forEachIndexed { index, entity -> result.add(entity.toInventoryModel(index)) }
         return InventorySegmentModel(
             inventory = result,
             errorData = errorData
@@ -78,15 +79,16 @@ class InventoryRepositoryImpl(
                             CellType.BLANK -> {
                                 ""
                             }
+
                             else -> "Unknown"
                         }
                         cells.add(cellValue.toString())
                         rowData.append("$cellValue\t")
                     }
                     Log.i("EXEL", "#${row.rowNum}")
-                    if(row.rowNum != 0) {
-                        if(cells.size == 5)
-                            cells.add(1,"")
+                    if (row.rowNum != 0) {
+                        if (cells.size == 5)
+                            cells.add(1, "")
                         inventories.add(
                             Inventory(
                                 quantity = cells[4].toDouble(),
@@ -120,12 +122,45 @@ class InventoryRepositoryImpl(
         fileId: Int,
         mfgPartNumber: String
     ): InventorySegmentModel {
-        var inventory = database.inventoryDao().getInventoryByFile(fileId, mfgPartNumber)
-        if(inventory.isEmpty())
+        var inventory = if (mfgPartNumber.isNotEmpty()) {
+            val barcodes = mfgPartNumber.split("/")
+            val res = ArrayList<Inventory>()
+            Log.e("BARCODE_SCAN","$barcodes")
+            val filteredBarcodes = ArrayList<String>()
+            barcodes.forEachIndexed { index, b ->
+                if(b == "G" || b == "T") {
+                    if(index != 0) {
+                        val prevPart = filteredBarcodes[index-1]
+                        filteredBarcodes.remove(prevPart)
+                        filteredBarcodes.add("$prevPart/$b")
+                    }
+                } else {
+                    filteredBarcodes.add(b)
+                }
+            }
+            filteredBarcodes.forEach { b ->
+                if(b.length > 1)
+                    res.addAll(database.inventoryDao().getInventoryByItemSegment(fileId, b))
+            }
+            filteredBarcodes.forEach { b ->
+                if(b.length > 1)
+                   res.addAll(database.inventoryDao().getInventoryByFile(fileId, b))
+            }
+            filteredBarcodes.forEach { b ->
+                if(b.length > 1)
+                   res.addAll(database.inventoryDao().getInventoryByInventoryItem(fileId, b))
+            }
+            res
+        }
+        else {
+            database.inventoryDao().getEmptyBarcodes(fileId)
+        }
+        if (inventory.isEmpty())
             inventory = database.inventoryDao().getInventoryByItemId(fileId, mfgPartNumber)
         val result = ArrayList<InventoryModel>()
         inventory.forEachIndexed { index, entity -> result.add(entity.toInventoryModel(index)) }
-        return InventorySegmentModel(inventory = result, errorData = null)
+        val distinctList = result.distinctBy { it.inventoryItemId }
+        return InventorySegmentModel(inventory = distinctList, errorData = null)
     }
 
     override suspend fun getInventoryFiles(): List<InventoryFileModel> {
@@ -150,12 +185,13 @@ class InventoryRepositoryImpl(
 
     override suspend fun exportAllInventoryModelFileData(fileId: Int): Uri? {
         val result = ArrayList<InventoryModel>()
-        database.inventoryDao().exportInventoryByFile(fileId).forEachIndexed { index, inventory -> result.add(inventory.toInventoryModel(index)) }
+        database.inventoryDao().exportInventoryByFile(fileId)
+            .forEachIndexed { index, inventory -> result.add(inventory.toInventoryModel(index)) }
         val file = database.inventoryFilesDao().getInventoryFileById(fileId)
         val fileUri = ExcelExporter.export(
             context,
             result,
-            file.fileName.replace(" ","_")
+            file.fileName.replace(" ", "_")
         )
         return fileUri
     }

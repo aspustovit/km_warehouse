@@ -15,6 +15,8 @@ object KmWarehousePreference {
     val PASS: String = "last_pass"
     val TERMINAL_ID: String = "terminal_id"
 
+    val SERCH_BY_MFR_CODE: String = "mfr_code_search"
+
     lateinit var tokenPrefs: SharedPreferences
 
     fun init(context: Context) {

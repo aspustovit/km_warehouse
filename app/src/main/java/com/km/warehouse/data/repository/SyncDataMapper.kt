@@ -87,7 +87,7 @@ fun Inventory.toInventoryModel(_id: Int): InventoryModel {
     val im = InventoryModel(
         inventoryItemId = id.toLong(),
         itemSegment = itemSegment,
-        mfgPartNumber = mfgPartNumber,
+        mfgPartNumber = mfgPartNumber.ifBlank { itemSegment },
         freeQuantity = freeQuantity,
         quantity = quantity,
         itemDescription = itemDescription,

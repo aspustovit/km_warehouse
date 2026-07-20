@@ -15,6 +15,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -54,6 +56,14 @@ fun FullInventoryItemView(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     text = stringResource(id = R.string.inventory_find_message),
+                    fontSize = 16.sp
+                )
+            }else {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    text = AnnotatedString.fromHtml("${stringResource(id = R.string.search_result)} <b>$barcode</b>"),
                     fontSize = 16.sp
                 )
             }

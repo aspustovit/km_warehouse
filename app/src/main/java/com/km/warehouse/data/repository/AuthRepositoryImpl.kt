@@ -84,6 +84,7 @@ class AuthRepositoryImpl(val authApiService: AuthApiService, val context: Contex
         val tokenManager = TokenManager(context)
         tokenManager.deleteToken()
         tokenManager.deleteRefreshToken()
+        tokenManager.deleteSaveCred()
         //database.clearAllTables()
     }
 

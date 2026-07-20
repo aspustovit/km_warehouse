@@ -87,4 +87,5 @@
     <string name="inventory_set_as_done">Позначити зробленим</string>
     <string name="quantity_equal">Кількість однакова</string>
     <string name="to_exel">Експортувати в exel</string>
+    <string name="search_result">Результат пошуку за номером - </string>
 </resources>

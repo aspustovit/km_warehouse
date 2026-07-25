@@ -10,6 +10,6 @@ import com.km.warehouse.domain.usecase.inventory.InventorySegmentModel
 class GetInventorySegmentUseCase(private val inventoryRepository: InventoryRepository) :
     UseCase<InventorySegmentModel, String>() {
     override suspend fun run(params: String): Result<InventorySegmentModel> {
-        return Result.success(inventoryRepository.loadInventoryBySegment(params))
+        return Result.success(inventoryRepository.loadInventoryBySegment("LX.A9805.221"))
     }
 }

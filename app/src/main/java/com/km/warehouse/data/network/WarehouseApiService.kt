@@ -112,4 +112,8 @@ interface WarehouseApiService {
     @Headers("Content-Type: application/json")
     @GET("/api/main/item_onhand_quantity")
     fun getInventoryBySegment(@Query("itemSegment1") itemSegment: String): Call<BaseResponse<List<InventoryEntity>>>
+
+    @Headers("Content-Type: application/json")
+    @GET("/api/main/item_onhand_quantity_by_mfg_part_number")
+    fun getInventoryByMfrPartNumber(@Query("mfgPartNumber") mfgPartNumber: String): Call<BaseResponse<List<InventoryEntity>>>
 }

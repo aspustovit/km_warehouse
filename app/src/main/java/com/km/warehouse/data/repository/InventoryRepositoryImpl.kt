@@ -40,6 +40,15 @@ class InventoryRepositoryImpl(
         val result = ArrayList<InventoryModel>()
         data.orEmpty()
             .forEachIndexed { index, entity -> result.add(entity.toInventoryModel(index)) }
+        if(result.isEmpty()) {
+            val mfrResponse = warehouseApiService.getInventoryByMfrPartNumber(itemSegment).execute()
+            if (!mfrResponse.isSuccessful) {
+                errorData = parseError(mfrResponse.errorBody()!!.string())
+            }
+            val mfrData = mfrResponse.body()?.data
+            mfrData.orEmpty()
+                .forEachIndexed { index, entity -> result.add(entity.toInventoryModel(index)) }
+        }
         return InventorySegmentModel(
             inventory = result,
             errorData = errorData

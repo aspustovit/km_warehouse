@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.km.warehouse.data.converter.InventoryFileTypes
 import com.km.warehouse.data.network.entity.ErrorData
 import com.km.warehouse.domain.usecase.DeleteInventoryFileUseCase
 import com.km.warehouse.domain.usecase.ExportFullInventoryUseCase
@@ -13,6 +14,7 @@ import com.km.warehouse.domain.usecase.ObserveBarcodeDataUseCase
 import com.km.warehouse.domain.usecase.RenameInventoryFileUseCase
 import com.km.warehouse.domain.usecase.UpdateFullInventoryModelUseCase
 import com.km.warehouse.domain.usecase.UploadInventoryExelFileUseCase
+import com.km.warehouse.domain.usecase.base.DataHub
 import com.km.warehouse.domain.usecase.inventory.InventoryFileModel
 import com.km.warehouse.domain.usecase.inventory.InventoryModel
 import com.km.warehouse.ui.move_order.MoveOrderItemViewModel.Companion.NO_SERIAL_NUMBER_CONFLICT
@@ -76,7 +78,7 @@ class FullInventoryViewModel(
                     .onSuccess {
                         Log.d("EXEL", "Reload $it")
                         if (it)
-                            loadSavedFiles()
+                            loadSavedFiles(InventoryFileTypes.FULL)
                         else {
                             _viewState.update {
                                 _viewState.value.copy(
@@ -159,9 +161,9 @@ class FullInventoryViewModel(
         _viewState.update { it.copy(selectedInventory = inv) }
     }
 
-    fun loadSavedFiles() {
+    fun loadSavedFiles(fileTypes: InventoryFileTypes) {
         viewModelScope.launch {
-            getInventoryFilesUseCase.invoke(Unit).onSuccess { dbFiles ->
+            getInventoryFilesUseCase.invoke(fileTypes).onSuccess { dbFiles ->
                 _viewState.update {
                     _viewState.value.copy(
                         dbFiles = dbFiles,
@@ -171,7 +173,8 @@ class FullInventoryViewModel(
                         processNewFile = false,
                         parseExelProgress = false,
                         barcode = null,
-                        showNoInventoryMessage = true
+                        showNoInventoryMessage = true,
+                        fileTypes = fileTypes
                     )
                 }
             }.onFailure { ex ->
@@ -228,7 +231,8 @@ class FullInventoryViewModel(
         viewModelScope.launch {
             deleteInventoryFileUseCase.invoke(_viewState.value.fileModelForDelete!!).onSuccess {
                 if (it) {
-                    loadSavedFiles()
+                    loadSavedFiles(_viewState.value.fileTypes)
+                    DataHub.emitSavedBarcodeFileChange(true)
                 }
             }.onFailure { ex ->
                 _viewState.update {
@@ -271,7 +275,7 @@ class FullInventoryViewModel(
         _viewState.value.fileModelForRename?.let {
             viewModelScope.launch {
                 renameInventoryFileUseCase.invoke(Pair(it.id, newName)).onSuccess {
-                    loadSavedFiles()
+                    loadSavedFiles(_viewState.value.fileTypes)
                 }.onFailure { ex ->
                     _viewState.update {
                         _viewState.value.copy(

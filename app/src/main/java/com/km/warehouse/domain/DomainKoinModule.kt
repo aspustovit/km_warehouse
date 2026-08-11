@@ -10,11 +10,15 @@ import com.km.warehouse.domain.usecase.GetInventoryByFileUseCase
 import com.km.warehouse.domain.usecase.GetInventoryFilesUseCase
 import com.km.warehouse.domain.usecase.GetInventorySegmentUseCase
 import com.km.warehouse.domain.usecase.GetItemSerialFromDBUseCase
+import com.km.warehouse.domain.usecase.GetPartFilesInventoryFromDBUseCase
+import com.km.warehouse.domain.usecase.GetPartInventoryByFileIdUseCase
 import com.km.warehouse.domain.usecase.LoadBayerUseCase
 import com.km.warehouse.domain.usecase.LoadMoveOrdersUseCase
 import com.km.warehouse.domain.usecase.auth.LoginUseCase
 import com.km.warehouse.domain.usecase.ObserveBarcodeDataUseCase
+import com.km.warehouse.domain.usecase.ObservePartFileChangeUseCase
 import com.km.warehouse.domain.usecase.RenameInventoryFileUseCase
+import com.km.warehouse.domain.usecase.SavePartInventoryToDBUseCase
 import com.km.warehouse.domain.usecase.SaveSerialToDBUseCase
 import com.km.warehouse.domain.usecase.SetNoSerialsUseCase
 import com.km.warehouse.domain.usecase.SetQuantityGivenUseCase
@@ -63,6 +67,10 @@ object DomainKoinModule {
         factory { RenameInventoryFileUseCase(inventoryRepository = get()) }
         factory { UpdateFullInventoryModelUseCase(inventoryRepository = get()) }
         factory { ExportFullInventoryUseCase(inventoryRepository = get()) }
+        factory { SavePartInventoryToDBUseCase(inventoryRepository = get()) }
+        factory { GetPartFilesInventoryFromDBUseCase(inventoryRepository = get()) }
+        factory { GetPartInventoryByFileIdUseCase(inventoryRepository = get()) }
+        factory { ObservePartFileChangeUseCase() }
     }
 
     val parentModule = module {

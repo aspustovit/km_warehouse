@@ -2,6 +2,7 @@ package com.km.warehouse.data.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.km.warehouse.data.converter.InventoryFileTypes
 import com.km.warehouse.data.entity.InventoryFiles
 
 /**
@@ -10,8 +11,8 @@ import com.km.warehouse.data.entity.InventoryFiles
 @Dao
 abstract class InventoryFilesDao : BaseDao<InventoryFiles>(){
 
-    @Query("SELECT b.* FROM inventory_files b ")
-    abstract fun getInventoryFiles(): List<InventoryFiles>
+    @Query("SELECT b.* FROM inventory_files b where file_type = :fileTypes")
+    abstract fun getInventoryFiles(fileTypes: InventoryFileTypes = InventoryFileTypes.FULL): List<InventoryFiles>
 
     @Query("DELETE FROM inventory_files WHERE id = :fileId")
     abstract fun deleteFile(fileId: Int): Int

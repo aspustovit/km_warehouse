@@ -3,6 +3,7 @@ package com.km.warehouse.data.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.km.warehouse.data.converter.InventoryFileTypes
 import com.km.warehouse.data.entity.InventoryFiles.Companion.TABLE_NAME
 
 /**
@@ -16,9 +17,10 @@ data class InventoryFiles(
     val createDate: Long,
     @ColumnInfo(name = "file_name")
     val fileName: String,
-    val comments: String? = null
-)
-{
+    val comments: String? = null,
+    @ColumnInfo(name = "file_type")
+    val fileType: InventoryFileTypes
+) {
     companion object {
         const val TABLE_NAME = "inventory_files"
     }

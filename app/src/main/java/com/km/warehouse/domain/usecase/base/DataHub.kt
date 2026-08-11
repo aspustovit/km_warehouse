@@ -11,12 +11,18 @@ import kotlinx.coroutines.flow.MutableSharedFlow
  */
 object DataHub: BarcodeDataEmitter, BarcodeDataObserver {
     private val _barcodeData: MutableSharedFlow<String> = MutableSharedFlow()
+    private val _barcodeFileChange: MutableSharedFlow<Boolean> = MutableSharedFlow()
 
     override suspend fun emitBarcodeData(barcode: String) {
         _barcodeData.emit(barcode)
         Log.d("onKeyDown_SCAN_EMIT", barcode)
     }
 
+    override suspend fun emitSavedBarcodeFileChange(isChange: Boolean) {
+        _barcodeFileChange.emit(isChange)
+    }
+
     override fun observeBarcodeData(): Flow<String> = _barcodeData
+    override fun observeSavedBarcodeFileChange(): Flow<Boolean> = _barcodeFileChange
 
 }

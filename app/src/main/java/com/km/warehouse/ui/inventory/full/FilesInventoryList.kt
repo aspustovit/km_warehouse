@@ -38,6 +38,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.km.warehouse.R
+import com.km.warehouse.data.converter.InventoryFileTypes
 import com.km.warehouse.domain.usecase.inventory.InventoryFileModel
 import com.km.warehouse.ui.DarkTopAppBar
 import com.km.warehouse.ui.inventory.EditInventoryView
@@ -54,7 +55,9 @@ import org.koin.androidx.compose.koinViewModel
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilesInventoryList(onBackClick: () -> Unit) {
+fun FilesInventoryList(onBackClick: () -> Unit,
+                       fileTypes: InventoryFileTypes = InventoryFileTypes.FULL,
+                       onPartFileClick: (Int) -> Unit) {
     val context = LocalContext.current
     val viewModel: FullInventoryViewModel = koinViewModel()
     val state = viewModel.viewState.collectAsState()
@@ -64,7 +67,7 @@ fun FilesInventoryList(onBackClick: () -> Unit) {
 
     LaunchedEffect(viewModel) {
         viewModel.observeBarcodes()
-        viewModel.loadSavedFiles()
+        viewModel.loadSavedFiles(fileTypes)
     }
     BackHandler {
         onBackClick.invoke()
@@ -149,14 +152,16 @@ fun FilesInventoryList(onBackClick: () -> Unit) {
                         )
                     }
                 } else {
-                    IconButton(modifier = Modifier.focusable(enabled = true), onClick = {
-                        showNewFileDialog = true
-                    }) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_income_documents),
-                            contentDescription = "",
-                            tint = MaterialTheme.colorScheme.surface
-                        )
+                    if(fileTypes == InventoryFileTypes.FULL) {
+                        IconButton(modifier = Modifier.focusable(enabled = true), onClick = {
+                            showNewFileDialog = true
+                        }) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_income_documents),
+                                contentDescription = "",
+                                tint = MaterialTheme.colorScheme.surface
+                            )
+                        }
                     }
                 }
             }
@@ -198,7 +203,11 @@ fun FilesInventoryList(onBackClick: () -> Unit) {
                             FilesItemView(
                                 item = it,
                                 onFileClick = { inventoryFile ->
-                                    viewModel.onInventoryFileSelected(inventoryFile)
+                                    when(fileTypes){
+                                        InventoryFileTypes.FULL -> viewModel.onInventoryFileSelected(inventoryFile)
+                                        InventoryFileTypes.PART -> onPartFileClick(inventoryFile.id)
+                                    }
+
                                 }, onEdit = { inventoryFile ->
                                     viewModel.startRenameFile(inventoryFile)
                                     showRenameDialog = true

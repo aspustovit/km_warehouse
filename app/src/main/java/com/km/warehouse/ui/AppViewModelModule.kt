@@ -49,7 +49,12 @@ object AppViewModelModule {
             InventoryViewModel(
                 getInventorySegmentUseCase = get(),
                 observeBarcodeDataUseCase = get(),
-                uploadInventoryExelFileUseCase = get()
+                uploadInventoryExelFileUseCase = get(),
+                savePartInventoryToDBUseCase = get(),
+                getPartFilesInventoryFromDBUseCase = get(),
+                getPartInventoryByFileIdUseCase = get(),
+                updateFullInventoryModelUseCase = get(),
+                observePartFileChangeUseCase = get()
             )
         }
         viewModel {

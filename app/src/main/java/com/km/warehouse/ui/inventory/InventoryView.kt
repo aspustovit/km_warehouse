@@ -10,11 +10,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,17 +30,26 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.km.warehouse.MainActivity
 import com.km.warehouse.R
+import com.km.warehouse.data.converter.InventoryFileTypes
 import com.km.warehouse.ui.DarkTopAppBar
+import com.km.warehouse.ui.OutlinedIconButton
 import com.km.warehouse.ui.inventory.full.FilesInventoryList
 import com.km.warehouse.ui.sync.ErrorDialog
 import com.km.warehouse.ui.sync.Loader
@@ -64,13 +75,17 @@ fun InventoryView(onBackClick: () -> Unit) {
     }
     LaunchedEffect(viewModel) {
         viewModel.observeBarcodes()
+        viewModel.loadPartInventoryFromDB()
     }
-
     BackHandler {
         if (state.value.inventory.isEmpty()) {
             onBackClick.invoke()
         } else {
-            viewModel.showExitWarning()
+            if(state.value.partFileId != null){
+                viewModel.returnToDefState()
+            } else {
+                viewModel.showExitWarning()
+            }
         }
     }
 
@@ -94,6 +109,13 @@ fun InventoryView(onBackClick: () -> Unit) {
     if (state.value.showFullInventoryScreen) {
         FilesInventoryList(onBackClick = {
             viewModel.cancelFullInventoryScreen()
+        }, fileTypes = InventoryFileTypes.FULL,
+            onPartFileClick = {})
+    } else if(state.value.showPartInventoryScreen) {
+        FilesInventoryList(onBackClick = {
+            viewModel.cancelFullInventoryScreen()
+        }, fileTypes = InventoryFileTypes.PART, onPartFileClick = { partFileId ->
+            viewModel.postPartNumberFile(partFileId)
         })
     } else {
         if (state.value.selectedInventory != null) {
@@ -147,7 +169,17 @@ fun InventoryView(onBackClick: () -> Unit) {
                                 tint = MaterialTheme.colorScheme.surface
                             )
                         }
-
+                        if (!state.value.inventory.isEmpty() && state.value.partFileId == null) {
+                            IconButton(onClick = {
+                                viewModel.savePartInventoryToDB()
+                            }) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_save_part_inventory),
+                                    contentDescription = "",
+                                    tint = MaterialTheme.colorScheme.surface
+                                )
+                            }
+                        }
                     }
                 )
 
@@ -166,15 +198,29 @@ fun InventoryView(onBackClick: () -> Unit) {
                             .width(260.dp)
                     )
                 } else {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        text = stringResource(id = R.string.inventory_find_message),
-                        fontSize = 16.sp
-                    )
-                    if (state.value.inventoryBarcode.isNotBlank() && state.value.inventory.isEmpty()) {
-                        InventoryNotFoundView(barcode = state.value.inventoryBarcode)
+                    Row(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp, top = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        if(!state.value.savedPartInventoryFiles.isEmpty()) {
+                            OutlinedIconButton(
+                                resDrawable = R.drawable.ic_saved_part_inventory,
+                                resDescription = R.string.saved_part_inventory,
+                                onClick = { viewModel.showPartInventoryScreen() }
+                            )
+                        }
+
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .wrapContentHeight(Alignment.CenterVertically),
+                            text = stringResource(id = if(!state.value.savedPartInventoryFiles.isEmpty()) R.string.inventory_find_saved_message else R.string.inventory_find_message),
+                            fontSize = 16.sp
+                        )
+                        if (state.value.inventoryBarcode.isNotBlank() && state.value.inventory.isEmpty()) {
+                            InventoryNotFoundView(barcode = state.value.inventoryBarcode)
+                        }
                     }
                 }
 

@@ -121,3 +121,18 @@ fun InventoryModel.toInventory(): Inventory {
         fileId = fileId
     )
 }
+
+fun InventoryModel.toInventory(partFileId: Long): Inventory {
+    return Inventory(
+        id = 0,
+        itemSegment = itemSegment,
+        inventoryItemId = mfgPartNumber /*mfgPartNumber*/,
+        freeQuantity = freeQuantity,
+        quantity = quantity,
+        itemDescription = itemDescription,
+        mfgPartNumber = organizationName,
+        factQuantity = factQuantity,
+        comments = comments,
+        fileId = partFileId.toInt()
+    )
+}

@@ -7,9 +7,11 @@ import kotlinx.coroutines.flow.Flow
  */
 interface BarcodeDataEmitter {
     suspend fun emitBarcodeData(barcode: String)
+    suspend fun emitSavedBarcodeFileChange(isChange: Boolean)
 }
 
 
 interface BarcodeDataObserver {
     fun observeBarcodeData(): Flow<String>
+    fun observeSavedBarcodeFileChange(): Flow<Boolean>
 }

@@ -24,4 +24,10 @@ interface InventoryRepository {
     suspend fun updateInventoryModelInFile(inventoryModel: InventoryModel): Boolean
 
     suspend fun exportAllInventoryModelFileData(fileId: Int): Uri?
+
+    suspend fun savePartInventoryToDB(params: Pair<String, List<InventoryModel>>): Int
+
+    suspend fun getPartInventoryFromDB(): List<InventoryFileModel>
+
+    suspend fun getPartInventory(partFileId: Int): List<InventoryModel>
 }

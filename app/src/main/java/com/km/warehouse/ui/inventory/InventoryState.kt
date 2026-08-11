@@ -1,6 +1,7 @@
 package com.km.warehouse.ui.inventory
 
 import com.km.warehouse.data.network.entity.ErrorData
+import com.km.warehouse.domain.usecase.inventory.InventoryFileModel
 import com.km.warehouse.domain.usecase.inventory.InventoryModel
 
 /**
@@ -16,5 +17,8 @@ data class InventoryState(
     val showExitDialog: Boolean = false,
     val showLoadFileDialog: Boolean = false,
     val parseExelProgress: Boolean = false,
-    val showFullInventoryScreen: Boolean = false
+    val showFullInventoryScreen: Boolean = false,
+    val showPartInventoryScreen: Boolean = false,
+    val savedPartInventoryFiles: List<InventoryFileModel> = emptyList(),
+    val partFileId: Int? = null
 )

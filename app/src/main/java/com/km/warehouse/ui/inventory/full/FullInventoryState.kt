@@ -1,6 +1,7 @@
 package com.km.warehouse.ui.inventory.full
 
 import android.net.Uri
+import com.km.warehouse.data.converter.InventoryFileTypes
 import com.km.warehouse.data.network.entity.ErrorData
 import com.km.warehouse.domain.usecase.inventory.InventoryFileModel
 import com.km.warehouse.domain.usecase.inventory.InventoryModel
@@ -23,5 +24,6 @@ data class FullInventoryState(
     val selectedInventory: InventoryModel? = null,
     val xlsFileUri: Uri? = null,
     val barcode: String? = null,
-    val showNoInventoryMessage: Boolean = true
+    val showNoInventoryMessage: Boolean = true,
+    val fileTypes: InventoryFileTypes = InventoryFileTypes.FULL
 )

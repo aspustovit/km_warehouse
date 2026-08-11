@@ -56,6 +56,7 @@
     <string name="inventory_segment_code">Код КМ</string>
     <string name="find">Знайти</string>
     <string name="inventory_find_message">Відскануйте QR або штрихкод!</string>
+    <string name="inventory_find_saved_message">Продовжіть роботу з збереженими данними, або відскануйте QR або штрихкод!</string>
     <string name="inventory_search">Виконується пошук за номером - </string>
     <string name="comment">Коментар:</string>
     <string name="fact">Фактична кількість:</string>
@@ -88,4 +89,5 @@
     <string name="quantity_equal">Кількість однакова</string>
     <string name="to_exel">Експортувати в exel</string>
     <string name="search_result">Результат пошуку за номером - </string>
+    <string name="saved_part_inventory">Збережена інвентаризація.</string>
 </resources>

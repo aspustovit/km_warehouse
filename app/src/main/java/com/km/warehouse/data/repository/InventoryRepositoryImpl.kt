@@ -6,6 +6,7 @@ import android.net.Uri
 import android.util.Log
 import com.google.gson.Gson
 import com.km.warehouse.data.KmWarehouseDatabase
+import com.km.warehouse.data.converter.InventoryFileTypes
 import com.km.warehouse.data.entity.Inventory
 import com.km.warehouse.data.entity.InventoryFiles
 import com.km.warehouse.data.network.WarehouseApiService
@@ -20,6 +21,7 @@ import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.ss.usermodel.WorkbookFactory
 import kotlin.collections.forEachIndexed
 import kotlin.collections.orEmpty
+import kotlin.text.ifEmpty
 
 /**
  * Create by Pustovit Oleksandr on 01/06/2026
@@ -40,7 +42,7 @@ class InventoryRepositoryImpl(
         val result = ArrayList<InventoryModel>()
         data.orEmpty()
             .forEachIndexed { index, entity -> result.add(entity.toInventoryModel(index)) }
-        if(result.isEmpty()) {
+        if (result.isEmpty()) {
             val mfrResponse = warehouseApiService.getInventoryByMfrPartNumber(itemSegment).execute()
             if (!mfrResponse.isSuccessful) {
                 errorData = parseError(mfrResponse.errorBody()!!.string())
@@ -73,7 +75,8 @@ class InventoryRepositoryImpl(
                 val fileId = database.inventoryFilesDao().insert(
                     InventoryFiles(
                         createDate = Calendar.getInstance().timeInMillis,
-                        fileName = fileName.ifEmpty { fileUri.toString() }
+                        fileName = fileName.ifEmpty { fileUri.toString() },
+                        fileType = InventoryFileTypes.FULL
                     )
                 )
                 Log.i("EXEL", "Start")
@@ -134,12 +137,12 @@ class InventoryRepositoryImpl(
         var inventory = if (mfgPartNumber.isNotEmpty()) {
             val barcodes = mfgPartNumber.split("/")
             val res = ArrayList<Inventory>()
-            Log.e("BARCODE_SCAN","$barcodes")
+            Log.e("BARCODE_SCAN", "$barcodes")
             val filteredBarcodes = ArrayList<String>()
             barcodes.forEachIndexed { index, b ->
-                if(b == "G" || b == "T") {
-                    if(index != 0) {
-                        val prevPart = filteredBarcodes[index-1]
+                if (b == "G" || b == "T") {
+                    if (index != 0) {
+                        val prevPart = filteredBarcodes[index - 1]
                         filteredBarcodes.remove(prevPart)
                         filteredBarcodes.add("$prevPart/$b")
                     }
@@ -148,20 +151,19 @@ class InventoryRepositoryImpl(
                 }
             }
             filteredBarcodes.forEach { b ->
-                if(b.length > 1)
+                if (b.length > 1)
                     res.addAll(database.inventoryDao().getInventoryByItemSegment(fileId, b))
             }
             filteredBarcodes.forEach { b ->
-                if(b.length > 1)
-                   res.addAll(database.inventoryDao().getInventoryByFile(fileId, b))
+                if (b.length > 1)
+                    res.addAll(database.inventoryDao().getInventoryByFile(fileId, b))
             }
             filteredBarcodes.forEach { b ->
-                if(b.length > 1)
-                   res.addAll(database.inventoryDao().getInventoryByInventoryItem(fileId, b))
+                if (b.length > 1)
+                    res.addAll(database.inventoryDao().getInventoryByInventoryItem(fileId, b))
             }
             res
-        }
-        else {
+        } else {
             database.inventoryDao().getEmptyBarcodes(fileId)
         }
         if (inventory.isEmpty())
@@ -203,5 +205,41 @@ class InventoryRepositoryImpl(
             file.fileName.replace(" ", "_")
         )
         return fileUri
+    }
+
+    override suspend fun savePartInventoryToDB(params: Pair<String, List<InventoryModel>>): Int {
+        val fileId = database.inventoryFilesDao().insert(
+            InventoryFiles(
+                createDate = Calendar.getInstance().timeInMillis,
+                fileName = params.first,
+                fileType = InventoryFileTypes.PART,
+                comments = "Часткова інвентаризація по номеру ${params.first}. Всього одиниць - ${params.second.size}"
+            )
+        )
+        val inventories = params.second.map { it.toInventory(fileId) }
+        try {
+            inventories.forEach {
+                Log.i("savePartInventoryToDB", "$it")
+                database.inventoryDao().insert(it)
+            }
+        } catch (ex: Exception){
+            Log.e("savePartInventoryToDB", "$ex")
+        }
+
+        return fileId.toInt()
+    }
+
+    override suspend fun getPartInventoryFromDB(): List<InventoryFileModel> {
+        return database.inventoryFilesDao().getInventoryFiles(InventoryFileTypes.PART)
+            .map { it.toInventoryFilesModel() }
+    }
+
+    override suspend fun getPartInventory(partFileId: Int): List<InventoryModel> {
+        val result = ArrayList<InventoryModel>()
+        database.inventoryDao().getPartInventoryByFile(partFileId)
+            .forEachIndexed { index, inventory ->
+                result.add(inventory.toInventoryModel(index))
+            }
+        return result
     }
 }

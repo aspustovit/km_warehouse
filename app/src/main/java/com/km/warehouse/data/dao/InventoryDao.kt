@@ -30,4 +30,7 @@ abstract class InventoryDao : BaseDao<Inventory>() {
 
     @Query("SELECT b.* FROM inventory b where b.file_id == :fileId and b.inventory_item_id = :inventoryItemId")
     abstract fun getInventoryByInventoryItem(fileId: Int, inventoryItemId: String): List<Inventory>
+
+    @Query("SELECT b.* FROM inventory b where b.file_id == :fileId")
+    abstract fun getPartInventoryByFile(fileId: Int): List<Inventory>
 }

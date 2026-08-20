@@ -12,14 +12,14 @@ plugins {
 
 android {
     namespace = "com.km.warehouse"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.km.warehouse"
         minSdk = 28
         targetSdk = 36
-        versionCode = 32
-        versionName = "1.2.5"
+        versionCode = 36
+        versionName = "1.2.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -32,7 +32,9 @@ class InventoryRepositoryImpl(
     val database: KmWarehouseDatabase
 ) :
     InventoryRepository {
-    override suspend fun loadInventoryBySegment(itemSegment: String): InventorySegmentModel {
+    override suspend fun loadInventoryBySegment(segment: Pair<String, Int>): InventorySegmentModel {
+        val itemSegment = segment.first
+        val lastIndex = segment.second
         val response = warehouseApiService.getInventoryBySegment(itemSegment).execute()
         var errorData: ErrorData? = null
         if (!response.isSuccessful) {
@@ -49,7 +51,7 @@ class InventoryRepositoryImpl(
             }
             val mfrData = mfrResponse.body()?.data
             mfrData.orEmpty()
-                .forEachIndexed { index, entity -> result.add(entity.toInventoryModel(index)) }
+                .forEachIndexed { index, entity -> result.add(entity.toInventoryModel(lastIndex+index)) }
         }
         return InventorySegmentModel(
             inventory = result,

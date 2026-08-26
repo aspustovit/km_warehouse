@@ -113,6 +113,13 @@ fun ScanMoveOrderView(
             }
 
             SERIAL_NUMBER_ALREDY_ADD -> {
+                ErrorDialog(
+                    errorMessage = "${stringResource(R.string.barcode)} ${it.message} ${
+                        stringResource(R.string.barcode_already_scan)
+                    }", onDismiss = {
+                        viewModel.cancelError()
+                        viewModel.filterDoneOrder(it.message)
+                    })
               /*  LocalContext.current.playSound(R.raw.windows_error)
                 val toast = Toast.makeText(LocalContext.current, it.message, Toast.LENGTH_LONG)
                 val view = toast.view
@@ -120,12 +127,12 @@ fun ScanMoveOrderView(
                     v.setBackgroundResource(R.color.error) // Sets background to red
                 }
                 toast.show()*/
-                coroutineScope.launch {
+                /*coroutineScope.launch {
                     snackbarHostState.showSnackbar(
                         message = it.message,
                         duration = SnackbarDuration.Short
                     )
-                }
+                }*/
             }
 
             NO_SERIAL_NUMBER_CONFLICT -> {

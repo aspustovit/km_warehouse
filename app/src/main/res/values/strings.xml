@@ -50,6 +50,7 @@
     <string name="text_update_settings">Перейти в налаштування</string>
     <string name="delete_order_dialog_message">Ви дійсно бажаєте видалити Документ.\nВсі данні будуть втрачені!</string>
     <string name="no_barcode_scan_error">не однаковий з вже відсканованими серійними номерами!</string>
+    <string name="barcode_already_scan">вже оброблено!</string>
 
     //Інвентарізація
     <string name="inventory">3. Інвентаризація</string>

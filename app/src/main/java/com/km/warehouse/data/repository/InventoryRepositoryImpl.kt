@@ -34,6 +34,7 @@ class InventoryRepositoryImpl(
     InventoryRepository {
     override suspend fun loadInventoryBySegment(segment: Pair<String, Int>): InventorySegmentModel {
         val itemSegment = segment.first
+        Log.v("loadInventoryBySegment", "Start load")
         val lastIndex = segment.second
         val response = warehouseApiService.getInventoryBySegment(itemSegment).execute()
         var errorData: ErrorData? = null
@@ -53,6 +54,7 @@ class InventoryRepositoryImpl(
             mfrData.orEmpty()
                 .forEachIndexed { index, entity -> result.add(entity.toInventoryModel(lastIndex+index)) }
         }
+        Log.e("loadInventoryBySegment", "End load")
         return InventorySegmentModel(
             inventory = result,
             errorData = errorData

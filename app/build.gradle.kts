@@ -18,8 +18,8 @@ android {
         applicationId = "com.km.warehouse"
         minSdk = 28
         targetSdk = 36
-        versionCode = 40
-        versionName = "1.2.10"
+        versionCode = 41
+        versionName = "1.2.11"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

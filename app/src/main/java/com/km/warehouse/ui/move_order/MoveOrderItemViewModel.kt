@@ -94,7 +94,12 @@ class MoveOrderItemViewModel(
 
     fun clearOrderItemForScan() {
         Log.e("onKeyDown_SCAN_4", "CLEAR !!")
-        _viewState.update { _viewState.value.copy(orderItemForScan = null, lastNoSerialScannedBarcode = null) }
+        _viewState.update {
+            _viewState.value.copy(
+                orderItemForScan = null,
+                lastNoSerialScannedBarcode = null
+            )
+        }
     }
 
     fun setManualOrderItemForScan(orderItem: MoveOrderItemsModel) {
@@ -126,6 +131,7 @@ class MoveOrderItemViewModel(
         var searchedOrderItem: MoveOrderItemsModel? = null
         val moveOrderItems = viewState.value.selectedOrder?.moveOrderItemsModels
         var finishedDocumentCount = 0
+        val finishedOrderItemsModels = ArrayList<MoveOrderItemsModel>()
         moveOrderItems?.forEach { orderItem ->
             val barcodePatterns = ArrayList<String>()
             if (orderItem.mfgPartNumExp != null)
@@ -135,11 +141,14 @@ class MoveOrderItemViewModel(
                 if (barcode.contains(pattern)) {
                     if (orderItem.qtyGiven == orderItem.quantity && orderItem.noSerials) {
                         finishedDocumentCount += 1
+                        finishedOrderItemsModels.add(orderItem)
                         return@forEach
                     }
-                    val orderSerials = _viewState.value.itemSerials.filter { it.moveOrderItemId == orderItem.id }
+                    val orderSerials =
+                        _viewState.value.itemSerials.filter { it.moveOrderItemId == orderItem.id }
                     if (orderItem.qtyGiven == orderItem.quantity && orderSerials.size == orderItem.qtyGiven.toInt()) {
                         finishedDocumentCount += 1
+                        finishedOrderItemsModels.add(orderItem)
                         return@forEach
                     }
 
@@ -160,10 +169,37 @@ class MoveOrderItemViewModel(
                 }
             }
         }
-        if(finishedDocumentCount == moveOrderItems?.size){
-            _viewState.update{
-                _viewState.value.copy(errorData = ErrorData(status = SERIAL_NUMBER_ALREDY_FINISH, message = barcode, error = ""),
-                    showManualEnterBarcode = false)
+        if (finishedDocumentCount == moveOrderItems?.size) {
+            _viewState.update {
+                _viewState.value.copy(
+                    errorData = ErrorData(
+                        status = SERIAL_NUMBER_ALREDY_FINISH,
+                        message = barcode,
+                        error = ""
+                    ),
+                    showManualEnterBarcode = false
+                )
+            }
+        }
+        finishedOrderItemsModels.forEach {
+            val barcodePatterns = ArrayList<String>()
+            if (it.mfgPartNumExp != null)
+                barcodePatterns.addAll(it.mfgPartNumExp.split("/").toMutableList())
+            barcodePatterns.add(it.mfrCode)
+            barcodePatterns.forEach { pattern ->
+                if (barcode.contains(pattern)) {
+                    _viewState.update {
+                        _viewState.value.copy(
+                            errorData = ErrorData(
+                                status = SERIAL_NUMBER_ALREDY_ADD,
+                                message = barcode,
+                                error = "Barcode already add!"
+                            ),
+                            showManualEnterBarcode = false
+                        )
+                    }
+                    return
+                }
             }
         }
         if (searchedOrderItem == null) {
@@ -181,19 +217,31 @@ class MoveOrderItemViewModel(
     }
 
     fun checkInputSerials(orderItemForScan: MoveOrderItemsModel, barcodeSerial: String) {
-        if(orderItemForScan.noSerials) {
-            if(_viewState.value.lastNoSerialScannedBarcode == null) {
+        if (orderItemForScan.noSerials) {
+            if (_viewState.value.lastNoSerialScannedBarcode == null) {
                 _viewState.update {
                     _viewState.value.copy(lastNoSerialScannedBarcode = barcodeSerial)
                 }
-                setQuantityGiven(moveOrderItemsModel = orderItemForScan, qtyGiven = orderItemForScan.qtyGiven.toInt()+1)
+                setQuantityGiven(
+                    moveOrderItemsModel = orderItemForScan,
+                    qtyGiven = orderItemForScan.qtyGiven.toInt() + 1
+                )
             } else {
-                if(_viewState.value.lastNoSerialScannedBarcode == barcodeSerial){
-                    setQuantityGiven(moveOrderItemsModel = orderItemForScan, qtyGiven = orderItemForScan.qtyGiven.toInt()+1)
+                if (_viewState.value.lastNoSerialScannedBarcode == barcodeSerial) {
+                    setQuantityGiven(
+                        moveOrderItemsModel = orderItemForScan,
+                        qtyGiven = orderItemForScan.qtyGiven.toInt() + 1
+                    )
                 } else {
-                    _viewState.update{
-                        _viewState.value.copy(errorData = ErrorData(status = NO_SERIAL_NUMBER_CONFLICT, message = barcodeSerial, error = ""),
-                            showManualEnterBarcode = false)
+                    _viewState.update {
+                        _viewState.value.copy(
+                            errorData = ErrorData(
+                                status = NO_SERIAL_NUMBER_CONFLICT,
+                                message = barcodeSerial,
+                                error = ""
+                            ),
+                            showManualEnterBarcode = false
+                        )
                     }
                 }
             }
@@ -219,18 +267,19 @@ class MoveOrderItemViewModel(
             val prevSerialModel = edit.copy()
             val serials = viewState.value.itemSerials.toMutableList()
             serials.forEach {
-                if(it.serial == edit.serial) {
+                if (it.serial == edit.serial) {
                     it.serial = editedBarcode
                     viewModelScope.launch {
-                        updateSerialNumberUseCase.invoke(Pair(prevSerialModel, editedBarcode)).onSuccess {
-                            _viewState.update { state ->
-                                state.copy(
-                                    itemSerials = serials.toList(),
-                                    showManualEnterBarcode = false,
-                                    editingItemSerialModel = null
-                                )
+                        updateSerialNumberUseCase.invoke(Pair(prevSerialModel, editedBarcode))
+                            .onSuccess {
+                                _viewState.update { state ->
+                                    state.copy(
+                                        itemSerials = serials.toList(),
+                                        showManualEnterBarcode = false,
+                                        editingItemSerialModel = null
+                                    )
+                                }
                             }
-                        }
                     }
                     return@forEach
                 }
@@ -281,7 +330,7 @@ class MoveOrderItemViewModel(
             serial = barcodeSerial,
             moveOrderItemId = orderItemForScan.id
         )
-        serials.add(0,itemSerial)
+        serials.add(0, itemSerial)
         saveItemSerialToDb(itemSerial)
         val updatedMoveOrderItem: MoveOrderItemsModel =
             orderItemForScan.copy(qtyGiven = if (order != null && order.isComplete) orderItemForScan.qtyGiven else orderItemForScan.qtyGiven + 1)
@@ -473,7 +522,8 @@ class MoveOrderItemViewModel(
                     list.add(updateOrderForScan)
                     val order =
                         selectedOrder.copy(moveOrderItemsModels = list.sortedBy { it.id }.toList())
-                    val isComplete = updateOrderForScan.noSerials && updateOrderForScan.quantity == updateOrderForScan.qtyGiven
+                    val isComplete =
+                        updateOrderForScan.noSerials && updateOrderForScan.quantity == updateOrderForScan.qtyGiven
                     _viewState.update { state ->
                         state.copy(
                             orderItemForScan = if (noSerials || isComplete) null else orderItemForScan,
@@ -511,13 +561,14 @@ class MoveOrderItemViewModel(
                         val order =
                             selectedOrder.copy(moveOrderItemsModels = list.sortedBy { it.id }
                                 .toList())
-                        val isComplete = updateOrderForScan.noSerials && updateOrderForScan.quantity == updateOrderForScan.qtyGiven
+                        val isComplete =
+                            updateOrderForScan.noSerials && updateOrderForScan.quantity == updateOrderForScan.qtyGiven
                         val prevNoSerialScannedBarcode = _viewState.value.lastNoSerialScannedBarcode
                         _viewState.update { state ->
                             state.copy(
-                                orderItemForScan = if(isComplete) null else updateOrderForScan,
+                                orderItemForScan = if (isComplete) null else updateOrderForScan,
                                 selectedOrder = order,
-                                lastNoSerialScannedBarcode = if(isComplete) null else prevNoSerialScannedBarcode
+                                lastNoSerialScannedBarcode = if (isComplete) null else prevNoSerialScannedBarcode
                             )
                         }
                         _soundViewState.update { isComplete }
@@ -588,6 +639,24 @@ class MoveOrderItemViewModel(
                 }
             }.onFailure {
                 _viewState.value.copy(error = it.message!!)
+            }
+        }
+    }
+
+    fun filterDoneOrder(order: String) {
+        val moveOrder = viewState.value.selectedOrder
+        val moveOrderItems = moveOrder?.moveOrderItemsModels
+        val moveOrderItem = moveOrderItems?.find { it.mfrCode == order }
+
+        moveOrderItem?.let {
+            val list = moveOrderItems.toMutableList()
+            list.remove(moveOrderItem)
+            list.add(0, moveOrderItem)
+            val newOrder = moveOrder.copy(moveOrderItemsModels = list.toList())
+            _viewState.update { state ->
+                state.copy(
+                    selectedOrder = newOrder
+                )
             }
         }
     }

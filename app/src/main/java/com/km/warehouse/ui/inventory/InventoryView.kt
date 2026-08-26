@@ -179,6 +179,16 @@ fun InventoryView(onBackClick: () -> Unit) {
                                     tint = MaterialTheme.colorScheme.surface
                                 )
                             }
+
+                            IconButton(onClick = {
+                                viewModel.returnToDefState()
+                            }) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_cancel_part_inventory_list),
+                                    contentDescription = "",
+                                    tint = MaterialTheme.colorScheme.surface
+                                )
+                            }
                         }
                         if (!state.value.inventory.isEmpty() && state.value.partFileId == null) {
                             IconButton(onClick = {

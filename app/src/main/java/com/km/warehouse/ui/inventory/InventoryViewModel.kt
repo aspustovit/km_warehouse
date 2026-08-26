@@ -74,9 +74,10 @@ class InventoryViewModel(
         }
         viewModelScope.launch {
             Log.d("InventorySegment", segmentId)
-            getInventorySegmentUseCase.invoke(segmentId).onSuccess { inv ->
-                val prevInventory = _viewState.value.inventory.toMutableList()
-                val newInventory = inv.inventory.toMutableList()
+            val lastPrevItemId = if(_viewState.value.inventory.isEmpty()) 0 else _viewState.value.inventory.last().id+1
+            getInventorySegmentUseCase.invoke(Pair(segmentId, lastPrevItemId)).onSuccess { inv ->
+                val prevInventory = _viewState.value.inventory
+                val newInventory = ArrayList(inv.inventory)
                 newInventory.addAll(prevInventory)
                 _viewState.update {
                     _viewState.value.copy(

@@ -9,7 +9,7 @@ import com.km.warehouse.domain.usecase.inventory.InventorySegmentModel
  * Create by Pustovit Oleksandr on 01/06/2026
  */
 interface InventoryRepository {
-    suspend fun loadInventoryBySegment(itemSegment: String): InventorySegmentModel
+    suspend fun loadInventoryBySegment(segment: Pair<String, Int>): InventorySegmentModel
 
     suspend fun loadInventoryByExel(fileUri: Uri, fileName: String): Boolean
 

@@ -180,6 +180,17 @@ fun InventoryView(onBackClick: () -> Unit) {
                                 )
                             }
                         }
+                        if (!state.value.inventory.isEmpty() && state.value.partFileId == null) {
+                            IconButton(onClick = {
+                                viewModel.returnToDefState()
+                            }) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_cancel_part_inventory_session),
+                                    contentDescription = "",
+                                    tint = MaterialTheme.colorScheme.surface
+                                )
+                            }
+                        }
                     }
                 )
 

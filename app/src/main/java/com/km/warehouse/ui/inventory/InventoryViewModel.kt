@@ -75,9 +75,12 @@ class InventoryViewModel(
         viewModelScope.launch {
             Log.d("InventorySegment", segmentId)
             getInventorySegmentUseCase.invoke(segmentId).onSuccess { inv ->
+                val prevInventory = _viewState.value.inventory.toMutableList()
+                val newInventory = inv.inventory.toMutableList()
+                newInventory.addAll(prevInventory)
                 _viewState.update {
                     _viewState.value.copy(
-                        inventory = inv.inventory,
+                        inventory = newInventory.toList(),
                         errorData = inv.errorData,
                         inventoryListLoading = false
                     )

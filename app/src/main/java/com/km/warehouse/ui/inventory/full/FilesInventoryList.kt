@@ -122,7 +122,7 @@ fun FilesInventoryList(onBackClick: () -> Unit,
                 if (state.value.selectedInventoryFile != null) {
                     Text(text = state.value.selectedInventoryFile!!.fileName)
                 } else {
-                    Text(stringResource(id = R.string.inventory))
+                    Text(stringResource(id = R.string.inventory_wn))
                 }
             },
             modifier = Modifier.fillMaxWidth(),

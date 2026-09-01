@@ -29,6 +29,8 @@ import com.km.warehouse.domain.usecase.UpdateSerialNumberUseCase
 import com.km.warehouse.domain.usecase.UploadInventoryExelFileUseCase
 import com.km.warehouse.domain.usecase.auth.GetPrevLoginUseCase
 import com.km.warehouse.domain.usecase.auth.LogoutUseCase
+import com.km.warehouse.domain.usecase.settings.GetUserWarehouseSettingsUseCase
+import com.km.warehouse.domain.usecase.settings.SetUserWarehouseSettingsUseCase
 import org.koin.dsl.module
 
 /**
@@ -71,6 +73,8 @@ object DomainKoinModule {
         factory { GetPartFilesInventoryFromDBUseCase(inventoryRepository = get()) }
         factory { GetPartInventoryByFileIdUseCase(inventoryRepository = get()) }
         factory { ObservePartFileChangeUseCase() }
+        factory { GetUserWarehouseSettingsUseCase(inventoryRepository = get()) }
+        factory { SetUserWarehouseSettingsUseCase(inventoryRepository = get()) }
     }
 
     val parentModule = module {

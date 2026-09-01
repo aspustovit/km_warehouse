@@ -7,6 +7,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.km.warehouse.data.KmWarehouseDatabase
 import com.km.warehouse.data.converter.InventoryFileTypes
+import com.km.warehouse.data.converter.PidzapasTypes
 import com.km.warehouse.data.entity.Inventory
 import com.km.warehouse.data.entity.InventoryFiles
 import com.km.warehouse.data.network.WarehouseApiService
@@ -15,6 +16,7 @@ import com.km.warehouse.domain.repository.InventoryRepository
 import com.km.warehouse.domain.usecase.inventory.InventoryFileModel
 import com.km.warehouse.domain.usecase.inventory.InventoryModel
 import com.km.warehouse.domain.usecase.inventory.InventorySegmentModel
+import com.km.warehouse.domain.usecase.inventory.UserWarehouseModel
 import com.km.warehouse.ui.utils.ExcelExporter
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.Workbook
@@ -42,19 +44,34 @@ class InventoryRepositoryImpl(
             errorData = parseError(response.errorBody()!!.string())
         }
         val data = response.body()?.data
-        val result = ArrayList<InventoryModel>()
+        val partInventories = ArrayList<InventoryModel>()
         data.orEmpty()
-            .forEachIndexed { index, entity -> result.add(entity.toInventoryModel(index)) }
-        if (result.isEmpty()) {
+            .forEachIndexed { index, entity -> partInventories.add(entity.toInventoryModel(index)) }
+        if (partInventories.isEmpty()) {
             val mfrResponse = warehouseApiService.getInventoryByMfrPartNumber(itemSegment).execute()
             if (!mfrResponse.isSuccessful) {
                 errorData = parseError(mfrResponse.errorBody()!!.string())
             }
             val mfrData = mfrResponse.body()?.data
             mfrData.orEmpty()
-                .forEachIndexed { index, entity -> result.add(entity.toInventoryModel(lastIndex+index)) }
+                .forEachIndexed { index, entity -> partInventories.add(entity.toInventoryModel(lastIndex + index)) }
         }
         Log.e("loadInventoryBySegment", "End load")
+
+        val userWarehouses = database.userWarehouseDao().getUserWarehouse()
+        val result = if(userWarehouses.isEmpty()){
+            partInventories
+        } else {
+            val res = ArrayList<InventoryModel>()
+            partInventories.forEach { part ->
+                userWarehouses.forEach { warehouse ->
+                    if(warehouse.warehouseName == part.subInventoryCode){
+                        res.add(part)
+                    }
+                }
+            }
+            res
+        }
         return InventorySegmentModel(
             inventory = result,
             errorData = errorData
@@ -226,7 +243,7 @@ class InventoryRepositoryImpl(
                 Log.i("savePartInventoryToDB", "$it")
                 database.inventoryDao().insert(it)
             }
-        } catch (ex: Exception){
+        } catch (ex: Exception) {
             Log.e("savePartInventoryToDB", "$ex")
         }
 
@@ -245,5 +262,24 @@ class InventoryRepositoryImpl(
                 result.add(inventory.toInventoryModel(index))
             }
         return result
+    }
+
+    override suspend fun getUserWarehouses(): List<UserWarehouseModel> {
+        val saved = database.userWarehouseDao().getUserWarehouse()
+        val userWarehouseModels = ArrayList<UserWarehouseModel>()
+        PidzapasTypes.entries.forEach {
+            userWarehouseModels.add(it.toUserWarehouseModel(isSelected = saved.find { s -> s.warehouseName == it.warehouseName } != null))
+        }
+        return userWarehouseModels
+    }
+
+    override suspend fun saveUserWarehouses(userWarehouses: List<UserWarehouseModel>): Boolean {
+        database.userWarehouseDao().deleteWarehouseSettings()
+        val selectedWarehouses = userWarehouses.filter { it.isSelected }
+        var insertId = 0L
+        selectedWarehouses.map { it.toUserWarehouse() }.forEach {
+            insertId = database.userWarehouseDao().insert(it)
+        }
+        return insertId != 0L
     }
 }

@@ -1,17 +1,20 @@
 package com.km.warehouse.data.repository
 
 import androidx.compose.ui.res.integerResource
+import com.km.warehouse.data.converter.PidzapasTypes
 import com.km.warehouse.data.entity.Inventory
 import com.km.warehouse.data.entity.InventoryFiles
 import com.km.warehouse.data.entity.ItemsSerial
 import com.km.warehouse.data.entity.MoveOrder
 import com.km.warehouse.data.entity.MoveOrderItem
+import com.km.warehouse.data.entity.UserWarehouse
 import com.km.warehouse.data.network.entity.InventoryEntity
 import com.km.warehouse.data.network.entity.ItemSerialSync
 import com.km.warehouse.data.network.entity.MoveOrderEntity
 import com.km.warehouse.data.network.entity.MoveOrderItemsEntity
 import com.km.warehouse.domain.usecase.inventory.InventoryFileModel
 import com.km.warehouse.domain.usecase.inventory.InventoryModel
+import com.km.warehouse.domain.usecase.inventory.UserWarehouseModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -135,4 +138,12 @@ fun InventoryModel.toInventory(partFileId: Long): Inventory {
         comments = comments,
         fileId = partFileId.toInt()
     )
+}
+
+fun PidzapasTypes.toUserWarehouseModel(isSelected: Boolean): UserWarehouseModel {
+    return UserWarehouseModel(warehouseType = sybType, warehouseName = warehouseName, isSelected = isSelected)
+}
+
+fun UserWarehouseModel.toUserWarehouse(): UserWarehouse {
+    return UserWarehouse(id = 0, warehouseType = warehouseType, warehouseName = warehouseName)
 }

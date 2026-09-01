@@ -18,21 +18,24 @@ import com.km.warehouse.data.dao.InventoryFilesDao
 import com.km.warehouse.data.dao.ItemsSerialDao
 import com.km.warehouse.data.dao.MoveOrderDao
 import com.km.warehouse.data.dao.MoveOrderItemDao
+import com.km.warehouse.data.dao.UserWarehouseDao
 import com.km.warehouse.data.entity.Bayer
 import com.km.warehouse.data.entity.Inventory
 import com.km.warehouse.data.entity.InventoryFiles
 import com.km.warehouse.data.entity.ItemsSerial
 import com.km.warehouse.data.entity.MoveOrder
 import com.km.warehouse.data.entity.MoveOrderItem
+import com.km.warehouse.data.entity.UserWarehouse
 
 /**
  * Create by Pustovit Oleksandr on 9/18/2025
  */
 @Database(
-    entities = [Bayer::class, MoveOrder::class, MoveOrderItem::class, ItemsSerial::class, InventoryFiles::class, Inventory::class],
-    version = 3
+    entities = [Bayer::class, MoveOrder::class, MoveOrderItem::class, ItemsSerial::class, InventoryFiles::class, Inventory::class,
+        UserWarehouse::class],
+    version = 4
 )
-@TypeConverters( WarehouseConverter::class)
+@TypeConverters(WarehouseConverter::class)
 abstract class KmWarehouseDatabase : RoomDatabase() {
     abstract fun bayerDao(): BayerDao
     abstract fun itemsSerialDao(): ItemsSerialDao
@@ -40,6 +43,7 @@ abstract class KmWarehouseDatabase : RoomDatabase() {
     abstract fun moveOrderItemDao(): MoveOrderItemDao
     abstract fun inventoryDao(): InventoryDao
     abstract fun inventoryFilesDao(): InventoryFilesDao
+    abstract fun userWarehouseDao(): UserWarehouseDao
 
     companion object {
         const val DB_NAME = "km_warehouse_database.db"
@@ -60,7 +64,7 @@ abstract class KmWarehouseDatabase : RoomDatabase() {
                         context.applicationContext, KmWarehouseDatabase::class.java,
                         DB_NAME
                     ).setJournalMode(JournalMode.TRUNCATE).allowMainThreadQueries().addMigrations(
-                        MIGRATION_1_2,MIGRATION_2_3
+                        MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4
                     ).build()
                     INSTANCE = instance
 
@@ -89,6 +93,12 @@ abstract class KmWarehouseDatabase : RoomDatabase() {
                     false,
                     InventoryFileTypes.FULL.name
                 )
+            }
+        }
+
+        private val MIGRATION_3_4 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `user_warehouse` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `warehouse_type` TEXT NOT NULL, `warehouse_name` TEXT NOT NULL)")
             }
         }
 

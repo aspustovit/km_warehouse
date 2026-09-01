@@ -44,7 +44,13 @@ object AppViewModelModule {
             )
         }
         viewModel { AuthViewModel(loginUseCase = get(), getPrevLoginUseCase = get()) }
-        viewModel { SettingsViewModel(context = get()) }
+        viewModel {
+            SettingsViewModel(
+                context = get(),
+                getUserWarehouseSettingsUseCase = get(),
+                setUserWarehouseSettingsUseCase = get()
+            )
+        }
         viewModel {
             InventoryViewModel(
                 getInventorySegmentUseCase = get(),

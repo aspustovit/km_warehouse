@@ -130,7 +130,7 @@ fun InventoryView(onBackClick: () -> Unit) {
         } else {
             Column(modifier = Modifier.fillMaxSize()) {
                 DarkTopAppBar(
-                    title = { Text(stringResource(id = R.string.inventory)) },
+                    title = { Text(stringResource(id = R.string.inventory_wn)) },
                     modifier = Modifier.fillMaxWidth(),
                     actions = {
                         IconButton(onClick = {

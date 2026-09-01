@@ -4,7 +4,7 @@
     <string name="approved_documents">1. Підтверджені документи</string>
     <string name="issued_documents">2. Видані документи</string>
     <string name="income_documents">3. Прихідні документи</string>
-    <string name="settings">3. Налаштування</string>
+    <string name="settings">Налаштування</string>
     <string name="scan_to_file">4. Сканувати в файл</string>
     <string name="sync">5. Синхронізація</string>
     <string name="exit">0. Вихід</string>
@@ -54,6 +54,7 @@
 
     //Інвентарізація
     <string name="inventory">3. Інвентаризація</string>
+    <string name="inventory_wn">Інвентаризація</string>
     <string name="inventory_segment_code">Код КМ</string>
     <string name="find">Знайти</string>
     <string name="inventory_find_message">Відскануйте QR або штрихкод!</string>

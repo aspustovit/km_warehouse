@@ -135,7 +135,7 @@ fun InventoryView(onBackClick: () -> Unit) {
                     actions = {
                         IconButton(onClick = {
                             val dataForXls = viewModel.viewState.value
-                            val fileUri = ExcelExporter.export(
+                            val fileUri = ExcelExporter.exportPartInventory(
                                 context,
                                 dataForXls.inventory,
                                 dataForXls.inventoryBarcode

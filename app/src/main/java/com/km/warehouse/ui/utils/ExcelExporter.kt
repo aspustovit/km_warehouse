@@ -117,34 +117,77 @@ object ExcelExporter {
         }
     }
 
-    fun createTestFile(context: Context): Uri? {
+
+    fun exportPartInventory(context: Context, inventory: List<InventoryModel>, barcode: String): Uri? {
+
         try {
-            val dir = context.cacheDir
-            if (!dir.exists())
-                dir.mkdirs()
+            val sd: File = context.getExternalFilesDir(null)!!
+            val csvFile = "inventory_${barcode}.xls"
 
-            val fileDeviceInfo =
-                File(context.cacheDir, "cojail_file.txt")
-            if (!fileDeviceInfo.exists())
-                fileDeviceInfo.createNewFile()
+            val directory = File(sd.absolutePath)
 
-            val out = FileWriter(fileDeviceInfo)
-            out.write("Hellow txt file Cojail!\n")
-            out.close()
-
-            if (fileDeviceInfo.exists() && fileDeviceInfo.canRead()) {
-                val att = FileProvider.getUriForFile(
-                    context,
-                    context.packageName + ".fileprovider",
-                    fileDeviceInfo
-                )
-                return att
+            //create directory if not exist
+            if (!directory.isDirectory()) {
+                directory.mkdirs()
             }
-        } catch (ex: Exception) {
-            Log.e("CojailSender_У", "${ex}")
+            //file path
+
+            val file = File(directory, csvFile)
+            /*if(!file.exists()){
+                Log.e("EXECEL", "${file.exists()}")
+                file.createNewFile()
+            }*/
+            val wbSettings: WorkbookSettings = WorkbookSettings()
+            wbSettings.locale = Locale(Locale.UK.language, Locale.UK.country)
+            val workbook: WritableWorkbook = Workbook.createWorkbook(file, wbSettings)
+
+            //Excel sheetA first sheetA
+            val sheetA: WritableSheet = workbook.createSheet("${context.getString(R.string.xls_sheet)} $barcode", 0)
+            // column and row titles
+            context.getXlsColumnHeader().forEachIndexed { index, columnName ->
+                sheetA.addCell(Label(index, 0, columnName))
+            }
+            inventory.forEachIndexed { index, model ->
+                sheetA.addCell(Label(XLS_SUBSTOCK_ID,index+1 ,model.subInventoryCode ))
+                sheetA.addCell(Label(XLS_CODE_ID,index+1 , model.itemSegment))
+                sheetA.addCell(Label(XLS_MANUFACTURE_ID,index+1 ,  model.mfgPartNumber))
+                sheetA.addCell(Label(XLS_MODEL_ID,index+1 , model.itemDescription))
+                sheetA.addCell(Label(XLS_TOTAL_ID,index+1 , model.quantity.toString()))
+                sheetA.addCell(Label(XLS_FREE_ID,index+1 , model.freeQuantity.toString()))
+                sheetA.addCell(Label(XLS_FACT_ID,index+1 , model.factQuantity.toString()))
+                sheetA.addCell(Label(XLS_COMMENTS_ID,index+1 , model.comments))
+            }
+            sheetA.setColumnView(XLS_SUBSTOCK_ID,25)
+            sheetA.setColumnView(XLS_CODE_ID,40)
+            sheetA.setColumnView(XLS_MODEL_ID, 50)
+            sheetA.setColumnView(XLS_MANUFACTURE_ID, 30)
+            sheetA.setColumnView(XLS_COMMENTS_ID, 70)
+            /*sheetA.addCell(Label(0, 0, "sheet A 1"))
+            sheetA.addCell(Label(1, 0, "sheet A 2"))
+            sheetA.addCell(Label(0, 1, "sheet A 3"))
+            sheetA.addCell(Label(1, 1, "sheet A 4"))*/
+
+            //Excel sheetB represents second sheet
+            /*val sheetB: WritableSheet = workbook.createSheet("sheet B", 1)
+
+            // column and row titles
+            sheetB.addCell(Label(0, 0, "sheet B 1"))
+            sheetB.addCell(Label(1, 0, "sheet B 2"))
+            sheetB.addCell(Label(0, 1, "sheet B 3"))
+            sheetB.addCell(Label(1, 1, "sheet B 4"))*/
+
+            // close workbook
+            workbook.write()
+            workbook.close()
+            val uri =
+                FileProvider.getUriForFile(context, context.packageName + ".fileprovider", file)
+            return uri
+
+        } catch (e: Exception) {
+            Log.e("EXECEL", "$e")
+            e.printStackTrace()
             return null
         }
-        return null
     }
 
     fun getIntentForMail(

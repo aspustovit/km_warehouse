@@ -12,6 +12,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import com.km.warehouse.data.network.entity.ErrorData
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onKeyEvent
@@ -29,6 +31,23 @@ import org.koin.androidx.compose.koinViewModel
 /**
  * Create by Pustovit Oleksandr on 1/8/2026
  */
+
+/**
+ * Shows [ConnectionErrorDialog] when the server could not be reached,
+ * otherwise the regular [ErrorDialog] with the server error text.
+ */
+@Composable
+fun ErrorDialog(
+    errorData: ErrorData,
+    onDismiss: () -> Unit
+) {
+    val connectionError = remember(errorData) { ConnectionError.from(errorData) }
+    if (connectionError != null) {
+        ConnectionErrorDialog(connectionError = connectionError, onDismiss = onDismiss)
+    } else {
+        ErrorDialog(errorMessage = errorData.getErrorMessage(), onDismiss = onDismiss)
+    }
+}
 
 @Composable
 fun ErrorDialog(

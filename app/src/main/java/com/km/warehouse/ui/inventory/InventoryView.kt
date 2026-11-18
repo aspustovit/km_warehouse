@@ -101,7 +101,7 @@ fun InventoryView(onBackClick: () -> Unit) {
         )
     }
     state.value.errorData?.let {
-        ErrorDialog(errorMessage = it.getErrorMessage(), onDismiss = {
+        ErrorDialog(errorData = it, onDismiss = {
             viewModel.cancelError()
         })
     }

@@ -246,7 +246,13 @@ fun SyncDialog(
                         }
                         else -> {
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text(
+                            val connectionError = ConnectionError.from(state.value.syncError)
+                            if (connectionError != null) {
+                                ConnectionErrorContent(
+                                    connectionError = connectionError,
+                                    modifier = Modifier.padding(horizontal = 16.dp)
+                                )
+                            } else Text(
                                 modifier = Modifier
                                     .padding(horizontal = 16.dp)
                                     .heightIn(max = 150.dp)

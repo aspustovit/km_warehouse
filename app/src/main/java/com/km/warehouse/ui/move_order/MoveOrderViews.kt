@@ -152,7 +152,7 @@ fun MoveOrderView(
                         viewModel.cancelError()
                     })
             } else {
-                ErrorDialog(errorMessage = it.getErrorMessage(), onDismiss = {
+                ErrorDialog(errorData = it, onDismiss = {
                     viewModel.cancelError()
                 })
             }

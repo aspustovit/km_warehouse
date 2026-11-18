@@ -95,7 +95,7 @@ fun FilesInventoryList(onBackClick: () -> Unit,
             }
 
             else -> {
-                ErrorDialog(errorMessage = it.getErrorMessage(), onDismiss = {
+                ErrorDialog(errorData = it, onDismiss = {
                     viewModel.cancelError()
                 })
             }

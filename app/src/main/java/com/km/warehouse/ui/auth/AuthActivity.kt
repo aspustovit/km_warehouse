@@ -90,7 +90,7 @@ class AuthActivity : ComponentActivity() {
                     "${state.value.loginModel.isLoggedIn} - ${state.value.loginModel.error}"
                 )
                 if (!state.value.loginModel.isLoggedIn && state.value.loginModel.error != null) {
-                    ErrorDialog(errorMessage = state.value.loginModel.error!!.getErrorMessage(), onDismiss = {
+                    ErrorDialog(errorData = state.value.loginModel.error!!, onDismiss = {
                         viewModel.cancelError()
                     })
                 }

@@ -92,4 +92,16 @@
     <string name="to_exel">Експортувати в exel</string>
     <string name="search_result">Результат пошуку за номером - </string>
     <string name="saved_part_inventory">Збережена інвентаризація.</string>
+
+    //Помилка з\'єднання
+    <string name="connection_error_title">Немає зв\'язку з сервером</string>
+    <string name="connection_error_timeout">Сервер не відповідає. Час очікування з\'єднання вичерпано.</string>
+    <string name="connection_error_refused">Не вдалося підключитися до сервера. Сервер недоступний або відхилив з\'єднання.</string>
+    <string name="connection_error_unknown_host">Не вдалося знайти сервер. Перевірте адресу сервера та підключення до мережі.</string>
+    <string name="connection_error_server_address">Адреса сервера</string>
+    <string name="connection_error_waited">Очікування: %1$d с</string>
+    <string name="connection_error_hint">Перевірте підключення терміналу до Wi-Fi та повторіть спробу. Якщо помилка повторюється — зверніться до адміністратора.</string>
+    <string name="connection_error_show_details">Технічні деталі</string>
+    <string name="connection_error_hide_details">Сховати деталі</string>
+    <string name="connection_error_retry">Повторити</string>
 </resources>

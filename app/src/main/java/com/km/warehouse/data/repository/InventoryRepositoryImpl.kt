@@ -35,10 +35,10 @@ class InventoryRepositoryImpl(
 ) :
     InventoryRepository {
     override suspend fun loadInventoryBySegment(segment: Pair<String, Int>): InventorySegmentModel {
-        val itemSegment = segment.first
+        val itemSegment = shrinkSegmentSuffix(segment.first)
         Log.v("loadInventoryBySegment", "Start load")
         val lastIndex = segment.second
-        val response = warehouseApiService.getInventoryBySegment(itemSegment).execute()
+        val response = warehouseApiService.getInventoryByAny(itemSegment).execute()
         var errorData: ErrorData? = null
         if (!response.isSuccessful) {
             errorData = parseError(response.errorBody()!!.string())
@@ -47,7 +47,7 @@ class InventoryRepositoryImpl(
         val partInventories = ArrayList<InventoryModel>()
         data.orEmpty()
             .forEachIndexed { index, entity -> partInventories.add(entity.toInventoryModel(index)) }
-        if (partInventories.isEmpty()) {
+        /*if (partInventories.isEmpty()) {
             val mfrResponse = warehouseApiService.getInventoryByMfrPartNumber(itemSegment).execute()
             if (!mfrResponse.isSuccessful) {
                 errorData = parseError(mfrResponse.errorBody()!!.string())
@@ -55,7 +55,7 @@ class InventoryRepositoryImpl(
             val mfrData = mfrResponse.body()?.data
             mfrData.orEmpty()
                 .forEachIndexed { index, entity -> partInventories.add(entity.toInventoryModel(lastIndex + index)) }
-        }
+        }*/
         Log.e("loadInventoryBySegment", "End load")
 
         val userWarehouses = database.userWarehouseDao().getUserWarehouse()
@@ -76,6 +76,20 @@ class InventoryRepositoryImpl(
             inventory = result,
             errorData = errorData
         )
+    }
+
+    /**
+     * Strips the trailing "/NN-NNNNN" suffix (last '/' and everything after it),
+     * e.g. "CMBGRF-10/G/16-06688" -> "CMBGRF-10/G", "CMBGRF-1/16-07523" -> "CMBGRF-1".
+     * Other values are returned unchanged.
+     */
+    private fun shrinkSegmentSuffix(segment: String): String {
+        val trimmed = segment.trim()
+        return if (SEGMENT_SUFFIX_REGEX.containsMatchIn(trimmed)) {
+            trimmed.substringBeforeLast('/')
+        } else {
+            trimmed
+        }
     }
 
     private fun parseError(errorBody: String): ErrorData? {
@@ -281,5 +295,10 @@ class InventoryRepositoryImpl(
             insertId = database.userWarehouseDao().insert(it)
         }
         return insertId != 0L
+    }
+
+    private companion object {
+        // Matches a trailing "/<digits>-<digits>" part, e.g. "/16-06688"
+        val SEGMENT_SUFFIX_REGEX = Regex("""/\d+-\d+$""")
     }
 }
